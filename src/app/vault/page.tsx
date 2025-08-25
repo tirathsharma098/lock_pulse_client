@@ -46,8 +46,8 @@ interface VaultItem {
   id: string;
   titleNonce: string;
   titleCiphertext: string;
-  passwordNonce: string;
-  passwordCiphertext: string;
+  passwordNonce?: string;
+  passwordCiphertext?: string;
   createdAt: string;
 }
 
@@ -152,8 +152,8 @@ export default function VaultPage() {
 
   useEffect(() => {
     if (!isUnlocked) {
-      console.warn('[vault] Not unlocked, redirecting to /unlock');
-      router.push('/unlock');
+      console.warn('[vault] Not unlocked; skipping load');
+      setLoading(false);
       return;
     }
     console.debug('[vault] useEffect loadItems page=', page, 'isUnlocked=', isUnlocked, 'vaultKeyLen=', vaultKey?.length);
@@ -163,8 +163,8 @@ export default function VaultPage() {
   const loadItems = async () => {
     if (!vaultKey || vaultKey.length !== 32) {
       console.error('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
-      setError('Vault key missing or invalid. Please unlock again.');
-      router.push('/unlock');
+      setError('Vault key missing or invalid. Please log in again.');
+      setLoading(false);
       return;
     }
 
@@ -209,6 +209,12 @@ export default function VaultPage() {
       setError('');
     } catch (err: any) {
       console.error('Failed to load vault items:', err);
+      if (err?.status === 401 || err?.response?.status === 401) {
+        toast.info('Session expired. Please log in again.');
+        wipeVaultKey();
+        router.replace('/login');
+        return;
+      }
       setError(err?.message || 'Failed to load vault items');
     } finally {
       setLoading(false);
@@ -248,18 +254,25 @@ export default function VaultPage() {
       setNewTitle('');
       setNewPassword('');
       setAddDialogOpen(false);
+      toast.success('Password added');
       loadItems();
     } catch (err: any) {
       console.error('Failed to add item:', err);
+      if (err?.status === 401 || err?.response?.status === 401) {
+        toast.info('Session expired. Please log in again.');
+        wipeVaultKey();
+        router.replace('/login');
+        return;
+      }
       setError(err?.message || 'Failed to add item');
+      toast.error('Failed to add item');
     }
   };
 
   const handleViewItem = async (itemId: string) => {
     if (!vaultKey || vaultKey.length !== 32) {
       console.error('[vault] View missing/invalid key. length=', vaultKey?.length);
-      setError('Vault key missing or invalid. Please unlock again.');
-      router.push('/unlock');
+      setError('Vault key missing or invalid. Please log in again.');
       return;
     }
 
@@ -286,7 +299,7 @@ export default function VaultPage() {
         const decryptedItem: DecryptedItem = {
           id: item.id,
           title: await decryptField(item.titleNonce, item.titleCiphertext, vaultKey),
-          password: await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey),
+          password: await decryptField(item.passwordNonce!, item.passwordCiphertext!, vaultKey),
           createdAt: item.createdAt,
         };
         console.debug('[vault] view decrypt (no-fix) ok:', { id: item.id });
@@ -296,7 +309,7 @@ export default function VaultPage() {
         const decryptedItem: DecryptedItem = {
           id: item.id,
           title: await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey),
-          password: await decryptCompat(item.passwordNonce, item.passwordCiphertext, vaultKey),
+          password: await decryptCompat(item.passwordNonce!, item.passwordCiphertext!, vaultKey),
           createdAt: item.createdAt,
         };
         console.debug('[vault] view decrypt (compat) ok:', { id: item.id });
@@ -307,6 +320,12 @@ export default function VaultPage() {
       setViewDialogOpen(true);
     } catch (err: any) {
       console.error('Failed to load item:', err);
+      if (err?.status === 401 || err?.response?.status === 401) {
+        toast.info('Session expired. Please log in again.');
+        wipeVaultKey();
+        router.replace('/login');
+        return;
+      }
       setError(err?.message || 'Failed to load item');
     }
   };
@@ -318,9 +337,17 @@ export default function VaultPage() {
       await vaultApi.deleteItem(itemToDelete);
       setDeleteDialogOpen(false);
       setItemToDelete(null);
+      toast.success('Password deleted');
       loadItems();
     } catch (err: any) {
+      if (err?.status === 401 || err?.response?.status === 401) {
+        toast.info('Session expired. Please log in again.');
+        wipeVaultKey();
+        router.replace('/login');
+        return;
+      }
       setError('Failed to delete item');
+      toast.error('Failed to delete');
     }
   };
 
@@ -328,9 +355,11 @@ export default function VaultPage() {
     try {
       await auth.logout();
       wipeVaultKey();
+      toast.success('Logged out');
       router.push('/');
     } catch (err) {
       wipeVaultKey();
+      toast.success('Logged out');
       router.push('/');
     }
   };
@@ -348,7 +377,37 @@ export default function VaultPage() {
   };
 
   if (!isUnlocked) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AppBar position="static">
+          <Toolbar>
+            <LockIcon className="mr-2" />
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              LockPulse Vault
+            </Typography>
+          </Toolbar>
+        </AppBar>
+
+        <Container maxWidth="sm" className="py-16">
+          {error && (
+            <Alert severity="error" className="mb-4" onClose={() => setError('')}>
+              {error}
+            </Alert>
+          )}
+          <Paper elevation={2} className="p-6 text-center">
+            <Typography variant="h6" className="mb-2">
+              Vault is locked
+            </Typography>
+            <Typography variant="body2" color="textSecondary" className="mb-4">
+              Please log in to unlock your vault.
+            </Typography>
+            <Button variant="contained" onClick={() => router.replace('/login')}>
+              Go to Login
+            </Button>
+          </Paper>
+        </Container>
+      </div>
+    );
   }
 
   return (
