@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Container,
@@ -35,6 +35,8 @@ import {
   Lock as LockIcon,
   ContentCopy as CopyIcon,
 } from '@mui/icons-material';
+import CheckIcon from '@mui/icons-material/Check';
+import { Toaster, toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { vault as vaultApi, auth } from '@/lib/api';
 import { encryptField, decryptField, initSodium } from '@/lib/crypto';
@@ -80,6 +82,17 @@ export default function VaultPage() {
   const [selectedItem, setSelectedItem] = useState<DecryptedItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const copyResetRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    // cleanup any pending timer on unmount
+    return () => {
+      if (copyResetRef.current) {
+        window.clearTimeout(copyResetRef.current);
+      }
+    };
+  }, []);
 
   // Normalize base64 to standard alphabet and apply padding
   const fixBase64 = (s: string) => {
@@ -322,8 +335,16 @@ export default function VaultPage() {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success('Copied to clipboard', { duration: 1500 });
+      if (copyResetRef.current) window.clearTimeout(copyResetRef.current);
+      copyResetRef.current = window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      toast.error('Copy failed', { duration: 1500 });
+    }
   };
 
   if (!isUnlocked) {
@@ -338,10 +359,11 @@ export default function VaultPage() {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             LockPulse Vault
           </Typography>
-          <Chip 
-            label="Unlocked" 
-            color="success" 
-            variant="outlined" 
+          <Chip
+            label="Unlocked"
+            color="success"
+            variant="filled"
+            sx={{ color: '#fff', fontWeight: 600 }}
             className="mr-4"
           />
           <Button 
@@ -353,6 +375,8 @@ export default function VaultPage() {
           </Button>
         </Toolbar>
       </AppBar>
+
+      <Toaster position="top-center" duration={1500} richColors />
 
       <Container maxWidth="md" className="py-8">
         {error && (
@@ -482,6 +506,7 @@ export default function VaultPage() {
                         aria-label={showPassword ? 'hide password' : 'show password'}
                         onClick={() => setShowPassword((v) => !v)}
                         edge="end"
+                        sx={{ mr: 1 }}
                       >
                         {showPassword ? <VisibilityOffIcon /> : <ViewIcon />}
                       </IconButton>
@@ -489,8 +514,10 @@ export default function VaultPage() {
                         aria-label="copy password"
                         onClick={() => copyToClipboard(selectedItem.password)}
                         edge="end"
+                        color={copied ? 'success' : 'default'}
+                        sx={{ ml: 1 }}
                       >
-                        <CopyIcon />
+                        {copied ? <CheckIcon /> : <CopyIcon />}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -504,7 +531,7 @@ export default function VaultPage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
+          <Button variant="contained" onClick={() => setViewDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 
