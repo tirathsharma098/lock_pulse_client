@@ -55,6 +55,29 @@ export const deriveKEK = async (
   );
 };
 
+// Robust base64 decoder (handles padding and URL-safe variants)
+export const decodeBase64 = async (input: string): Promise<Uint8Array> => {
+  await initSodium();
+  try {
+    // Try standard first
+    return sodium.from_base64(input, sodium.base64_variants.ORIGINAL);
+  } catch {
+    // Normalize URL-safe and add padding
+    let s = input.replace(/-/g, '+').replace(/_/g, '/');
+    const pad = (4 - (s.length % 4)) % 4;
+    if (pad) s += '='.repeat(pad);
+    try {
+      return sodium.from_base64(s, sodium.base64_variants.ORIGINAL);
+    } catch {
+      // Final fallback via atob
+      const bin = atob(s);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+      return out;
+    }
+  }
+};
+
 export const wrapVaultKey = async (vaultKey: Uint8Array, kek: Uint8Array): Promise<{ nonce: Uint8Array; ciphertext: Uint8Array }> => {
   await initSodium();
   
@@ -66,11 +89,25 @@ export const wrapVaultKey = async (vaultKey: Uint8Array, kek: Uint8Array): Promi
 
 export const unwrapVaultKey = async (wrappedKey: string, kek: Uint8Array): Promise<Uint8Array> => {
   await initSodium();
-  const wrapped = sodium.from_base64(wrappedKey);
-  const nonce = wrapped.slice(0, sodium.crypto_secretbox_NONCEBYTES);
-  const ciphertext = wrapped.slice(sodium.crypto_secretbox_NONCEBYTES);
   
-  return sodium.crypto_secretbox_open_easy(ciphertext, nonce, kek);
+  try {
+    // Decode combined (nonce || ciphertext)
+    const wrapped = await decodeBase64(wrappedKey);
+    if (wrapped.length !== 72) {
+      throw new Error(`Invalid wrapped key length: expected 72 bytes, got ${wrapped.length} bytes`);
+    }
+    const nonce = wrapped.slice(0, sodium.crypto_secretbox_NONCEBYTES);
+    const ciphertext = wrapped.slice(sodium.crypto_secretbox_NONCEBYTES);
+    return sodium.crypto_secretbox_open_easy(ciphertext, nonce, kek);
+  } catch (error: any) {
+    if (error.message?.includes('verification failed')) {
+      throw new Error('Invalid master password');
+    }
+    if (error.message?.includes('Invalid wrapped key length')) {
+      throw new Error(error.message);
+    }
+    throw new Error('Invalid base64 format in wrapped vault key');
+  }
 };
 
 export const encryptField = async (plaintext: string, vaultKey: Uint8Array): Promise<{ nonce: string; ciphertext: string }> => {

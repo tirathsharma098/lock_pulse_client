@@ -40,7 +40,14 @@ interface VaultItem {
   id: string;
   titleNonce: string;
   titleCiphertext: string;
+  passwordNonce: string;
+  passwordCiphertext: string;
   createdAt: string;
+}
+
+interface DecryptedVaultItem extends VaultItem {
+  title: string;
+  password: string;
 }
 
 interface DecryptedItem {
@@ -53,7 +60,7 @@ interface DecryptedItem {
 export default function VaultPage() {
   const { vaultKey, isUnlocked, wipeVaultKey } = useVault();
   const router = useRouter();
-  const [items, setItems] = useState<VaultItem[]>([]);
+  const [items, setItems] = useState<DecryptedVaultItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(1);
@@ -83,10 +90,13 @@ export default function VaultPage() {
       setLoading(true);
       const response = await vaultApi.getItems(page);
       
-      const decryptedItems = response.items.map((item: any) => ({
-        ...item,
-        title: decryptField(item.titleNonce, item.titleCiphertext, vaultKey!),
-      }));
+      const decryptedItems = await Promise.all(
+        response.items.map(async (item: VaultItem) => ({
+          ...item,
+          title: await decryptField(item.titleNonce, item.titleCiphertext, vaultKey!),
+          password: await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey!),
+        }))
+      );
       
       setItems(decryptedItems);
       setTotalPages(Math.ceil(response.total / 10));
@@ -102,8 +112,8 @@ export default function VaultPage() {
     if (!newTitle || !newPassword) return;
 
     try {
-      const titleEncrypted = encryptField(newTitle, vaultKey!);
-      const passwordEncrypted = encryptField(newPassword, vaultKey!);
+      const titleEncrypted = await encryptField(newTitle, vaultKey!);
+      const passwordEncrypted = await encryptField(newPassword, vaultKey!);
 
       await vaultApi.createItem({
         titleNonce: titleEncrypted.nonce,
@@ -126,8 +136,8 @@ export default function VaultPage() {
       const item = await vaultApi.getItem(itemId);
       const decryptedItem: DecryptedItem = {
         id: item.id,
-        title: decryptField(item.titleNonce, item.titleCiphertext, vaultKey!),
-        password: decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey!),
+        title: await decryptField(item.titleNonce, item.titleCiphertext, vaultKey!),
+        password: await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey!),
         createdAt: item.createdAt,
       };
       
@@ -224,7 +234,7 @@ export default function VaultPage() {
                 No passwords saved yet
               </Typography>
               <Typography variant="body2" color="textSecondary" className="mt-2">
-                Click "Add Password" to create your first entry
+                Click &quot;Add Password&quot; to create your first entry
               </Typography>
             </Box>
           ) : (
@@ -234,7 +244,7 @@ export default function VaultPage() {
                   <ListItem key={item.id} divider>
                     <ListItemText
                       primary={item.title}
-                      secondary={new Date(item.createdAt).toLocaleDateString()}
+                      secondary={`Password: ${item.password} • ${new Date(item.createdAt).toLocaleDateString()}`}
                     />
                     <ListItemSecondaryAction>
                       <IconButton onClick={() => handleViewItem(item.id)} className="mr-2">

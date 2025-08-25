@@ -55,9 +55,10 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      wipeVaultKey();
+      // Do NOT wipe here — this cleanup runs on re-renders (e.g., when vaultKey changes)
+      // wiping here would instantly clear the key after setVaultKey.
     };
-  }, [vaultKey]);
+  }, []); // run once on mount, not on vaultKey changes
 
   const value: VaultContextType = {
     vaultKey,

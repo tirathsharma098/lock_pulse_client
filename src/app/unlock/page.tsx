@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { user } from '@/lib/api';
-import { deriveKEK, unwrapVaultKey, initSodium } from '@/lib/crypto';
+import { deriveKEK, unwrapVaultKey, initSodium, decodeBase64 } from '@/lib/crypto';
 import { useVault } from '@/contexts/VaultContext';
 import sodium from 'libsodium-wrappers-sumo';
 
@@ -32,16 +32,42 @@ export default function UnlockPage() {
     try {
       await initSodium();
 
+      console.log('Starting unlock process...');
+      
       // Get user security parameters
-      const { vaultKdfSalt, vaultKdfParams } = await user.getSecurity();
-      const { wrappedVaultKey } = await user.getWrappedKey();
+      const securityData = await user.getSecurity();
+      console.log('Security data received:', { 
+        hasVaultKdfSalt: !!securityData.vaultKdfSalt,
+        hasVaultKdfParams: !!securityData.vaultKdfParams 
+      });
+      
+      const wrappedKeyData = await user.getWrappedKey();
+      console.log('Wrapped key data received:', { 
+        hasWrappedVaultKey: !!wrappedKeyData.wrappedVaultKey,
+        wrappedKeyLength: wrappedKeyData.wrappedVaultKey?.length 
+      });
+
+      const { vaultKdfSalt, vaultKdfParams } = securityData;
+      const { wrappedVaultKey } = wrappedKeyData;
+
+      // Validate required data
+      if (!vaultKdfSalt || !vaultKdfParams || !wrappedVaultKey) {
+        throw new Error('Missing security parameters');
+      }
 
       // Derive KEK from password
-      const saltBytes = sodium.from_base64(vaultKdfSalt);
+      const saltBytes = await decodeBase64(vaultKdfSalt);
+      console.log('Salt bytes length:', saltBytes.length);
+      
       const kek = await deriveKEK(password, saltBytes, vaultKdfParams);
+      console.log('KEK derived, length:', kek.length);
 
       // Unwrap vault key
+      console.log('Attempting to unwrap vault key...');
+      console.log('Wrapped key preview:', wrappedVaultKey.substring(0, 50) + '...');
+      
       const vaultKey = await unwrapVaultKey(wrappedVaultKey, kek);
+      console.log('Vault key unwrapped successfully, length:', vaultKey.length);
 
       // Store vault key in context
       setVaultKey(vaultKey);
@@ -50,9 +76,22 @@ export default function UnlockPage() {
       kek.fill(0);
       setPassword('');
 
-      router.push('/vault');
+      // Navigate to the vault
+      router.replace('/vault');
+      return;
     } catch (err: any) {
-      setError('Invalid master password or corrupted data');
+      console.error('Unlock error:', err);
+      
+      // More specific error messages
+      if (err.message.includes('incomplete input')) {
+        setError('Corrupted vault data. Please contact support.');
+      } else if (err.message.includes('Failed to unwrap vault key')) {
+        setError('Invalid master password or corrupted vault key.');
+      } else if (err.message.includes('Missing security parameters')) {
+        setError('Account setup incomplete. Please re-register.');
+      } else {
+        setError('Invalid master password or corrupted data');
+      }
     } finally {
       setLoading(false);
     }
