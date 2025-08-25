@@ -25,6 +25,12 @@ import {
   Toolbar,
   Chip,
   InputAdornment,
+  FormControlLabel,
+  Switch,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -49,6 +55,7 @@ interface VaultItem {
   passwordNonce?: string;
   passwordCiphertext?: string;
   createdAt: string;
+  isLong?: boolean;
 }
 
 interface DecryptedVaultItem extends VaultItem {
@@ -60,6 +67,11 @@ interface DecryptedItem {
   title: string;
   password: string;
   createdAt: string;
+  isLong?: boolean;
+}
+
+function utf8BytesLen(s: string) {
+  return new TextEncoder().encode(s).length;
 }
 
 export default function VaultPage() {
@@ -75,7 +87,7 @@ export default function VaultPage() {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  
+
   // Form states
   const [newTitle, setNewTitle] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -84,6 +96,13 @@ export default function VaultPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
   const copyResetRef = useRef<number | null>(null);
+
+  const [longMode, setLongMode] = useState(false);
+  const [passwordBytes, setPasswordBytes] = useState(0);
+  const [passwordTooLong, setPasswordTooLong] = useState<string | null>(null);
+
+  const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
+  const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
 
   useEffect(() => {
     // cleanup any pending timer on unmount
@@ -157,10 +176,15 @@ export default function VaultPage() {
       return;
     }
     console.debug('[vault] useEffect loadItems page=', page, 'isUnlocked=', isUnlocked, 'vaultKeyLen=', vaultKey?.length);
-    loadItems();
+    loadItems(page); // pass current page to avoid always loading page 1
   }, [isUnlocked, page]);
 
-  const loadItems = async () => {
+  // Accept optional override filter/sort to avoid stale state during onChange
+  const loadItems = async (
+    page: number = 1,
+    overrideType?: 'all' | 'normal' | 'long',
+    overrideSortDir?: 'ASC' | 'DESC'
+  ) => {
     if (!vaultKey || vaultKey.length !== 32) {
       console.error('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
       setError('Vault key missing or invalid. Please log in again.');
@@ -173,11 +197,19 @@ export default function VaultPage() {
       await initSodium();
       console.debug('[vault] initSodium done. Fetching items page=', page);
 
-      const response = await vaultApi.getItems(page);
+      const typeToUse = overrideType ?? filterType;
+      const sortDirToUse = overrideSortDir ?? sortDir;
+
+      // Request server-side pagination + filtering + sorting
+      const response = await (vaultApi.getItems as any)(
+        `${page}&type=${encodeURIComponent(typeToUse)}&sortDir=${encodeURIComponent(sortDirToUse)}`
+      );
       console.debug('[vault] api.getItems ok:', {
         page: response.page,
         count: response.items?.length,
         total: response.total,
+        type: typeToUse,
+        sortDir: sortDirToUse,
       });
 
       const decryptedItems = await Promise.all(
@@ -204,6 +236,7 @@ export default function VaultPage() {
         })
       );
 
+      // Do not filter/sort on client; server already did it
       setItems(decryptedItems);
       setTotalPages(Math.ceil(response.total / 10));
       setError('');
@@ -227,6 +260,19 @@ export default function VaultPage() {
       return;
     }
 
+    const bytes = utf8BytesLen(newPassword);
+    setPasswordBytes(bytes);
+
+    if (!longMode && bytes > 1024) {
+      setPasswordTooLong('Normal password max is 1KB. Switch to Long secret to continue.');
+      return;
+    }
+    if (bytes > 20 * 1024) {
+      setPasswordTooLong('Password max is 20KB.');
+      return;
+    }
+    setPasswordTooLong(null);
+
     try {
       await initSodium();
       console.debug('[vault] Adding item...');
@@ -248,11 +294,15 @@ export default function VaultPage() {
         titleCiphertext: titleEncrypted.ciphertext,
         passwordNonce: passwordEncrypted.nonce,
         passwordCiphertext: passwordEncrypted.ciphertext,
-      });
+        isLong: longMode, // send user’s choice to backend
+      } as any);
       console.debug('[vault] createItem response:', res);
 
       setNewTitle('');
       setNewPassword('');
+      setPasswordBytes(0);
+      setPasswordTooLong(null);
+      setLongMode(false);
       setAddDialogOpen(false);
       toast.success('Password added');
       loadItems();
@@ -300,6 +350,7 @@ export default function VaultPage() {
           id: item.id,
           title: await decryptField(item.titleNonce, item.titleCiphertext, vaultKey),
           password: await decryptField(item.passwordNonce!, item.passwordCiphertext!, vaultKey),
+          isLong: item.isLong,
           createdAt: item.createdAt,
         };
         console.debug('[vault] view decrypt (no-fix) ok:', { id: item.id });
@@ -310,6 +361,7 @@ export default function VaultPage() {
           id: item.id,
           title: await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey),
           password: await decryptCompat(item.passwordNonce!, item.passwordCiphertext!, vaultKey),
+          isLong: item.isLong,
           createdAt: item.createdAt,
         };
         console.debug('[vault] view decrypt (compat) ok:', { id: item.id });
@@ -458,6 +510,42 @@ export default function VaultPage() {
             </Button>
           </Box>
 
+          <Box className="flex flex-col sm:flex-row gap-3 mb-4">
+            <FormControl size="small" fullWidth>
+              <InputLabel>Filter</InputLabel>
+              <Select
+                label="Filter"
+                value={filterType}
+                onChange={(e) => {
+                  const nextType = e.target.value as 'all' | 'normal' | 'long';
+                  setFilterType(nextType);
+                  setPage(1);
+                  loadItems(1, nextType, sortDir); // pass next filter explicitly
+                }}
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="normal">Normal</MenuItem>
+                <MenuItem value="long">Long</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl size="small" fullWidth>
+              <InputLabel>Order (by date)</InputLabel>
+              <Select
+                label="Order (by date)"
+                value={sortDir}
+                onChange={(e) => {
+                  const nextDir = (e.target.value as string).toUpperCase() as 'ASC' | 'DESC';
+                  setSortDir(nextDir);
+                  setPage(1);
+                  loadItems(1, filterType, nextDir); // pass next sort explicitly
+                }}
+              >
+                <MenuItem value="DESC">Newest first</MenuItem>
+                <MenuItem value="ASC">Oldest first</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
           {loading ? (
             <Typography>Loading...</Typography>
           ) : items.length === 0 ? (
@@ -502,7 +590,10 @@ export default function VaultPage() {
                   <Pagination
                     count={totalPages}
                     page={page}
-                    onChange={(_, newPage) => setPage(newPage)}
+                    onChange={(_, newPage) => {
+                      setPage(newPage);
+                      loadItems(newPage); // page change uses current state
+                    }}
                   />
                 </Box>
               )}
@@ -514,26 +605,72 @@ export default function VaultPage() {
       {/* Add Password Dialog */}
       <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Add New Password</DialogTitle>
-        <DialogContent className="space-y-4">
+        <DialogContent className="space-y-2">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={longMode}
+                onChange={(_, checked) => {
+                  setLongMode(checked);
+                  const bytes = utf8BytesLen(newPassword);
+                  setPasswordBytes(bytes);
+                  if (!checked && bytes > 1024) {
+                    setPasswordTooLong('Normal password max is 1KB. Switch to Long secret to continue.');
+                  } else if (checked && bytes > 20 * 1024) {
+                    setPasswordTooLong('Password max is 20KB.');
+                  } else {
+                    setPasswordTooLong(null);
+                  }
+                }}
+              />
+            }
+            label="Long secret (multi-line, up to 20KB)"
+          />
+          {/* Title label */}
+          <Typography variant="subtitle2" sx={{ mt: 1 }}>Title</Typography>
           <TextField
             fullWidth
-            label="Title"
+            // label removed for consistency with custom label above
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             margin="normal"
           />
+          {/* Password label */}
+          <Typography variant="subtitle2" sx={{ mt: 1 }}>
+            Password {longMode ? '(up to 20KB)' : '(up to 1KB)'}
+          </Typography>
           <TextField
             fullWidth
-            label="Password"
-            type="password"
+            // label removed for consistency
+            type={longMode ? 'text' : 'password'}
+            multiline={longMode}
+            minRows={longMode ? 8 : undefined}
             value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            onChange={(e) => {
+              const v = e.target.value;
+              setNewPassword(v);
+              const bytes = utf8BytesLen(v);
+              setPasswordBytes(bytes);
+              if (!longMode && bytes > 1024) {
+                setPasswordTooLong('Normal password max is 1KB. Switch to Long secret to continue.');
+              } else if (bytes > 20 * 1024) {
+                setPasswordTooLong('Password max is 20KB.');
+              } else {
+                setPasswordTooLong(null);
+              }
+            }}
             margin="normal"
+            error={!!passwordTooLong}
+            helperText={
+              passwordTooLong
+                ? passwordTooLong
+                : `Size: ${passwordBytes} / ${longMode ? 20480 : 1024} bytes`
+            }
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleAddItem} variant="contained">
+          <Button onClick={handleAddItem} variant="contained" disabled={!!passwordTooLong}>
             Add
           </Button>
         </DialogActions>
@@ -544,46 +681,60 @@ export default function VaultPage() {
         <DialogTitle>Password Details</DialogTitle>
         <DialogContent>
           {selectedItem && (
-            <div className="space-y-4">
+            <div className="space-y-2">
+              {/* Title label */}
+              <Typography variant="subtitle2">Title</Typography>
               <TextField
                 fullWidth
-                label="Title"
+                // label removed
                 value={selectedItem.title}
                 InputProps={{ readOnly: true }}
                 margin="normal"
               />
-              <TextField
-                fullWidth
-                label="Password"
-                type={showPassword ? 'text' : 'password'}
-                value={selectedItem.password}
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        aria-label={showPassword ? 'hide password' : 'show password'}
-                        onClick={() => setShowPassword((v) => !v)}
-                        edge="end"
-                        sx={{ mr: 1 }}
-                      >
-                        {showPassword ? <VisibilityOffIcon /> : <ViewIcon />}
-                      </IconButton>
+              {(() => {
+                const isMulti = !!selectedItem.isLong;
+                return (
+                  <>
+                    {/* Password label with copy button beside label */}
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Typography variant="subtitle2">Password</Typography>
                       <IconButton
                         aria-label="copy password"
                         onClick={() => copyToClipboard(selectedItem.password)}
-                        edge="end"
+                        size="small"
                         color={copied ? 'success' : 'default'}
-                        sx={{ ml: 1 }}
                       >
                         {copied ? <CheckIcon /> : <CopyIcon />}
                       </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-                margin="normal"
-              />
-              <Typography variant="body2" color="textSecondary">
+                    </Box>
+                    <TextField
+                      fullWidth
+                      // label removed
+                      type={!isMulti ? (showPassword ? 'text' : 'password') : 'text'}
+                      multiline={isMulti}
+                      minRows={isMulti ? 10 : undefined}
+                      value={selectedItem.password}
+                      InputProps={{
+                        readOnly: true,
+                        // remove copy icon from adornments; keep only show/hide for single-line
+                        endAdornment: !isMulti ? (
+                          <InputAdornment position="end">
+                            <IconButton
+                              aria-label={showPassword ? 'hide password' : 'show password'}
+                              onClick={() => setShowPassword((v) => !v)}
+                              edge="end"
+                            >
+                              {showPassword ? <VisibilityOffIcon /> : <ViewIcon />}
+                            </IconButton>
+                          </InputAdornment>
+                        ) : undefined,
+                      }}
+                      margin="normal"
+                    />
+                  </>
+                );
+              })()}
+              <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
                 Created: {new Date(selectedItem.createdAt).toLocaleString()}
               </Typography>
             </div>
