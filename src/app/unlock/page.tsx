@@ -15,7 +15,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { user } from '@/lib/api';
 import { deriveKEK, unwrapVaultKey, initSodium } from '@/lib/crypto';
 import { useVault } from '@/contexts/VaultContext';
-import sodium from 'libsodium-wrappers';
+import sodium from 'libsodium-wrappers-sumo';
 
 export default function UnlockPage() {
   const [password, setPassword] = useState('');
@@ -41,7 +41,7 @@ export default function UnlockPage() {
       const kek = await deriveKEK(password, saltBytes, vaultKdfParams);
 
       // Unwrap vault key
-      const vaultKey = unwrapVaultKey(wrappedVaultKey, kek);
+      const vaultKey = await unwrapVaultKey(wrappedVaultKey, kek);
 
       // Store vault key in context
       setVaultKey(vaultKey);

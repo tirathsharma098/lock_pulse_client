@@ -30,8 +30,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    console.log('📝 Registration: Starting registration process...');
-
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -45,59 +43,33 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      console.log('🔧 Registration: Initializing sodium...');
       await initSodium();
-      console.log('✅ Registration: Sodium initialized');
 
       // Start OPAQUE registration
-      console.log('🔧 Registration: Starting OPAQUE registration...');
       const { registrationRequest, clientRegistrationState } = opaque.client.startRegistration({ password });
-      console.log('✅ Registration: OPAQUE registration started');
 
       // Send registration request to server
-      console.log('🔧 Registration: Sending registration request to server...');
       const { registrationResponse } = await auth.registerStart({
         username,
         registrationRequest,
       });
-      console.log('✅ Registration: Received response from server');
 
       // Generate vault key and encryption parameters
-      console.log('🔧 Registration: Generating vault key...');
       const vaultKey = await generateVaultKey();
-      console.log('✅ Registration: Vault key generated');
-
-      console.log('🔧 Registration: Generating vault KDF salt...');
       const vaultKdfSalt = await generateSalt();
-      console.log('✅ Registration: Vault KDF salt generated');
-
-      console.log('🔧 Registration: Getting default KDF params...');
       const defaultKdfParams = await getDefaultKdfParams();
-      console.log('✅ Registration: Default KDF params obtained');
-
-      console.log('🔧 Registration: Deriving KEK... THIS IS WHERE THE ERROR LIKELY OCCURS');
       const kek = await deriveKEK(password, vaultKdfSalt, defaultKdfParams);
-      console.log('✅ Registration: KEK derived successfully');
-
-      console.log('🔧 Registration: Wrapping vault key...');
       const { nonce, ciphertext } = await wrapVaultKey(vaultKey, kek);
-      console.log('✅ Registration: Vault key wrapped');
-
-      console.log('🔧 Registration: Combining nonce and ciphertext...');
       const wrappedVaultKey = await combineNonceAndCiphertext(nonce, ciphertext);
-      console.log('✅ Registration: Nonce and ciphertext combined');
 
       // Finish OPAQUE registration
-      console.log('🔧 Registration: Finishing OPAQUE registration...');
       const { registrationRecord } = opaque.client.finishRegistration({
         clientRegistrationState,
         registrationResponse,
         password,
       });
-      console.log('✅ Registration: OPAQUE registration finished');
 
       // Send final registration data
-      console.log('🔧 Registration: Sending final registration data...');
       await auth.registerFinish({
         username,
         registrationRecord,
@@ -105,7 +77,6 @@ export default function RegisterPage() {
         vaultKdfSalt: Buffer.from(vaultKdfSalt).toString('base64'),
         vaultKdfParams: defaultKdfParams,
       });
-      console.log('✅ Registration: Registration completed successfully');
 
       // Clear sensitive data
       vaultKey.fill(0);
@@ -113,8 +84,6 @@ export default function RegisterPage() {
 
       router.push('/login?registered=true');
     } catch (err: any) {
-      console.error('❌ Registration: Error occurred:', err);
-      console.error('❌ Registration: Error stack:', err.stack);
       setError(err.message || 'Registration failed');
     } finally {
       setLoading(false);
