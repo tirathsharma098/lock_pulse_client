@@ -1,7 +1,6 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface VaultContextType {
   vaultKey: Uint8Array | null;
@@ -22,9 +21,9 @@ export const useVault = () => {
 
 export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [vaultKey, setVaultKeyState] = useState<Uint8Array | null>(null);
-  const router = useRouter();
 
   const setVaultKey = (key: Uint8Array | null) => {
+    console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
     setVaultKeyState(key);
   };
 
@@ -32,6 +31,9 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (vaultKey) {
       // Zero out the key in memory
       vaultKey.fill(0);
+      console.debug('[vault-ctx] wipeVaultKey zeroed. prevLen=', vaultKey.length);
+    } else {
+      console.debug('[vault-ctx] wipeVaultKey called with null key');
     }
     setVaultKeyState(null);
   };

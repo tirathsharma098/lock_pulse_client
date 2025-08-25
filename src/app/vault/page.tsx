@@ -34,7 +34,8 @@ import {
 } from '@mui/icons-material';
 import { useVault } from '@/contexts/VaultContext';
 import { vault as vaultApi, auth } from '@/lib/api';
-import { encryptField, decryptField } from '@/lib/crypto';
+import { encryptField, decryptField, initSodium } from '@/lib/crypto';
+import sodium from 'libsodium-wrappers-sumo';
 
 interface VaultItem {
   id: string;
@@ -77,74 +78,232 @@ export default function VaultPage() {
   const [selectedItem, setSelectedItem] = useState<DecryptedItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
+  // Normalize base64 to standard alphabet and apply padding
+  const fixBase64 = (s: string) => {
+    if (!s) return s;
+    let t = s.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+    const pad = t.length % 4;
+    if (pad) t += '='.repeat(4 - pad);
+    return t;
+  };
+
+  // Decode base64 (standard or url-safe) to bytes using atob
+  const b64ToBytes = (s: string) => {
+    const t = fixBase64(s);
+    const bin = atob(t);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  };
+
+  // Fallback decrypt: try secretbox first, then AEAD XChaCha20-Poly1305
+  const decryptCompat = async (nonceB64: string, ciphertextB64: string, key: Uint8Array) => {
+    await initSodium();
+    const n = b64ToBytes(nonceB64);
+    const c = b64ToBytes(ciphertextB64);
+    console.debug('[vault] decryptCompat bytes:', { nLen: n.length, cLen: c.length, kLen: key.length });
+    try {
+      const msg = sodium.crypto_secretbox_open_easy(c, n, key);
+      const text = new TextDecoder().decode(msg);
+      console.debug('[vault] decryptCompat secretbox_open_easy ok, msgLen=', text.length);
+      return text;
+    } catch (e1: any) {
+      console.warn('[vault] secretbox_open_easy failed:', e1?.message);
+      try {
+        const msg = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(null, c, null, n, key);
+        const text = new TextDecoder().decode(msg);
+        console.debug('[vault] decryptCompat aead_xchacha20poly1305_ietf ok, msgLen=', text.length);
+        return text;
+      } catch (e2: any) {
+        console.error('[vault] decryptCompat aead failed:', e2?.message);
+        throw new Error(e2?.message || e1?.message || 'decryptCompat failed');
+      }
+    }
+  };
+
+  const isUrlSafe = (s: string) => /[-_]/.test(s);
+  const decodedLen = (label: string, s: string) => {
+    try {
+      const t = fixBase64(s);
+      const len = typeof atob === 'function' ? atob(t).length : -1;
+      console.debug(`[vault] decodedLen(${label}) ok:`, len);
+      return len;
+    } catch (e) {
+      console.warn(`[vault] decodedLen(${label}) failed`, e);
+      return -1;
+    }
+  };
+
   useEffect(() => {
     if (!isUnlocked) {
+      console.warn('[vault] Not unlocked, redirecting to /unlock');
       router.push('/unlock');
       return;
     }
+    console.debug('[vault] useEffect loadItems page=', page, 'isUnlocked=', isUnlocked, 'vaultKeyLen=', vaultKey?.length);
     loadItems();
   }, [isUnlocked, page]);
 
   const loadItems = async () => {
+    if (!vaultKey || vaultKey.length !== 32) {
+      console.error('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
+      setError('Vault key missing or invalid. Please unlock again.');
+      router.push('/unlock');
+      return;
+    }
+
     try {
       setLoading(true);
+      await initSodium();
+      console.debug('[vault] initSodium done. Fetching items page=', page);
+
       const response = await vaultApi.getItems(page);
-      
+      console.debug('[vault] api.getItems ok:', {
+        page: response.page,
+        count: response.items?.length,
+        total: response.total,
+      });
+
       const decryptedItems = await Promise.all(
-        response.items.map(async (item: VaultItem) => ({
-          ...item,
-          title: await decryptField(item.titleNonce, item.titleCiphertext, vaultKey!),
-          password: await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey!),
-        }))
+        response.items.map(async (item: VaultItem, idx: number) => {
+          console.debug('[vault] item pre-decrypt:', {
+            idx,
+            id: item.id,
+            titleNonceLen: item.titleNonce?.length,
+            titleCipherLen: item.titleCiphertext?.length,
+            passNonceLen: item.passwordNonce?.length,
+            passCipherLen: item.passwordCiphertext?.length,
+            titleNonceUrlSafe: isUrlSafe(item.titleNonce),
+            passNonceUrlSafe: isUrlSafe(item.passwordNonce),
+          });
+          decodedLen('titleNonce', item.titleNonce);
+          decodedLen('titleCiphertext', item.titleCiphertext);
+          decodedLen('passwordNonce', item.passwordNonce);
+          decodedLen('passwordCiphertext', item.passwordCiphertext);
+
+          try {
+            const title = await decryptField(item.titleNonce, item.titleCiphertext, vaultKey);
+            const password = await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey);
+            console.debug('[vault] item decrypted (no-fix):', { id: item.id, titleLen: title.length, passwordLen: password.length });
+            return { ...item, title, password };
+          } catch (e: any) {
+            console.warn('[vault] decrypt failed (raw), trying compat:', { id: item.id, error: e?.message });
+            try {
+              const title = await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey);
+              const password = await decryptCompat(item.passwordNonce, item.passwordCiphertext, vaultKey);
+              console.debug('[vault] item decrypted (compat):', { id: item.id, titleLen: title.length, passwordLen: password.length });
+              return { ...item, title, password };
+            } catch (e2: any) {
+              console.error('[vault] decrypt failed (compat):', { id: item.id, error: e2?.message });
+              throw e2;
+            }
+          }
+        })
       );
-      
+
       setItems(decryptedItems);
       setTotalPages(Math.ceil(response.total / 10));
       setError('');
     } catch (err: any) {
-      setError('Failed to load vault items');
+      console.error('Failed to load vault items:', err);
+      setError(err?.message || 'Failed to load vault items');
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddItem = async () => {
-    if (!newTitle || !newPassword) return;
+    if (!newTitle || !newPassword || !vaultKey) {
+      console.warn('[vault] handleAddItem missing fields/key', { newTitleLen: newTitle.length, newPasswordLen: newPassword.length, vaultKeyLen: vaultKey?.length });
+      return;
+    }
 
     try {
-      const titleEncrypted = await encryptField(newTitle, vaultKey!);
-      const passwordEncrypted = await encryptField(newPassword, vaultKey!);
+      await initSodium();
+      console.debug('[vault] Adding item...');
 
-      await vaultApi.createItem({
+      const titleEncrypted = await encryptField(newTitle, vaultKey);
+      const passwordEncrypted = await encryptField(newPassword, vaultKey);
+
+      console.debug('[vault] Encrypted new item:', {
+        titleNonceLen: titleEncrypted.nonce.length,
+        titleCipherLen: titleEncrypted.ciphertext.length,
+        passNonceLen: passwordEncrypted.nonce.length,
+        passCipherLen: passwordEncrypted.ciphertext.length,
+        titleNonceUrlSafe: isUrlSafe(titleEncrypted.nonce),
+        passNonceUrlSafe: isUrlSafe(passwordEncrypted.nonce),
+      });
+
+      const res = await vaultApi.createItem({
         titleNonce: titleEncrypted.nonce,
         titleCiphertext: titleEncrypted.ciphertext,
         passwordNonce: passwordEncrypted.nonce,
         passwordCiphertext: passwordEncrypted.ciphertext,
       });
+      console.debug('[vault] createItem response:', res);
 
       setNewTitle('');
       setNewPassword('');
       setAddDialogOpen(false);
       loadItems();
     } catch (err: any) {
-      setError('Failed to add item');
+      console.error('Failed to add item:', err);
+      setError(err?.message || 'Failed to add item');
     }
   };
 
   const handleViewItem = async (itemId: string) => {
+    if (!vaultKey || vaultKey.length !== 32) {
+      console.error('[vault] View missing/invalid key. length=', vaultKey?.length);
+      setError('Vault key missing or invalid. Please unlock again.');
+      router.push('/unlock');
+      return;
+    }
+
     try {
+      await initSodium();
+      console.debug('[vault] Fetching item:', itemId);
+
       const item = await vaultApi.getItem(itemId);
-      const decryptedItem: DecryptedItem = {
+      console.debug('[vault] getItem ok:', {
         id: item.id,
-        title: await decryptField(item.titleNonce, item.titleCiphertext, vaultKey!),
-        password: await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey!),
-        createdAt: item.createdAt,
-      };
-      
-      setSelectedItem(decryptedItem);
+        titleNonceLen: item.titleNonce?.length,
+        titleCipherLen: item.titleCiphertext?.length,
+        passNonceLen: item.passwordNonce?.length,
+        passCipherLen: item.passwordCiphertext?.length,
+        titleNonceUrlSafe: isUrlSafe(item.titleNonce),
+        passNonceUrlSafe: isUrlSafe(item.passwordNonce),
+      });
+      decodedLen('titleNonce', item.titleNonce);
+      decodedLen('titleCiphertext', item.titleCiphertext);
+      decodedLen('passwordNonce', item.passwordNonce);
+      decodedLen('passwordCiphertext', item.passwordCiphertext);
+
+      try {
+        const decryptedItem: DecryptedItem = {
+          id: item.id,
+          title: await decryptField(item.titleNonce, item.titleCiphertext, vaultKey),
+          password: await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey),
+          createdAt: item.createdAt,
+        };
+        console.debug('[vault] view decrypt (no-fix) ok:', { id: item.id, titleLen: decryptedItem.title.length, passwordLen: decryptedItem.password.length });
+        setSelectedItem(decryptedItem);
+      } catch (e: any) {
+        console.warn('[vault] view decrypt failed (raw), trying compat:', { id: item.id, error: e?.message });
+        const decryptedItem: DecryptedItem = {
+          id: item.id,
+          title: await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey),
+          password: await decryptCompat(item.passwordNonce, item.passwordCiphertext, vaultKey),
+          createdAt: item.createdAt,
+        };
+        console.debug('[vault] view decrypt (compat) ok:', { id: item.id, titleLen: decryptedItem.title.length, passwordLen: decryptedItem.password.length });
+        setSelectedItem(decryptedItem);
+      }
+
       setViewDialogOpen(true);
     } catch (err: any) {
-      setError('Failed to load item');
+      console.error('Failed to load item:', err);
+      setError(err?.message || 'Failed to load item');
     }
   };
 
@@ -167,7 +326,6 @@ export default function VaultPage() {
       wipeVaultKey();
       router.push('/');
     } catch (err) {
-      // Even if logout fails, clear local state
       wipeVaultKey();
       router.push('/');
     }
