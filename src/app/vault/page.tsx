@@ -23,11 +23,13 @@ import {
   Fab,
   AppBar,
   Toolbar,
-  Chip
+  Chip,
+  InputAdornment,
 } from '@mui/material';
 import {
   Add as AddIcon,
   Visibility as ViewIcon,
+  VisibilityOff as VisibilityOffIcon,
   Delete as DeleteIcon,
   Logout as LogoutIcon,
   Lock as LockIcon
@@ -48,7 +50,6 @@ interface VaultItem {
 
 interface DecryptedVaultItem extends VaultItem {
   title: string;
-  password: string;
 }
 
 interface DecryptedItem {
@@ -77,6 +78,7 @@ export default function VaultPage() {
   const [newPassword, setNewPassword] = useState('');
   const [selectedItem, setSelectedItem] = useState<DecryptedItem | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Normalize base64 to standard alphabet and apply padding
   const fixBase64 = (s: string) => {
@@ -171,32 +173,19 @@ export default function VaultPage() {
             id: item.id,
             titleNonceLen: item.titleNonce?.length,
             titleCipherLen: item.titleCiphertext?.length,
-            passNonceLen: item.passwordNonce?.length,
-            passCipherLen: item.passwordCiphertext?.length,
-            titleNonceUrlSafe: isUrlSafe(item.titleNonce),
-            passNonceUrlSafe: isUrlSafe(item.passwordNonce),
           });
           decodedLen('titleNonce', item.titleNonce);
           decodedLen('titleCiphertext', item.titleCiphertext);
-          decodedLen('passwordNonce', item.passwordNonce);
-          decodedLen('passwordCiphertext', item.passwordCiphertext);
 
           try {
             const title = await decryptField(item.titleNonce, item.titleCiphertext, vaultKey);
-            const password = await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey);
-            console.debug('[vault] item decrypted (no-fix):', { id: item.id, titleLen: title.length, passwordLen: password.length });
-            return { ...item, title, password };
+            console.debug('[vault] title decrypted:', { id: item.id, titleLen: title.length });
+            return { ...item, title };
           } catch (e: any) {
-            console.warn('[vault] decrypt failed (raw), trying compat:', { id: item.id, error: e?.message });
-            try {
-              const title = await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey);
-              const password = await decryptCompat(item.passwordNonce, item.passwordCiphertext, vaultKey);
-              console.debug('[vault] item decrypted (compat):', { id: item.id, titleLen: title.length, passwordLen: password.length });
-              return { ...item, title, password };
-            } catch (e2: any) {
-              console.error('[vault] decrypt failed (compat):', { id: item.id, error: e2?.message });
-              throw e2;
-            }
+            console.warn('[vault] title decrypt failed (raw), trying compat:', { id: item.id, error: e?.message });
+            const title = await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey);
+            console.debug('[vault] title decrypted (compat):', { id: item.id, titleLen: title.length });
+            return { ...item, title };
           }
         })
       );
@@ -286,7 +275,7 @@ export default function VaultPage() {
           password: await decryptField(item.passwordNonce, item.passwordCiphertext, vaultKey),
           createdAt: item.createdAt,
         };
-        console.debug('[vault] view decrypt (no-fix) ok:', { id: item.id, titleLen: decryptedItem.title.length, passwordLen: decryptedItem.password.length });
+        console.debug('[vault] view decrypt (no-fix) ok:', { id: item.id });
         setSelectedItem(decryptedItem);
       } catch (e: any) {
         console.warn('[vault] view decrypt failed (raw), trying compat:', { id: item.id, error: e?.message });
@@ -296,10 +285,11 @@ export default function VaultPage() {
           password: await decryptCompat(item.passwordNonce, item.passwordCiphertext, vaultKey),
           createdAt: item.createdAt,
         };
-        console.debug('[vault] view decrypt (compat) ok:', { id: item.id, titleLen: decryptedItem.title.length, passwordLen: decryptedItem.password.length });
+        console.debug('[vault] view decrypt (compat) ok:', { id: item.id });
         setSelectedItem(decryptedItem);
       }
 
+      setShowPassword(false);
       setViewDialogOpen(true);
     } catch (err: any) {
       console.error('Failed to load item:', err);
@@ -402,10 +392,10 @@ export default function VaultPage() {
                   <ListItem key={item.id} divider>
                     <ListItemText
                       primary={item.title}
-                      secondary={`Password: ${item.password} • ${new Date(item.createdAt).toLocaleDateString()}`}
+                      secondary={`Password: •••••••• • ${new Date(item.createdAt).toLocaleDateString()}`}
                     />
                     <ListItemSecondaryAction>
-                      <IconButton onClick={() => handleViewItem(item.id)} className="mr-2">
+                      <IconButton onClick={() => handleViewItem(item.id)} className="mr-2" aria-label="view details">
                         <ViewIcon />
                       </IconButton>
                       <IconButton 
@@ -414,6 +404,7 @@ export default function VaultPage() {
                           setDeleteDialogOpen(true);
                         }}
                         color="error"
+                        aria-label="delete"
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -480,14 +471,28 @@ export default function VaultPage() {
               <TextField
                 fullWidth
                 label="Password"
+                type={showPassword ? 'text' : 'password'}
                 value={selectedItem.password}
-                InputProps={{ 
+                InputProps={{
                   readOnly: true,
                   endAdornment: (
-                    <Button onClick={() => copyToClipboard(selectedItem.password)}>
-                      Copy
-                    </Button>
-                  )
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? 'hide password' : 'show password'}
+                        onClick={() => setShowPassword((v) => !v)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOffIcon /> : <ViewIcon />}
+                      </IconButton>
+                      <IconButton
+                        aria-label="copy password"
+                        onClick={() => copyToClipboard(selectedItem.password)}
+                        edge="end"
+                      >
+                        <Button>Copy</Button>
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
                 margin="normal"
               />
