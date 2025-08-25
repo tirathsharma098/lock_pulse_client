@@ -32,7 +32,8 @@ import {
   VisibilityOff as VisibilityOffIcon,
   Delete as DeleteIcon,
   Logout as LogoutIcon,
-  Lock as LockIcon
+  Lock as LockIcon,
+  ContentCopy as CopyIcon,
 } from '@mui/icons-material';
 import { useVault } from '@/contexts/VaultContext';
 import { vault as vaultApi, auth } from '@/lib/api';
@@ -489,7 +490,7 @@ export default function VaultPage() {
                         onClick={() => copyToClipboard(selectedItem.password)}
                         edge="end"
                       >
-                        <Button>Copy</Button>
+                        <CopyIcon />
                       </IconButton>
                     </InputAdornment>
                   ),
