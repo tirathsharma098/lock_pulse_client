@@ -34,7 +34,7 @@ export default function HomePage() {
             <Link href="/login" className="bg-transparent border border-primary text-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all duration-300">
               Sign In
             </Link>
-            <Link href="/register" className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-all duration-300">
+            <Link href="/register" className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary-dark transition-all duration-300 hidden sm:block">
               Create Account
             </Link>
           </div>
@@ -125,12 +125,20 @@ export default function HomePage() {
           
           {/* Interactive Demo */}
           <div className="relative mb-16">
-            <div className="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0">
+            {/* Connection Lines - Hidden on mobile */}
+            <div className="absolute top-8 left-16 right-16 h-1 bg-gray-600 hidden md:block z-0">
+              <div 
+                className="h-full bg-primary transition-all duration-500"
+                style={{ width: `${(currentStep / (securitySteps.length - 1)) * 100}%` }}
+              ></div>
+            </div>
+            
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 space-y-4 md:space-y-0 relative z-10">
               {securitySteps.map((step, index) => (
                 <div key={index} className={`flex flex-col items-center transition-all duration-500 ${
-                  index === currentStep ? 'scale-110' : 'opacity-50'
+                  index === currentStep ? 'scale-110' : 'opacity-99'
                 } flex-1 max-w-40`}>
-                  <div className={`w-16 h-16 rounded-full border-4 flex items-center justify-center mb-3 ${
+                  <div className={`w-16 h-16 rounded-full border-4 flex items-center justify-center mb-3 bg-slate-800 ${
                     index === currentStep ? 'border-primary bg-primary text-white' : 'border-gray-500 text-gray-400'
                   }`}>
                     {index + 1}
@@ -139,14 +147,6 @@ export default function HomePage() {
                   <p className="text-xs md:text-sm text-gray-400 text-center">{step.description}</p>
                 </div>
               ))}
-            </div>
-            
-            {/* Connection Lines - Hidden on mobile */}
-            <div className="absolute top-8 left-16 right-16 h-1 bg-gray-600 hidden md:block">
-              <div 
-                className="h-full bg-primary transition-all duration-500"
-                style={{ width: `${(currentStep / (securitySteps.length - 1)) * 100}%` }}
-              ></div>
             </div>
           </div>
 
@@ -351,7 +351,7 @@ export default function HomePage() {
               <span className="text-2xl font-bold text-white">LockPulse</span>
             </div>
             <div className="text-gray-400 text-center md:text-right">
-              <p>&copy; 2024 LockPulse. Your security is our priority.</p>
+              <p>&copy; 2025 LockPulse. Your security is our priority.</p>
               <p className="text-sm mt-1">Zero-knowledge password storage for everyone.</p>
             </div>
           </div>
