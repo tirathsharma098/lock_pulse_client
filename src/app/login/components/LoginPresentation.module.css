@@ -1,0 +1,50 @@
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.floatingElement {
+  animation: float 6s ease-in-out infinite;
+}
+
+.logoContainer {
+  animation: pulse-glow 3s ease-in-out infinite;
+  padding: 1rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.featureCard {
+  animation: slide-up 0.5s ease-out;
+  transition: all 0.3s ease;
+}
+
+.featureCard:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+}

@@ -15,7 +15,11 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import * as opaque from '@serenity-kit/opaque';
-import { auth } from '@/lib/api';
+import { auth, user } from '@/lib/api';
+import { deriveKEK, unwrapVaultKey, initSodium, decodeBase64 } from '@/lib/crypto';
+import { useVault } from '@/contexts/VaultContext';
+import { Toaster, toast } from 'sonner';
+import LoginPresentation from './components/LoginPresentation';
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -25,6 +29,7 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('');
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setVaultKey } = useVault();
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
@@ -60,80 +65,109 @@ export default function LoginPage() {
         finishLoginRequest,
       });
 
-      router.push('/unlock');
+      // Derive KEK and unwrap vault key, then route to /vault
+      await initSodium();
+      const securityData = await user.getSecurity();
+      const wrappedKeyData = await user.getWrappedKey();
+
+      if (!securityData?.vaultKdfSalt || !securityData?.vaultKdfParams || !wrappedKeyData?.wrappedVaultKey) {
+        throw new Error('Missing security parameters');
+      }
+
+      const saltBytes = await decodeBase64(securityData.vaultKdfSalt);
+      const kek = await deriveKEK(password, saltBytes, securityData.vaultKdfParams);
+      const vaultKey = await unwrapVaultKey(wrappedKeyData.wrappedVaultKey, kek);
+
+      setVaultKey(vaultKey);
+      kek.fill(0);
+      setPassword('');
+
+      toast.success('Signed in');
+      router.replace('/vault');
     } catch (err: any) {
-      setError(err.message || 'Login failed');
+      setError(err?.message || 'Login failed');
+      toast.error(err?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <Container maxWidth="sm">
-        <Paper elevation={3} className="p-8">
-          <Typography variant="h4" component="h1" className="mb-6 text-center font-bold">
-            Sign In
-          </Typography>
-
-          {success && (
-            <Alert severity="success" className="mb-4">
-              {success}
-            </Alert>
-          )}
-
-          {error && (
-            <Alert severity="error" className="mb-4">
-              {error}
-            </Alert>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <TextField
-              fullWidth
-              label="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              disabled={loading}
-              autoComplete="username"
-            />
-
-            <TextField
-              fullWidth
-              type="password"
-              label="Master Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              disabled={loading}
-              autoComplete="current-password"
-            />
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              disabled={loading}
-              className="mt-6"
-            >
-              {loading ? <CircularProgress size={24} /> : 'Sign In'}
-            </Button>
-          </form>
-
-          <Box className="mt-4 text-center">
-            <Typography variant="body2">
-              Don't have an account?{' '}
-              <Link href="/register" passHref>
-                <MuiLink component="span" className="cursor-pointer">
-                  Create one
-                </MuiLink>
-              </Link>
+    <div className="min-h-screen flex">
+      <Toaster position="top-center" duration={1500} richColors />
+      
+      {/* Presentation Side */}
+      <LoginPresentation />
+      
+      {/* Form Side */}
+      <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <Container maxWidth="sm">
+          <Paper elevation={3} className="p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
+            <Typography variant="h4" component="h1" className="mb-6 text-center font-bold text-gray-800">
+              Sign In
             </Typography>
-          </Box>
-        </Paper>
-      </Container>
+
+            {success && (
+              <Alert severity="success" className="mb-4">
+                {success}
+              </Alert>
+            )}
+
+            {error && (
+              <Alert severity="error" className="mb-4">
+                {error}
+              </Alert>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <TextField
+                fullWidth
+                label="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                disabled={loading}
+                autoComplete="username"
+                className="bg-white/70"
+              />
+
+              <TextField
+                fullWidth
+                type="password"
+                label="Master Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={loading}
+                autoComplete="current-password"
+                className="bg-white/70"
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading}
+                className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
+              >
+                {loading ? <CircularProgress size={24} /> : 'Sign In to Vault'}
+              </Button>
+            </form>
+
+            <Box className="mt-6 text-center">
+              <Typography variant="body2" className="text-gray-600">
+                Don&apos;t have an account?{' '}
+                <Link href="/register" passHref>
+                  <MuiLink component="span" className="cursor-pointer font-semibold text-blue-600 hover:text-purple-600 transition-colors">
+                    Create one
+                  </MuiLink>
+                </Link>
+              </Typography>
+            </Box>
+          </Paper>
+        </Container>
+      </div>
     </div>
   );
 }
