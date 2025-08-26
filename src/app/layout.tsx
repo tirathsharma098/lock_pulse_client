@@ -97,7 +97,7 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <ThemeProvider defaultTheme="dark">
+        <ThemeProvider defaultTheme="system">
           <VaultProvider>
             {children}
           </VaultProvider>
