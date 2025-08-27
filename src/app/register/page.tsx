@@ -101,7 +101,7 @@ export default function RegisterPage() {
       <RegisterPresentation />
       
       {/* Form Side */}
-      <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center p-4">
+      <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Container maxWidth="sm">
           <Paper elevation={3} className="p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
             <Typography variant="h4" component="h1" className="mb-6 text-center font-bold text-gray-800">
@@ -156,7 +156,7 @@ export default function RegisterPage() {
                 variant="contained"
                 size="large"
                 disabled={loading}
-                className="mt-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
+                className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
               >
                 {loading ? <CircularProgress size={24} sx={{ color: 'white' }}/> : 'Create Secure Vault'}
               </Button>
@@ -166,7 +166,7 @@ export default function RegisterPage() {
               <Typography variant="body2" className="text-gray-600">
                 Already have an account?{' '}
                 <Link href="/login" passHref>
-                  <MuiLink component="span" className="cursor-pointer font-semibold text-emerald-600 hover:text-teal-600 transition-colors">
+                  <MuiLink component="span" className="cursor-pointer font-semibold text-blue-600 hover:text-purple-600 transition-colors">
                     Sign in
                   </MuiLink>
                 </Link>

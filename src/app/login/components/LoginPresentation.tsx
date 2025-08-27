@@ -33,7 +33,7 @@ export default function LoginPresentation() {
   }, []);
 
   return (
-    <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
+    <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 via-purple-700 to-purple-600 relative overflow-hidden">
       {/* Floating Background Elements */}
       <div className={`${styles.floatingElement} absolute top-20 left-10`}>
         <Shield className="h-12 w-12 text-white/20" />

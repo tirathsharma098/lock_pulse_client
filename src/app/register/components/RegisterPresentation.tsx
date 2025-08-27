@@ -40,7 +40,7 @@ export default function RegisterPresentation() {
   }, []);
 
   return (
-    <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 relative overflow-hidden">
+    <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-blue-600 via-blue-700 via-purple-700 to-purple-600 relative overflow-hidden">
       {/* Animated Background Pattern */}
       <div className={styles.backgroundPattern}>
         {[...Array(20)].map((_, i) => (
@@ -76,10 +76,10 @@ export default function RegisterPresentation() {
           <div className={styles.welcomeBadge}>
             <span className="text-sm font-medium">Welcome to the Future</span>
           </div>
-          <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-emerald-100 to-white bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
             Join LockPulse
           </h1>
-          <p className="text-xl text-emerald-100 font-light">
+          <p className="text-xl text-blue-100 font-light">
             Where your passwords are truly yours
           </p>
         </div>
@@ -88,14 +88,14 @@ export default function RegisterPresentation() {
         <div className="w-full max-w-md mb-8">
           <div className={`${styles.stepCard} bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20`}>
             <div className="flex items-center mb-4">
-              <div className={`${styles.stepIcon} text-emerald-200 mr-4`}>
+              <div className={`${styles.stepIcon} text-blue-200 mr-4`}>
                 {steps[currentStep].icon}
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white">
                   Step {currentStep + 1}: {steps[currentStep].title}
                 </h3>
-                <p className="text-emerald-100 text-sm">
+                <p className="text-blue-100 text-sm">
                   {steps[currentStep].description}
                 </p>
               </div>
@@ -129,8 +129,8 @@ export default function RegisterPresentation() {
                 className={`${styles.benefitItem} flex items-center bg-white/5 rounded-lg p-3 backdrop-blur-sm`}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <CheckCircle className="h-5 w-5 text-emerald-300 mr-3 flex-shrink-0" />
-                <span className="text-emerald-50 text-sm">{benefit}</span>
+                <CheckCircle className="h-5 w-5 text-blue-300 mr-3 flex-shrink-0" />
+                <span className="text-blue-50 text-sm">{benefit}</span>
               </div>
             ))}
           </div>
@@ -138,10 +138,10 @@ export default function RegisterPresentation() {
 
         {/* CTA Section */}
         <div className="text-center">
-          <p className="text-emerald-100 text-lg mb-2">
+          <p className="text-blue-100 text-lg mb-2">
             Ready to secure your digital life?
           </p>
-          <div className="flex items-center justify-center text-emerald-200">
+          <div className="flex items-center justify-center text-blue-200">
             <span className="text-sm">Create your account now</span>
             <ArrowRight className="h-4 w-4 ml-2 animate-pulse" />
           </div>
