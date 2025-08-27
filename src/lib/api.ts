@@ -50,6 +50,7 @@ export const auth = {
   registerFinish: (data: {
     username: string;
     registrationRecord: string;
+    registrationRequest: string;
     wrappedVaultKey: string;
     vaultKdfSalt: string;
     vaultKdfParams: any;

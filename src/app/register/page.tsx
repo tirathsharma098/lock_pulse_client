@@ -75,6 +75,7 @@ export default function RegisterPage() {
       await auth.registerFinish({
         username,
         registrationRecord,
+        registrationRequest,
         wrappedVaultKey,
         vaultKdfSalt: Buffer.from(vaultKdfSalt).toString('base64'),
         vaultKdfParams: defaultKdfParams,
@@ -157,7 +158,7 @@ export default function RegisterPage() {
                 disabled={loading}
                 className="mt-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
               >
-                {loading ? <CircularProgress size={24} /> : 'Create Secure Vault'}
+                {loading ? <CircularProgress size={24} sx={{ color: 'white' }}/> : 'Create Secure Vault'}
               </Button>
             </form>
 

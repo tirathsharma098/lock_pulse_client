@@ -53,12 +53,15 @@ export default function LoginPage() {
       });
 
       // Finish OPAQUE login
-      const { finishLoginRequest } = opaque.client.finishLogin({
+      const loginResult = opaque.client.finishLogin({
         clientLoginState,
         loginResponse,
         password,
       });
-
+      if (!loginResult) {
+        throw new Error("Login failed: invalid state or password");
+      }
+      const { finishLoginRequest } = loginResult;
       // Send finish login request
       await auth.loginFinish({
         loginId,
@@ -68,15 +71,15 @@ export default function LoginPage() {
       // Derive KEK and unwrap vault key, then route to /vault
       await initSodium();
       const securityData = await user.getSecurity();
-      const wrappedKeyData = await user.getWrappedKey();
+      // const wrappedKeyData = await user.getWrappedKey();
 
-      if (!securityData?.vaultKdfSalt || !securityData?.vaultKdfParams || !wrappedKeyData?.wrappedVaultKey) {
+      if (!securityData?.vaultKdfSalt || !securityData?.vaultKdfParams || !securityData?.wrappedVaultKey) {
         throw new Error('Missing security parameters');
       }
 
       const saltBytes = await decodeBase64(securityData.vaultKdfSalt);
       const kek = await deriveKEK(password, saltBytes, securityData.vaultKdfParams);
-      const vaultKey = await unwrapVaultKey(wrappedKeyData.wrappedVaultKey, kek);
+      const vaultKey = await unwrapVaultKey(securityData.wrappedVaultKey, kek);
 
       setVaultKey(vaultKey);
       kek.fill(0);
@@ -151,7 +154,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
               >
-                {loading ? <CircularProgress size={24} /> : 'Sign In to Vault'}
+                {loading ? <CircularProgress size={24} sx={{ color: 'white' }}/> : 'Sign In to Vault'}
               </Button>
             </form>
 

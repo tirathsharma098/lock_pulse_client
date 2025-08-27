@@ -40,7 +40,7 @@ import {
 import { Toaster, toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { vault as vaultApi, auth } from '@/lib/api';
-import { encryptField, decryptField, initSodium } from '@/lib/crypto';
+import { decryptCompat, encryptField, initSodium } from '@/lib/crypto';
 import sodium from 'libsodium-wrappers-sumo';
 import AddPasswordDialog from './components/AddPasswordDialog';
 import ViewPasswordDialog from './components/ViewPasswordDialog';
@@ -67,36 +67,6 @@ interface DecryptedItem {
   isLong?: boolean;
 }
 
-// Add back base64 fix + compat decrypt for legacy/url-safe records
-const fixBase64 = (s: string) => {
-  if (!s) return s;
-  let t = s.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
-  const pad = t.length % 4;
-  if (pad) t += '='.repeat(4 - pad);
-  return t;
-};
-
-const b64ToBytes = (s: string) => {
-  const t = fixBase64(s);
-  const bin = atob(t);
-  const out = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
-  return out;
-};
-
-const decryptCompat = async (nonceB64: string, ciphertextB64: string, key: Uint8Array) => {
-  await initSodium();
-  const n = b64ToBytes(nonceB64);
-  const c = b64ToBytes(ciphertextB64);
-  try {
-    const msg1 = sodium.crypto_secretbox_open_easy(c, n, key);
-    return new TextDecoder().decode(msg1);
-  } catch {
-    const msg2 = sodium.crypto_aead_xchacha20poly1305_ietf_decrypt(null, c, null, n, key);
-    return new TextDecoder().decode(msg2);
-  }
-};
-
 export default function VaultPage() {
   const { vaultKey, isUnlocked, wipeVaultKey } = useVault();
   const router = useRouter();
@@ -116,19 +86,23 @@ export default function VaultPage() {
   const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
   const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
 
+  const clearVaultStateData = () => {
+    console.error('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
+    setItems([]);
+    setSelectedItem(null);
+    setAddDialogOpen(false);
+    setViewDialogOpen(false);
+    setDeleteDialogOpen(false);
+    toast.info('Session expired. Please log in again.');
+    wipeVaultKey();
+    router.replace('/login');
+    setLoading(false);
+    return;
+  }
+
   useEffect(() => {
     if (!isUnlocked) {
-      console.warn('[vault] Not unlocked; redirecting to login');
-      setLoading(false);
-      setItems([]);
-      setSelectedItem(null);
-      setAddDialogOpen(false);
-      setViewDialogOpen(false);
-      setDeleteDialogOpen(false);
-      wipeVaultKey();
-      toast.info('Session expired. Please log in again.');
-      router.replace('/login');
-      return;
+      return clearVaultStateData();
     }
     console.debug('[vault] useEffect loadItems page=', page, 'isUnlocked=', isUnlocked, 'vaultKeyLen=', vaultKey?.length);
     loadItems(page);
@@ -140,17 +114,7 @@ export default function VaultPage() {
     overrideSortDir?: 'ASC' | 'DESC'
   ) => {
     if (!vaultKey || vaultKey.length !== 32) {
-      console.error('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
-      setItems([]);
-      setSelectedItem(null);
-      setAddDialogOpen(false);
-      setViewDialogOpen(false);
-      setDeleteDialogOpen(false);
-      toast.info('Session expired. Please log in again.');
-      wipeVaultKey();
-      router.replace('/login');
-      setLoading(false);
-      return;
+      return clearVaultStateData();
     }
 
     try {
@@ -172,32 +136,34 @@ export default function VaultPage() {
         sortDir: sortDirToUse,
       });
 
-      const decryptedItems = await Promise.all(
-        response.items.map(async (item: VaultItem, idx: number) => {
-          try {
-            const title = await decryptField(item.titleNonce, item.titleCiphertext, vaultKey);
-            return { ...item, title };
-          } catch (e: any) {
-            // Fallback to compat decryption for older/url-safe entries
-            const title = await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey);
-            return { ...item, title };
-          }
-        })
-      );
+      const decryptedItems = [];
+      for (const item of response.items) {
+        let title = "";
+        try {
+          title = await decryptCompat(
+            item.titleNonce,
+            item.titleCiphertext,
+            vaultKey
+          );
+        } catch (err: any) {
+          console.debug("> Compact decryption failed :: ", err);
+          title = "Decryption failed";
+        }
+        decryptedItems.push({ ...item, title });
+      }
 
       setItems(decryptedItems);
       setTotalPages(Math.ceil(response.total / 10));
       setError('');
-    } catch (err: any) {
-      console.error('Failed to load vault items:', err);
+    }catch(err:any){
+      console.error("Api Error:: ", err);
       if (err?.status === 401 || err?.response?.status === 401) {
-        toast.info('Session expired. Please log in again.');
-        wipeVaultKey();
-        router.replace('/login');
+        toast.info("Session expired. Please log in again.");
+        clearVaultStateData();
         return;
       }
-      setError(err?.message || 'Failed to load vault items');
-    } finally {
+      // setError(err?.message || "Failed to load vault items");
+    }finally {
       setLoading(false);
     }
   };
@@ -239,38 +205,21 @@ export default function VaultPage() {
 
   const handleViewItem = async (itemId: string) => {
     if (!vaultKey || vaultKey.length !== 32) {
-      console.error('[vault] View missing/invalid key. length=', vaultKey?.length);
-      setSelectedItem(null);
-      setViewDialogOpen(false);
-      toast.info('Session expired. Please log in again.');
-      wipeVaultKey();
-      router.replace('/login');
+      clearVaultStateData();
       return;
     }
 
     try {
       await initSodium();
       const item = await vaultApi.getItem(itemId);
-      try {
-        const decryptedItem: DecryptedItem = {
-          id: item.id,
-          title: await decryptField(item.titleNonce, item.titleCiphertext, vaultKey),
-          password: await decryptField(item.passwordNonce!, item.passwordCiphertext!, vaultKey),
-          isLong: item.isLong,
-          createdAt: item.createdAt,
-        };
-        setSelectedItem(decryptedItem);
-      } catch {
-        // Fallback to compat for view
-        const decryptedItem: DecryptedItem = {
-          id: item.id,
-          title: await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey),
-          password: await decryptCompat(item.passwordNonce!, item.passwordCiphertext!, vaultKey),
-          isLong: item.isLong,
-          createdAt: item.createdAt,
-        };
-        setSelectedItem(decryptedItem);
-      }
+      const decryptedItem: DecryptedItem = {
+        id: item.id,
+        title: await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey),
+        password: await decryptCompat(item.passwordNonce!, item.passwordCiphertext!, vaultKey),
+        isLong: item.isLong,
+        createdAt: item.createdAt,
+      };
+      setSelectedItem(decryptedItem);
       setViewDialogOpen(true);
     } catch (err: any) {
       console.error('Failed to load item:', err);
