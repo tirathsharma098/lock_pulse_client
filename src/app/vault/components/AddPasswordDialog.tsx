@@ -2,114 +2,131 @@
 
 import { useState } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, Typography, FormControlLabel, Switch
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  FormControlLabel,
+  Switch,
+  Box,
 } from '@mui/material';
+import { toast } from 'sonner';
+import { useVault } from '@/contexts/VaultContext';
+import { vaultService, type VaultItemData } from '@/services';
+import { encryptField, initSodium } from '@/lib/crypto';
 
-function utf8BytesLen(s: string) {
-  return new TextEncoder().encode(s).length;
-}
-
-type Props = {
+interface AddPasswordDialogProps {
   open: boolean;
   onClose: () => void;
-  onAdd: (title: string, password: string, longMode: boolean) => void | Promise<void>;
-};
+  onAdd: () => void; // Callback to refresh the main list
+}
 
-export default function AddPasswordDialog({ open, onClose, onAdd }: Props) {
+export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordDialogProps) {
+  const { vaultKey, wipeVaultKey } = useVault();
   const [title, setTitle] = useState('');
   const [password, setPassword] = useState('');
   const [longMode, setLongMode] = useState(false);
-  const [passwordBytes, setPasswordBytes] = useState(0);
-  const [passwordTooLong, setPasswordTooLong] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLenCheck = (text: string, isLong: boolean) => {
-    const bytes = utf8BytesLen(text);
-    setPasswordBytes(bytes);
-    if (!isLong && bytes > 1024) {
-      setPasswordTooLong('Normal password max is 1KB. Switch to Long secret to continue.');
-    } else if (bytes > 20 * 1024) {
-      setPasswordTooLong('Password max is 20KB.');
-    } else {
-      setPasswordTooLong(null);
-    }
-  };
-
-  const handleToggleLong = (_: any, checked: boolean) => {
-    setLongMode(checked);
-    handleLenCheck(password, checked);
-  };
-
-  const handlePasswordChange = (v: string) => {
-    setPassword(v);
-    handleLenCheck(v, longMode);
-  };
-
-  const resetAndClose = () => {
+  const handleClose = () => {
     setTitle('');
     setPassword('');
-    setPasswordBytes(0);
-    setPasswordTooLong(null);
     setLongMode(false);
     onClose();
   };
 
-  const handleAddClick = async () => {
-    if (!title || !password || passwordTooLong) return;
+  const handleSubmit = async () => {
+    if (!title || !password || !vaultKey) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    if (vaultKey.length !== 32) {
+      toast.error('Invalid vault key');
+      wipeVaultKey();
+      return;
+    }
+
+    setLoading(true);
     try {
-      setSubmitting(true);
-      await onAdd(title, password, longMode);
-      resetAndClose();
+      await initSodium();
+      const titleEncrypted = await encryptField(title, vaultKey);
+      const passwordEncrypted = await encryptField(password, vaultKey);
+
+      const itemData: VaultItemData = {
+        titleNonce: titleEncrypted.nonce,
+        titleCiphertext: titleEncrypted.ciphertext,
+        passwordNonce: passwordEncrypted.nonce,
+        passwordCiphertext: passwordEncrypted.ciphertext,
+        isLong: longMode,
+      };
+
+      await vaultService.createItem(itemData);
+      
+      toast.success('Password added successfully');
+      handleClose();
+      onAdd(); // Refresh the main list
+    } catch (err: any) {
+      console.log('Failed to add item:', err);
+      if (err?.status === 401) {
+        toast.error('Session expired. Please log in again.');
+        wipeVaultKey();
+        return;
+      }
+      toast.error(err?.message || 'Failed to add password');
     } finally {
-      setSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Add New Password</DialogTitle>
-      <DialogContent className="space-y-2">
-        <FormControlLabel
-          control={<Switch checked={longMode} onChange={handleToggleLong} />}
-          label="Long secret (multi-line, up to 20KB)"
-        />
-
-        <Typography variant="subtitle2" sx={{ mt: 1 }}>Title</Typography>
-        <TextField
-          fullWidth
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          margin="normal"
-        />
-
-        <Typography variant="subtitle2" sx={{ mt: 1 }}>
-          Password {longMode ? '(up to 20KB)' : '(up to 1KB)'}
-        </Typography>
-        <TextField
-          fullWidth
-          type={longMode ? 'text' : 'password'}
-          multiline={longMode}
-          minRows={longMode ? 8 : undefined}
-          value={password}
-          onChange={(e) => handlePasswordChange(e.target.value)}
-          margin="normal"
-          error={!!passwordTooLong}
-          helperText={
-            passwordTooLong
-              ? passwordTooLong
-              : `Size: ${passwordBytes} / ${longMode ? 20480 : 1024} bytes`
-          }
-        />
+      <DialogContent>
+        <Box className="space-y-4 pt-2">
+          <TextField
+            fullWidth
+            label="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="e.g., Gmail Account"
+            autoFocus
+          />
+          
+          <TextField
+            fullWidth
+            label="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter password"
+            multiline={longMode}
+            rows={longMode ? 4 : 1}
+          />
+          
+          <FormControlLabel
+            control={
+              <Switch
+                checked={longMode}
+                onChange={(e) => setLongMode(e.target.checked)}
+              />
+            }
+            label="Long text mode (for notes, keys, etc.)"
+          />
+        </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={submitting}>Cancel</Button>
-        <Button
-          onClick={handleAddClick}
-          variant="contained"
-          disabled={!!passwordTooLong || !title || !password || submitting}
+        <Button onClick={handleClose} disabled={loading}>
+          Cancel
+        </Button>
+        <Button 
+          onClick={handleSubmit} 
+          variant="contained" 
+          disabled={loading || !title || !password}
         >
-          Add
+          {loading ? 'Adding...' : 'Add Password'}
         </Button>
       </DialogActions>
     </Dialog>

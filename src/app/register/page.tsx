@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import * as opaque from '@serenity-kit/opaque';
-import { auth } from '@/lib/api';
+import { authService } from '@/services'; // Updated import
 import { generateVaultKey, generateSalt, deriveKEK, wrapVaultKey, combineNonceAndCiphertext, getDefaultKdfParams, initSodium } from '@/lib/crypto';
 import RegisterPresentation from './components/RegisterPresentation';
 import {Toaster} from 'sonner';
@@ -50,8 +50,8 @@ export default function RegisterPage() {
       // Start OPAQUE registration
       const { registrationRequest, clientRegistrationState } = opaque.client.startRegistration({ password });
 
-      // Send registration request to server
-      const { registrationResponse } = await auth.registerStart({
+      // Send registration request to server - Updated to use authService
+      const { registrationResponse } = await authService.registerStart({
         username,
         registrationRequest,
       });
@@ -71,8 +71,8 @@ export default function RegisterPage() {
         password,
       });
 
-      // Send final registration data
-      await auth.registerFinish({
+      // Send final registration data - Updated to use authService
+      await authService.registerFinish({
         username,
         registrationRecord,
         registrationRequest,

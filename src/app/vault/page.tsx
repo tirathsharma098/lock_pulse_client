@@ -26,7 +26,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  ListItemIcon, // added
+  ListItemIcon,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -34,37 +34,18 @@ import {
   Delete as DeleteIcon,
   Logout as LogoutIcon,
   Lock as LockIcon,
-  Password as PasswordIcon, // added
-  Description as PageIcon,  // added
+  Password as PasswordIcon,
+  Description as PageIcon,
 } from '@mui/icons-material';
 import { Toaster, toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
-import { vault as vaultApi, auth } from '@/lib/api';
-import { decryptCompat, encryptField, initSodium } from '@/lib/crypto';
-import sodium from 'libsodium-wrappers-sumo';
+import { authService, vaultService, type VaultItem } from '@/services';
+import { decryptCompat, initSodium } from '@/lib/crypto';
 import AddPasswordDialog from './components/AddPasswordDialog';
 import ViewPasswordDialog from './components/ViewPasswordDialog';
 
-interface VaultItem {
-  id: string;
-  titleNonce: string;
-  titleCiphertext: string;
-  passwordNonce?: string;
-  passwordCiphertext?: string;
-  createdAt: string;
-  isLong?: boolean;
-}
-
 interface DecryptedVaultItem extends VaultItem {
   title: string;
-}
-
-interface DecryptedItem {
-  id: string;
-  title: string;
-  password: string;
-  createdAt: string;
-  isLong?: boolean;
 }
 
 export default function VaultPage() {
@@ -80,16 +61,16 @@ export default function VaultPage() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const [selectedItem, setSelectedItem] = useState<DecryptedItem | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
   const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
 
   const clearVaultStateData = () => {
-    console.error('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
+    console.debug('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
     setItems([]);
-    setSelectedItem(null);
+    setSelectedItemId(null);
     setAddDialogOpen(false);
     setViewDialogOpen(false);
     setDeleteDialogOpen(false);
@@ -124,9 +105,8 @@ export default function VaultPage() {
 
       const typeToUse = overrideType ?? filterType;
       const sortDirToUse = overrideSortDir ?? sortDir;
-
-      const response = await (vaultApi.getItems as any)(
-        `${page}&type=${encodeURIComponent(typeToUse)}&sortDir=${encodeURIComponent(sortDirToUse)}`
+      const response = await vaultService.getItems(
+        `page=${page}&type=${encodeURIComponent(typeToUse)}&sortDir=${encodeURIComponent(sortDirToUse)}`
       );
       console.debug('[vault] api.getItems ok:', {
         page: response.page,
@@ -156,7 +136,7 @@ export default function VaultPage() {
       setTotalPages(Math.ceil(response.total / 10));
       setError('');
     }catch(err:any){
-      console.error("Api Error:: ", err);
+      console.debug("Api Error:: ", err);
       if (err?.status === 401 || err?.response?.status === 401) {
         toast.info("Session expired. Please log in again.");
         clearVaultStateData();
@@ -168,76 +148,16 @@ export default function VaultPage() {
     }
   };
 
-  const handleAddItem = async (title: string, password: string, longMode: boolean) => {
-    if (!title || !password || !vaultKey) {
-      console.warn('[vault] handleAddItem missing fields/key', { titleLen: title.length, passwordLen: password.length, vaultKeyLen: vaultKey?.length });
-      return;
-    }
-
-    try {
-      await initSodium();
-      const titleEncrypted = await encryptField(title, vaultKey);
-      const passwordEncrypted = await encryptField(password, vaultKey);
-
-      await vaultApi.createItem({
-        titleNonce: titleEncrypted.nonce,
-        titleCiphertext: titleEncrypted.ciphertext,
-        passwordNonce: passwordEncrypted.nonce,
-        passwordCiphertext: passwordEncrypted.ciphertext,
-        isLong: longMode,
-      } as any);
-
-      setAddDialogOpen(false);
-      toast.success('Password added');
-      loadItems();
-    } catch (err: any) {
-      console.error('Failed to add item:', err);
-      if (err?.status === 401 || err?.response?.status === 401) {
-        toast.info('Session expired. Please log in again.');
-        wipeVaultKey();
-        router.replace('/login');
-        return;
-      }
-      setError(err?.message || 'Failed to add item');
-      toast.error('Failed to add item');
-    }
-  };
-
-  const handleViewItem = async (itemId: string) => {
-    if (!vaultKey || vaultKey.length !== 32) {
-      clearVaultStateData();
-      return;
-    }
-
-    try {
-      await initSodium();
-      const item = await vaultApi.getItem(itemId);
-      const decryptedItem: DecryptedItem = {
-        id: item.id,
-        title: await decryptCompat(item.titleNonce, item.titleCiphertext, vaultKey),
-        password: await decryptCompat(item.passwordNonce!, item.passwordCiphertext!, vaultKey),
-        isLong: item.isLong,
-        createdAt: item.createdAt,
-      };
-      setSelectedItem(decryptedItem);
-      setViewDialogOpen(true);
-    } catch (err: any) {
-      console.error('Failed to load item:', err);
-      if (err?.status === 401 || err?.response?.status === 401) {
-        toast.info('Session expired. Please log in again.');
-        wipeVaultKey();
-        router.replace('/login');
-        return;
-      }
-      setError(err?.message || 'Failed to load item');
-    }
+  const handleViewItem = (itemId: string) => {
+    setSelectedItemId(itemId);
+    setViewDialogOpen(true);
   };
 
   const handleDeleteItem = async () => {
     if (!itemToDelete) return;
 
     try {
-      await vaultApi.deleteItem(itemToDelete);
+      await vaultService.deleteItem(itemToDelete);
       setDeleteDialogOpen(false);
       setItemToDelete(null);
       toast.success('Password deleted');
@@ -256,11 +176,11 @@ export default function VaultPage() {
 
   const handleLogout = async () => {
     try {
-      await auth.logout();
+      await authService.logout();
       wipeVaultKey();
       toast.success('Logged out');
       router.push('/');
-    } catch (err) {
+    } catch {
       wipeVaultKey();
       toast.success('Logged out');
       router.push('/');
@@ -413,13 +333,13 @@ export default function VaultPage() {
       <AddPasswordDialog
         open={addDialogOpen}
         onClose={() => setAddDialogOpen(false)}
-        onAdd={handleAddItem}
+        onAdd={() => loadItems()} // Refresh list after adding
       />
 
       <ViewPasswordDialog
         open={viewDialogOpen}
         onClose={() => setViewDialogOpen(false)}
-        item={selectedItem}
+        itemId={selectedItemId}
       />
 
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>

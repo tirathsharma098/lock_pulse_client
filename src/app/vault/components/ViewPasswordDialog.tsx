@@ -1,124 +1,190 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  Dialog, DialogTitle, DialogContent, DialogActions,
-  Button, TextField, Typography, Box, IconButton, InputAdornment
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Button,
+  Box,
+  IconButton,
+  TextField,
+  Chip,
+  CircularProgress,
 } from '@mui/material';
 import {
-  Visibility as ViewIcon,
+  Visibility as VisibilityIcon,
   VisibilityOff as VisibilityOffIcon,
   ContentCopy as CopyIcon,
 } from '@mui/icons-material';
-import CheckIcon from '@mui/icons-material/Check';
 import { toast } from 'sonner';
+import { useVault } from '@/contexts/VaultContext';
+import { vaultService, type VaultItem } from '@/services';
+import { decryptCompat, initSodium } from '@/lib/crypto';
 
-type DecryptedItem = {
+interface DecryptedItem {
   id: string;
   title: string;
   password: string;
   createdAt: string;
   isLong?: boolean;
-};
+}
 
-type Props = {
+interface ViewPasswordDialogProps {
   open: boolean;
   onClose: () => void;
-  item: DecryptedItem | null;
-};
+  itemId: string | null;
+}
 
-export default function ViewPasswordDialog({ open, onClose, item }: Props) {
+export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswordDialogProps) {
+  const { vaultKey, wipeVaultKey } = useVault();
+  const [item, setItem] = useState<DecryptedItem | null>(null);
+  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const copyResetRef = useRef<number | null>(null);
 
   useEffect(() => {
-    return () => {
-      if (copyResetRef.current) window.clearTimeout(copyResetRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    // reset states when dialog re-opens for a different item
-    if (open) {
+    if (open && itemId && vaultKey) {
+      loadItem();
+    } else if (!open) {
+      // Reset state when dialog closes
+      setItem(null);
       setShowPassword(false);
-      setCopied(false);
     }
-  }, [open, item?.id]);
+  }, [open, itemId, vaultKey]);
 
-  const copyToClipboard = async (text: string) => {
+  const loadItem = async () => {
+    if (!itemId || !vaultKey || vaultKey.length !== 32) {
+      toast.error('Invalid request');
+      return;
+    }
+
+    setLoading(true);
     try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      toast.success('Copied to clipboard', { duration: 1500 });
-      if (copyResetRef.current) window.clearTimeout(copyResetRef.current);
-      copyResetRef.current = window.setTimeout(() => setCopied(false), 1500);
-    } catch {
-      toast.error('Copy failed', { duration: 1500 });
+      await initSodium();
+      const vaultItem = await vaultService.getItem(itemId);
+      
+      const decryptedItem: DecryptedItem = {
+        id: vaultItem.id,
+        title: await decryptCompat(vaultItem.titleNonce, vaultItem.titleCiphertext, vaultKey),
+        password: await decryptCompat(vaultItem.passwordNonce!, vaultItem.passwordCiphertext!, vaultKey),
+        isLong: vaultItem.isLong,
+        createdAt: vaultItem.createdAt,
+      };
+      
+      setItem(decryptedItem);
+    } catch (err: any) {
+      console.error('Failed to load item:', err);
+      if (err?.status === 401) {
+        toast.error('Session expired. Please log in again.');
+        wipeVaultKey();
+        return;
+      }
+      toast.error(err?.message || 'Failed to load password details');
+      onClose();
+    } finally {
+      setLoading(false);
     }
   };
 
+  const copyToClipboard = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied to clipboard`);
+    } catch (err) {
+      toast.error('Failed to copy to clipboard');
+    }
+  };
+
+  const handleClose = () => {
+    setItem(null);
+    setShowPassword(false);
+    onClose();
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Password Details</DialogTitle>
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+      <DialogTitle>
+        <Box className="flex items-center justify-between">
+          Password Details
+          {item?.isLong && (
+            <Chip label="Long Text" color="info" size="small" />
+          )}
+        </Box>
+      </DialogTitle>
+      
       <DialogContent>
-        {item && (
-          <div className="space-y-2">
-            <Typography variant="subtitle2">Title</Typography>
-            <TextField
-              fullWidth
-              value={item.title}
-              InputProps={{ readOnly: true }}
-              margin="normal"
-            />
-            {(() => {
-              const isMulti = !!item.isLong;
-              return (
-                <>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Typography variant="subtitle2">Password</Typography>
-                    <IconButton
-                      aria-label="copy password"
-                      onClick={() => copyToClipboard(item.password)}
-                      size="small"
-                      color={copied ? 'success' : 'default'}
-                    >
-                      {copied ? <CheckIcon /> : <CopyIcon />}
-                    </IconButton>
-                  </Box>
-                  <TextField
-                    fullWidth
-                    type={!isMulti ? (showPassword ? 'text' : 'password') : 'text'}
-                    multiline={isMulti}
-                    minRows={isMulti ? 10 : undefined}
-                    value={item.password}
-                    InputProps={{
-                      readOnly: true,
-                      endAdornment: !isMulti ? (
-                        <InputAdornment position="end">
-                          <IconButton
-                            aria-label={showPassword ? 'hide password' : 'show password'}
-                            onClick={() => setShowPassword((v) => !v)}
-                            edge="end"
-                          >
-                            {showPassword ? <VisibilityOffIcon /> : <ViewIcon />}
-                          </IconButton>
-                        </InputAdornment>
-                      ) : undefined,
-                    }}
-                    margin="normal"
-                  />
-                </>
-              );
-            })()}
-            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-              Created: {new Date(item.createdAt).toLocaleString()}
-            </Typography>
-          </div>
+        {loading ? (
+          <Box className="flex justify-center py-8">
+            <CircularProgress />
+          </Box>
+        ) : item ? (
+          <Box className="space-y-4">
+            <Box>
+              <Typography variant="subtitle2" className="mb-1">
+                Title
+              </Typography>
+              <Box className="flex items-center gap-2">
+                <TextField
+                  fullWidth
+                  value={item.title}
+                  variant="outlined"
+                  size="small"
+                  InputProps={{ readOnly: true }}
+                />
+                <IconButton 
+                  onClick={() => copyToClipboard(item.title, 'Title')}
+                  size="small"
+                >
+                  <CopyIcon />
+                </IconButton>
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="subtitle2" className="mb-1">
+                Password
+              </Typography>
+              <Box className="flex items-center gap-2">
+                <TextField
+                  fullWidth
+                  type={showPassword ? 'text' : 'password'}
+                  value={item.password}
+                  variant="outlined"
+                  size="small"
+                  multiline={item.isLong && showPassword}
+                  rows={item.isLong && showPassword ? 4 : 1}
+                  InputProps={{ readOnly: true }}
+                />
+                <IconButton 
+                  onClick={() => setShowPassword(!showPassword)}
+                  size="small"
+                >
+                  {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                </IconButton>
+                <IconButton 
+                  onClick={() => copyToClipboard(item.password, 'Password')}
+                  size="small"
+                >
+                  <CopyIcon />
+                </IconButton>
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="subtitle2" color="textSecondary">
+                Created: {new Date(item.createdAt).toLocaleString()}
+              </Typography>
+            </Box>
+          </Box>
+        ) : (
+          <Typography>No item data available</Typography>
         )}
       </DialogContent>
+      
       <DialogActions>
-        <Button variant="contained" onClick={onClose}>Close</Button>
+        <Button onClick={handleClose}>Close</Button>
       </DialogActions>
     </Dialog>
   );

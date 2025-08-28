@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { 
+import {
   Container, 
   Paper, 
   TextField, 
@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import * as opaque from '@serenity-kit/opaque';
-import { auth, user } from '@/lib/api';
+import { authService, userService } from '@/services';
 import { deriveKEK, unwrapVaultKey, initSodium, decodeBase64 } from '@/lib/crypto';
 import { useVault } from '@/contexts/VaultContext';
 import { Toaster, toast } from 'sonner';
@@ -46,8 +46,8 @@ export default function LoginPage() {
       // Start OPAQUE login
       const { startLoginRequest, clientLoginState } = opaque.client.startLogin({ password });
 
-      // Send login start request
-      const { loginResponse, loginId } = await auth.loginStart({
+      // Send login start request - Updated to use authService
+      const { loginResponse, loginId } = await authService.loginStart({
         username,
         startLoginRequest,
       });
@@ -62,16 +62,16 @@ export default function LoginPage() {
         throw new Error("Login failed: invalid state or password");
       }
       const { finishLoginRequest } = loginResult;
-      // Send finish login request
-      await auth.loginFinish({
+      
+      // Send finish login request - Updated to use authService
+      await authService.loginFinish({
         loginId,
         finishLoginRequest,
       });
 
       // Derive KEK and unwrap vault key, then route to /vault
       await initSodium();
-      const securityData = await user.getSecurity();
-      // const wrappedKeyData = await user.getWrappedKey();
+      const securityData = await userService.getSecurity(); // Updated to use userService
 
       if (!securityData?.vaultKdfSalt || !securityData?.vaultKdfParams || !securityData?.wrappedVaultKey) {
         throw new Error('Missing security parameters');
