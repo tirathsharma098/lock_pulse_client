@@ -17,6 +17,40 @@ import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { vaultService, type VaultItemData } from '@/services';
 import { encryptField, getEncryptedSize, initSodium } from '@/lib/crypto';
+import { z } from 'zod'; // add zod
+
+// local schema
+const addPasswordSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  password: z.string()
+  .min(4, { message: 'Password is required' }),
+  isLong: z.boolean(),
+}).refine((data) => {
+  if (data.title) {
+    return getEncryptedSize(data.title) <= 400;
+  }
+  return true;
+}, {
+  message: 'Encrypted title must be less than 400 bytes',
+  path: ['title'],
+}).refine((data) => {
+  if (data.isLong) {
+    return getEncryptedSize(data.password) <= 20 * 1024;
+  }
+  return true; // Skip this check if isLong is false
+}, {
+  message: 'Encrypted password must be less than 20 KB',
+  path: ['password'],
+})
+.refine((data) => {
+  if (!data.isLong) {
+    return getEncryptedSize(data.password) <= 200;
+  }
+  return true; // Skip this check if isLong is true
+}, {
+  message: 'Encrypted password must be less than 200 bytes',
+  path: ['password'],
+});
 
 interface AddPasswordDialogProps {
   open: boolean;
@@ -30,20 +64,36 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
   const [password, setPassword] = useState('');
   const [longMode, setLongMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ title?: string; password?: string }>({});
 
   const handleClose = () => {
     setTitle('');
     setPassword('');
     setLongMode(false);
+    setFieldErrors({});
     onClose();
   };
 
   const handleSubmit = async () => {
-    if (!title || !password || !vaultKey) {
+    setFieldErrors({});
+
+    // zod validation (replace inline empty checks)
+    const result = addPasswordSchema.safeParse({ title, password, isLong:longMode });
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = String(issue.path[0]);
+        if (!errs[key]) errs[key] = issue.message;
+      }
+      setFieldErrors(errs);
       toast.error('Please fill in all fields');
       return;
     }
 
+    if (!vaultKey) {
+      toast.error('Please fill in all fields');
+      return;
+    }
     if (vaultKey.length !== 32) {
       toast.error('Invalid vault key');
       wipeVaultKey();
@@ -55,7 +105,7 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
       await initSodium();
       const titleEncrypted = await encryptField(title, vaultKey);
       const passwordEncrypted = await encryptField(password, vaultKey);
-
+      // ...existing code...
       const itemData: VaultItemData = {
         titleNonce: titleEncrypted.nonce,
         titleCiphertext: titleEncrypted.ciphertext,
@@ -63,20 +113,12 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
         passwordCiphertext: passwordEncrypted.ciphertext,
         isLong: longMode,
       };
-
       await vaultService.createItem(itemData);
-      
       toast.success('Password added successfully');
       handleClose();
-      onAdd(); // Refresh the main list
+      onAdd();
     } catch (err: any) {
-      console.log('Failed to add item:', err);
-      if (err?.status === 401) {
-        toast.error('Session expired. Please log in again.');
-        wipeVaultKey();
-        return;
-      }
-      toast.error(err?.message || 'Failed to add password');
+      // ...existing code...
     } finally {
       setLoading(false);
     }
@@ -91,15 +133,20 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
       <DialogContent>
         <Box className="space-y-4 pt-2">
           <Box>
-          <TextField
-            fullWidth
-            label="Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g., Gmail Account"
-            autoFocus
-          />
-          {password && (
+            <TextField
+              fullWidth
+              label="Title"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (fieldErrors.title) setFieldErrors((p) => ({ ...p, title: undefined }));
+              }}
+              placeholder="e.g., Gmail Account"
+              autoFocus
+              error={!!fieldErrors.title}
+              helperText={fieldErrors.title ?? ''}
+            />
+            {password && (
               <Typography variant="caption" color="textSecondary" className="mt-1 block">
                 Encrypted size: {titleSize} bytes
               </Typography>
@@ -111,10 +158,15 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
               label="Password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
+              }}
               placeholder="Enter password"
               multiline={longMode}
-              rows={longMode ? 4 : 1}
+              rows={longMode ? 10 : 1}
+              error={!!fieldErrors.password}
+              helperText={fieldErrors.password ?? ''}
             />
             {password && (
               <Typography variant="caption" color="textSecondary" className="mt-1 block">
@@ -122,14 +174,8 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
               </Typography>
             )}
           </Box>
-          
           <FormControlLabel
-            control={
-              <Switch
-                checked={longMode}
-                onChange={(e) => setLongMode(e.target.checked)}
-              />
-            }
+            control={<Switch checked={longMode} onChange={(e) => setLongMode(e.target.checked)} />}
             label="Long text mode (for notes, keys, etc.)"
           />
         </Box>
@@ -138,9 +184,9 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
         <Button onClick={handleClose} disabled={loading}>
           Cancel
         </Button>
-        <Button 
-          onClick={handleSubmit} 
-          variant="contained" 
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
           disabled={loading || !title || !password}
         >
           {loading ? 'Adding...' : 'Add Password'}

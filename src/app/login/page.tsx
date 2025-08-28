@@ -16,10 +16,22 @@ import {
 import Link from 'next/link';
 import * as opaque from '@serenity-kit/opaque';
 import { authService, userService } from '@/services';
-import { deriveKEK, unwrapVaultKey, initSodium, decodeBase64 } from '@/lib/crypto';
+import { deriveKEK, unwrapVaultKey, initSodium, decodeBase64, getEncryptedSize } from '@/lib/crypto';
 import { useVault } from '@/contexts/VaultContext';
 import { Toaster, toast } from 'sonner';
 import LoginPresentation from './components/LoginPresentation';
+import { z } from 'zod'; // add zod
+
+// local schema
+const loginSchema = z.object({
+  username: z.string().min(5, 'Username is required'),
+  password: z.string()
+    .min(8, { message: 'Password must be at least 8 characters long' })
+    .max(60, { message: 'Username should not exceed 60 characters' })
+    .refine((val) => getEncryptedSize(val) <= 1024, {
+      message: 'Encrypted password must be less than 1 KB',
+    }),
+});
 
 export default function LoginPage() {
   const [username, setUsername] = useState('');
@@ -27,6 +39,8 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  // track field-level issues
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setVaultKey } = useVault();
@@ -40,7 +54,22 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
     setLoading(true);
+
+    // zod validation (replace native/inline validation)
+    const result = loginSchema.safeParse({ username, password });
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = String(issue.path[0]);
+        if (!errs[key]) errs[key] = issue.message;
+      }
+      setFieldErrors(errs);
+      setLoading(false);
+      setError('Please fix the form');
+      return;
+    }
 
     try {
       // Start OPAQUE login
@@ -51,7 +80,9 @@ export default function LoginPage() {
         username,
         startLoginRequest,
       });
-
+      if(!loginResponse || !loginId || loginResponse === 'decoy_response') {
+        throw new Error('Username or password is incorrect');
+      }
       // Finish OPAQUE login
       const loginResult = opaque.client.finishLogin({
         clientLoginState,
@@ -59,7 +90,7 @@ export default function LoginPage() {
         password,
       });
       if (!loginResult) {
-        throw new Error("Login failed: invalid state or password");
+        throw new Error("Username or password is incorrect");
       }
       const { finishLoginRequest } = loginResult;
       
@@ -127,11 +158,15 @@ export default function LoginPage() {
                 fullWidth
                 label="Username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  if (fieldErrors.username) setFieldErrors((p) => ({ ...p, username: undefined }));
+                }}
                 disabled={loading}
                 autoComplete="username"
                 className="bg-white/70"
+                error={!!fieldErrors.username}
+                helperText={fieldErrors.username ?? ''}
               />
 
               <TextField
@@ -139,11 +174,15 @@ export default function LoginPage() {
                 type="password"
                 label="Master Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
+                }}
                 disabled={loading}
                 autoComplete="current-password"
                 className="bg-white/70"
+                error={!!fieldErrors.password}
+                helperText={fieldErrors.password ?? ''}
               />
 
               <Button

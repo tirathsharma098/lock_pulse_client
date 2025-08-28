@@ -16,9 +16,32 @@ import {
 import Link from 'next/link';
 import * as opaque from '@serenity-kit/opaque';
 import { authService } from '@/services'; // Updated import
-import { generateVaultKey, generateSalt, deriveKEK, wrapVaultKey, combineNonceAndCiphertext, getDefaultKdfParams, initSodium } from '@/lib/crypto';
+import { generateVaultKey, generateSalt, deriveKEK, wrapVaultKey, combineNonceAndCiphertext, getDefaultKdfParams, initSodium, getEncryptedSize } from '@/lib/crypto';
 import RegisterPresentation from './components/RegisterPresentation';
 import {Toaster} from 'sonner';
+import { z } from 'zod'; // add zod
+
+// local schema
+const registerSchema = z.object({
+  username: z.preprocess(
+    (val) => typeof val === 'string' ? val.toLowerCase().trim() : val,
+    z.string()
+      .min(5, { message: 'Username must be at least 5 characters' })
+      .max(60, { message: 'Username should not exceed 60 characters' })
+      .refine((val) => /^[a-z0-9]+$/.test(val), {
+        message: 'Username must contain only letters and numbers',
+      })
+  ),
+  password: z.string()
+  .min(8, { message: 'Password must be at least 8 characters long' })
+  .refine((val) => getEncryptedSize(val) <= 1024, {
+    message: 'Encrypted password must be less than 1 KB',
+  }),
+  confirmPassword: z.string().min(1, 'Confirm Password is required'),
+}).refine((v) => v.password === v.confirmPassword, {
+  path: ['confirmPassword'],
+  message: 'Passwords do not match',
+});
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
@@ -26,19 +49,24 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string; confirmPassword?: string }>({});
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setFieldErrors({});
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
+    // zod validation (replace inline checks)
+    const result = registerSchema.safeParse({ username, password, confirmPassword });
+    if (!result.success) {
+      const errs: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const key = String(issue.path[0]);
+        if (!errs[key]) errs[key] = issue.message;
+      }
+      setFieldErrors(errs);
+      setError(Object.values(errs)[0] || 'Please fix the form');
       return;
     }
 
@@ -93,6 +121,8 @@ export default function RegisterPage() {
     }
   };
 
+    const passwordSize = password ? getEncryptedSize(password) : 0;
+
   return (
     <div className="min-h-screen flex">
       <Toaster position="top-center" duration={1500} richColors />
@@ -119,35 +149,52 @@ export default function RegisterPage() {
                 fullWidth
                 label="Username"
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  if (fieldErrors.username) setFieldErrors((p) => ({ ...p, username: undefined }));
+                }}
                 disabled={loading}
                 autoComplete="username"
                 className="bg-white/70"
+                error={!!fieldErrors.username}
+                helperText={fieldErrors.username ?? ''}
               />
-
+              <Box>
               <TextField
                 fullWidth
                 type="password"
                 label="Master Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
+                }}
                 disabled={loading}
                 autoComplete="new-password"
                 className="bg-white/70"
+                error={!!fieldErrors.password}
+                helperText={fieldErrors.password ?? ''}
               />
-
+              {password && (
+              <Typography variant="caption" color="textSecondary" className="mt-1 block">
+                Encrypted size: {passwordSize} bytes
+              </Typography>
+            )}
+            </Box>
               <TextField
                 fullWidth
                 type="password"
                 label="Confirm Master Password"
                 value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (fieldErrors.confirmPassword) setFieldErrors((p) => ({ ...p, confirmPassword: undefined }));
+                }}
                 disabled={loading}
                 autoComplete="new-password"
                 className="bg-white/70"
+                error={!!fieldErrors.confirmPassword}
+                helperText={fieldErrors.confirmPassword ?? ''}
               />
 
               <Button
