@@ -22,7 +22,7 @@ import {
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { vaultService, type VaultItem } from '@/services';
-import { decryptCompat, initSodium } from '@/lib/crypto';
+import { decryptCompat, getEncryptedSize, initSodium } from '@/lib/crypto';
 
 interface DecryptedItem {
   id: string;
@@ -30,6 +30,8 @@ interface DecryptedItem {
   password: string;
   createdAt: string;
   isLong?: boolean;
+  passwordSize?: number;
+  titleSize?: number;
 }
 
 interface ViewPasswordDialogProps {
@@ -64,13 +66,16 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
     try {
       await initSodium();
       const vaultItem = await vaultService.getItem(itemId);
-      
+      const password = await decryptCompat(vaultItem.passwordNonce!, vaultItem.passwordCiphertext!, vaultKey);
+      const title = await decryptCompat(vaultItem.titleNonce, vaultItem.titleCiphertext, vaultKey);
       const decryptedItem: DecryptedItem = {
         id: vaultItem.id,
-        title: await decryptCompat(vaultItem.titleNonce, vaultItem.titleCiphertext, vaultKey),
-        password: await decryptCompat(vaultItem.passwordNonce!, vaultItem.passwordCiphertext!, vaultKey),
+        title,
+        password,
         isLong: vaultItem.isLong,
         createdAt: vaultItem.createdAt,
+        passwordSize: getEncryptedSize(password),
+        titleSize: getEncryptedSize(title),
       };
       
       setItem(decryptedItem);
@@ -140,6 +145,11 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
                   <CopyIcon />
                 </IconButton>
               </Box>
+              {item.titleSize && (
+                <Typography variant="caption" color="textSecondary" className="mt-1 block">
+                  Encrypted size: {item.titleSize} bytes
+                </Typography>
+              )}
             </Box>
 
             <Box>
@@ -170,6 +180,11 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
                   <CopyIcon />
                 </IconButton>
               </Box>
+              {item.passwordSize && (
+                <Typography variant="caption" color="textSecondary" className="mt-1 block">
+                  Encrypted size: {item.passwordSize} bytes
+                </Typography>
+              )}
             </Box>
 
             <Box>

@@ -159,3 +159,19 @@ export const combineNonceAndCiphertext = async (nonce: Uint8Array, ciphertext: U
   combined.set(ciphertext, nonce.length);
   return sodium.to_base64(combined);
 };
+
+// Calculate estimated encrypted size (nonce + ciphertext + auth tag)
+export const getEncryptedSize = (plaintext: string): number => {
+  const plaintextBytes = new TextEncoder().encode(plaintext).length;
+  const nonceSize = 24; // sodium secretbox nonce size
+  const authTagSize = 16; // sodium secretbox auth tag size
+  return nonceSize + plaintextBytes + authTagSize;
+};
+
+// Calculate encrypted size from nonce and ciphertext
+export const getEncryptedSizeFromEncrypted = (nonce: string, ciphertext: string): number => {
+  console.log(">>> descrypting ", nonce, ciphertext);
+  const nonceBytes = nonce.length / 2; // hex string to bytes
+  const ciphertextBytes = ciphertext.length / 2; // hex string to bytes
+  return nonceBytes + ciphertextBytes;
+};

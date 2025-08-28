@@ -11,11 +11,12 @@ import {
   FormControlLabel,
   Switch,
   Box,
+  Typography,
 } from '@mui/material';
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { vaultService, type VaultItemData } from '@/services';
-import { encryptField, initSodium } from '@/lib/crypto';
+import { encryptField, getEncryptedSize, initSodium } from '@/lib/crypto';
 
 interface AddPasswordDialogProps {
   open: boolean;
@@ -81,11 +82,15 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
     }
   };
 
+  const titleSize = title ? getEncryptedSize(title) : 0;
+  const passwordSize = password ? getEncryptedSize(password) : 0;
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle>Add New Password</DialogTitle>
       <DialogContent>
         <Box className="space-y-4 pt-2">
+          <Box>
           <TextField
             fullWidth
             label="Title"
@@ -94,17 +99,29 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
             placeholder="e.g., Gmail Account"
             autoFocus
           />
-          
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Enter password"
-            multiline={longMode}
-            rows={longMode ? 4 : 1}
-          />
+          {password && (
+              <Typography variant="caption" color="textSecondary" className="mt-1 block">
+                Encrypted size: {titleSize} bytes
+              </Typography>
+            )}
+          </Box>
+          <Box>
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              multiline={longMode}
+              rows={longMode ? 4 : 1}
+            />
+            {password && (
+              <Typography variant="caption" color="textSecondary" className="mt-1 block">
+                Encrypted size: {passwordSize} bytes
+              </Typography>
+            )}
+          </Box>
           
           <FormControlLabel
             control={
