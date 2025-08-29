@@ -18,6 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useVault } from '@/contexts/VaultContext';
 import { authService } from '@/services';
 import { toast } from 'sonner';
+import Link from 'next/link';
 
 function VaultHeader() {
   const { wipeVaultKey } = useVault();
@@ -45,7 +46,7 @@ function VaultHeader() {
       <Toolbar>
         <LockIcon className="mr-2" />
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          LockPulse Vault
+          <Link href='/vault'> LockPulse</Link>
         </Typography>
         <Chip
           label="Unlocked"

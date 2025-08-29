@@ -300,7 +300,9 @@ export default function UpdatePasswordDialog({ open, onClose, username }: Update
             color="primary"
             disabled={loading || !newPassword || !confirmPassword}
           >
-            {loading ? <CircularProgress size={20} /> : 'Update Password'}
+             <Box sx={{ display: "flex", alignItems: "center", minWidth: 150, justifyContent: "center" }}>
+              {loading ? <CircularProgress size={20} sx={{color: "white"}}/> : "Update Password"}
+            </Box>
           </Button>
         )}
       </DialogActions>
