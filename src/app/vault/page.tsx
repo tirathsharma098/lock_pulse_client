@@ -19,9 +19,6 @@ import {
   Alert,
   Box,
   Pagination,
-  AppBar,
-  Toolbar,
-  Chip,
   FormControl,
   InputLabel,
   Select,
@@ -32,8 +29,6 @@ import {
   Add as AddIcon,
   Visibility as ViewIcon,
   Delete as DeleteIcon,
-  Logout as LogoutIcon,
-  Lock as LockIcon,
   Password as PasswordIcon,
   Description as PageIcon,
 } from '@mui/icons-material';
@@ -188,30 +183,7 @@ export default function VaultPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <AppBar position="static">
-        <Toolbar>
-          <LockIcon className="mr-2" />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            LockPulse Vault
-          </Typography>
-          <Chip
-            label="Unlocked"
-            color="success"
-            variant="filled"
-            sx={{ color: '#fff', fontWeight: 600 }}
-            className="mr-4"
-          />
-          <Button 
-            color="inherit" 
-            onClick={handleLogout}
-            startIcon={<LogoutIcon />}
-          >
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
-
+    <>
       <Toaster position="top-center" duration={1500} richColors />
 
       <Container maxWidth="md" className="py-8">
@@ -356,6 +328,6 @@ export default function VaultPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </>
   );
 }

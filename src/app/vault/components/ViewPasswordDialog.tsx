@@ -164,7 +164,7 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
                   variant="outlined"
                   size="small"
                   multiline={item.isLong && showPassword}
-                  rows={item.isLong && showPassword ? 4 : 1}
+                  rows={item.isLong && showPassword ? 10 : 1}
                   InputProps={{ readOnly: true }}
                 />
                 <IconButton 

@@ -100,6 +100,7 @@ export const unwrapVaultKey = async (wrappedKey: string, kek: Uint8Array): Promi
     const ciphertext = wrapped.slice(sodium.crypto_secretbox_NONCEBYTES);
     return sodium.crypto_secretbox_open_easy(ciphertext, nonce, kek);
   } catch (error: any) {
+    console.log(">> unwrap vault key error ::: ", error);
     if (error.message?.includes('verification failed')) {
       throw new Error('Invalid master password');
     }

@@ -89,6 +89,7 @@ export default function LoginPage() {
         loginResponse,
         password,
       });
+      console.log(">> OPAQUE loginResult:", loginResult);
       if (!loginResult) {
         throw new Error("Username or password is incorrect");
       }
@@ -119,6 +120,7 @@ export default function LoginPage() {
       toast.success('Signed in');
       router.replace('/vault');
     } catch (err: any) {
+      console.log(">> Error during login:", err);
       setError(err?.message || 'Login failed');
       toast.error(err?.message || 'Login failed');
     } finally {
