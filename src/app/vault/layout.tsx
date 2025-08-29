@@ -7,18 +7,88 @@ import {
   Typography, 
   Button, 
   IconButton,
-  Chip 
+  Chip,
+  Breadcrumbs,
+  Container
 } from '@mui/material';
 import {
   Lock as LockIcon,
   Logout as LogoutIcon,
-  Person as PersonIcon
+  Person as PersonIcon,
+  NavigateNext as NavigateNextIcon
 } from '@mui/icons-material';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useVault } from '@/contexts/VaultContext';
 import { authService } from '@/services';
 import { toast } from 'sonner';
 import Link from 'next/link';
+
+function VaultBreadcrumbs() {
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const breadcrumbMap: Record<string, string> = {
+    '/vault': 'Vault',
+    '/vault/profile': 'Profile',
+  };
+
+  const pathSegments = pathname.split('/').filter(Boolean);
+  const breadcrumbs = [];
+
+  // Build breadcrumb trail
+  let currentPath = '';
+  for (const segment of pathSegments) {
+    currentPath += `/${segment}`;
+    const label = breadcrumbMap[currentPath];
+    if (label) {
+      breadcrumbs.push({
+        path: currentPath,
+        label,
+        isCurrent: currentPath === pathname
+      });
+    }
+  }
+
+  if (breadcrumbs.length <= 1) return null;
+
+  return (
+    <Container maxWidth="lg" sx={{ mt: 2, mb: 1 }}>
+      <Breadcrumbs
+        separator={<NavigateNextIcon fontSize="small" />}
+        aria-label="breadcrumb"
+      >
+        {breadcrumbs.map((crumb) => (
+          crumb.isCurrent ? (
+            <Typography key={crumb.path} color="text.primary" sx={{ fontWeight: 500 }}>
+              {crumb.label}
+            </Typography>
+          ) : (
+            <Link
+              key={crumb.path}
+              href={crumb.path}
+              style={{
+                textDecoration: 'none',
+                color: 'inherit',
+                opacity: 0.7
+              }}
+            >
+              <Typography
+                sx={{
+                  '&:hover': {
+                    textDecoration: 'underline',
+                    opacity: 1
+                  }
+                }}
+              >
+                {crumb.label}
+              </Typography>
+            </Link>
+          )
+        ))}
+      </Breadcrumbs>
+    </Container>
+  );
+}
 
 function VaultHeader() {
   const { wipeVaultKey } = useVault();
@@ -81,9 +151,10 @@ export default function VaultLayout({
   children: React.ReactNode;
 }) {
   return (
-      <div className="min-h-screen bg-gray-50">
-        <VaultHeader />
-        {children}
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <VaultHeader />
+      <VaultBreadcrumbs />
+      {children}
+    </div>
   );
 }
