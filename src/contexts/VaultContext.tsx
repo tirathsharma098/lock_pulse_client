@@ -4,7 +4,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface VaultContextType {
   vaultKey: Uint8Array | null;
-  setVaultKey: (key: Uint8Array | null) => void;
+  username: string | null;
+  setVaultData: (key: Uint8Array | null, username: string) => void;
   isUnlocked: boolean;
   wipeVaultKey: () => void;
 }
@@ -21,10 +22,12 @@ export const useVault = () => {
 
 export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [vaultKey, setVaultKeyState] = useState<Uint8Array | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
-  const setVaultKey = (key: Uint8Array | null) => {
+  const setVaultData = (key: Uint8Array | null, username: string) => {
     console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
     setVaultKeyState(key);
+    setUsername(username);
   };
 
   const wipeVaultKey = () => {
@@ -64,7 +67,8 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const value: VaultContextType = {
     vaultKey,
-    setVaultKey,
+    username,
+    setVaultData,
     isUnlocked: vaultKey !== null,
     wipeVaultKey,
   };

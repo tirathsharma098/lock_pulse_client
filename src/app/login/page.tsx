@@ -43,7 +43,7 @@ export default function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setVaultKey } = useVault();
+  const { setVaultData } = useVault();
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
@@ -112,7 +112,7 @@ export default function LoginPage() {
       const kek = await deriveKEK(password, saltBytes, securityData.vaultKdfParams);
       const vaultKey = await unwrapVaultKey(securityData.wrappedVaultKey, kek);
 
-      setVaultKey(vaultKey);
+      setVaultData(vaultKey, username);
       kek.fill(0);
       setPassword('');
 
