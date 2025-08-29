@@ -32,6 +32,12 @@ const registerSchema = z.object({
         message: 'Username must contain only letters and numbers',
       })
   ),
+   email: z
+   .string()
+   .min(5, { message: "Email is required" })
+   .max(320, { message: "Email must be at most 320 characters" })
+   .toLowerCase()
+   .trim(),
   password: z.string()
   .min(8, { message: 'Password must be at least 8 characters long' })
   .refine((val) => getEncryptedSize(val) <= 1024, {
@@ -45,11 +51,12 @@ const registerSchema = z.object({
 
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string; confirmPassword?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; email?: string; password?: string; confirmPassword?: string }>({});
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,7 +65,7 @@ export default function RegisterPage() {
     setFieldErrors({});
 
     // zod validation (replace inline checks)
-    const result = registerSchema.safeParse({ username, password, confirmPassword });
+    const result = registerSchema.safeParse({ username, email, password, confirmPassword });
     if (!result.success) {
       const errs: Record<string, string> = {};
       for (const issue of result.error.issues) {
@@ -102,6 +109,7 @@ export default function RegisterPage() {
       // Send final registration data - Updated to use authService
       await authService.registerFinish({
         username,
+        email,
         registrationRecord,
         registrationRequest,
         wrappedVaultKey,
@@ -159,6 +167,22 @@ export default function RegisterPage() {
                 error={!!fieldErrors.username}
                 helperText={fieldErrors.username ?? ''}
               />
+               <TextField
+            fullWidth
+            // type="email"
+            label="Email Address"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              if (fieldErrors.email) {
+                setFieldErrors((prev) => ({ ...prev, email: undefined }));
+              }
+            }}
+            error={!!fieldErrors.email}
+            helperText={fieldErrors.email}
+            disabled={loading}
+            autoComplete="email"
+          />
               <Box>
               <TextField
                 fullWidth
