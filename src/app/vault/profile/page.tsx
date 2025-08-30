@@ -17,6 +17,7 @@ import { useVault } from '@/contexts/VaultContext';
 import { toast } from 'sonner';
 import ProfileHeader from './components/ProfileHeader';
 import UpdatePasswordDialog from './components/UpdatePasswordDialog';
+import { userService } from '@/services';
 
 export default function ProfilePage() {
   const { username, email, vaultKey, setVaultData } = useVault();
@@ -34,10 +35,18 @@ export default function ProfilePage() {
     setIsEditingEmail(true);
   };
 
-  const handleSaveEmail = () => {
-    setVaultData(vaultKey, username || '', tempEmail);
-    setIsEditingEmail(false);
-    toast.success('Email updated successfully');
+  const handleSaveEmail = async () => {
+    try{
+      await userService.updateEmail({email:tempEmail});
+      setVaultData(vaultKey, username || '', tempEmail);
+      setIsEditingEmail(false);
+      toast.success('Email updated successfully');
+    }catch(err){
+      console.error('Failed to update email', err);
+      setTempEmail('');
+      setIsEditingEmail(false);
+      toast.error('Email updated failed');
+    }
   };
 
   const handleCancelEditEmail = () => {

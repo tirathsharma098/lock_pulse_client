@@ -32,5 +32,14 @@ export const userService = {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+  
+  updateEmail: async(data: {
+    email: string;
+  }) => {
+    return apiRequest('/me/update-email', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 };
