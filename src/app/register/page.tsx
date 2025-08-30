@@ -139,7 +139,7 @@ export default function RegisterPage() {
       <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Container maxWidth="sm">
           <Paper elevation={3} className="p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
-            <Typography variant="h4" component="h1" className="mb-6 text-center font-bold text-gray-800">
+            <Typography variant="h4" component="h1" className="!mb-6 text-center font-bold text-gray-800">
               Create Account
             </Typography>
 

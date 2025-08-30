@@ -24,6 +24,16 @@ export interface VaultItemsResponse {
   total: number;
 }
 
+export interface DecryptedItem {
+  id: string;
+  title: string;
+  password: string;
+  createdAt: string;
+  isLong?: boolean;
+  passwordSize?: number;
+  titleSize?: number;
+}
+
 export const vaultService = {
   getItems: (query: string = ''): Promise<VaultItemsResponse> => 
     apiRequest(`/vault/items?${query}`),

@@ -38,6 +38,8 @@ import { authService, vaultService, type VaultItem } from '@/services';
 import { decryptCompat, initSodium } from '@/lib/crypto';
 import AddPasswordDialog from './components/AddPasswordDialog';
 import ViewPasswordDialog from './components/ViewPasswordDialog';
+import { Edit2Icon, EditIcon } from 'lucide-react';
+import EditPasswordDialog from './components/EditPasswordDialog';
 
 interface DecryptedVaultItem extends VaultItem {
   title: string;
@@ -54,6 +56,7 @@ export default function VaultPage() {
 
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
@@ -68,6 +71,7 @@ export default function VaultPage() {
     setSelectedItemId(null);
     setAddDialogOpen(false);
     setViewDialogOpen(false);
+    setEditDialogOpen(false);
     setDeleteDialogOpen(false);
     toast.info('Session expired. Please log in again.');
     wipeVaultKey();
@@ -147,6 +151,10 @@ export default function VaultPage() {
     setSelectedItemId(itemId);
     setViewDialogOpen(true);
   };
+  const handleEditItem = (itemId: string) => {
+    setSelectedItemId(itemId);
+    setEditDialogOpen(true);
+  };
 
   const handleDeleteItem = async () => {
     if (!itemToDelete) return;
@@ -166,19 +174,6 @@ export default function VaultPage() {
       }
       setError('Failed to delete item');
       toast.error('Failed to delete');
-    }
-  };
-
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-      wipeVaultKey();
-      toast.success('Logged out');
-      router.push('/');
-    } catch {
-      wipeVaultKey();
-      toast.success('Logged out');
-      router.push('/');
     }
   };
 
@@ -268,6 +263,9 @@ export default function VaultPage() {
                       <IconButton onClick={() => handleViewItem(item.id)} className="mr-2" aria-label="view details">
                         <ViewIcon />
                       </IconButton>
+                      <IconButton onClick={() => handleEditItem(item.id)} className="mr-2" aria-label="update details">
+                        <EditIcon />
+                      </IconButton>
                       <IconButton 
                         onClick={() => {
                           setItemToDelete(item.id);
@@ -311,6 +309,12 @@ export default function VaultPage() {
         onClose={() => setViewDialogOpen(false)}
         itemId={selectedItemId}
       />
+       {editDialogOpen && <EditPasswordDialog
+        open={editDialogOpen}
+        onEdit={() => loadItems()}
+        onClose={() => setEditDialogOpen(false)}
+        itemId={selectedItemId}
+      />}
 
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Delete Password</DialogTitle>

@@ -21,18 +21,9 @@ import {
 } from '@mui/icons-material';
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
-import { vaultService, type VaultItem } from '@/services';
+import { vaultService} from '@/services';
 import { decryptCompat, getEncryptedSize, initSodium } from '@/lib/crypto';
-
-interface DecryptedItem {
-  id: string;
-  title: string;
-  password: string;
-  createdAt: string;
-  isLong?: boolean;
-  passwordSize?: number;
-  titleSize?: number;
-}
+import { DecryptedItem } from '@/services/vault.service';
 
 interface ViewPasswordDialogProps {
   open: boolean;
