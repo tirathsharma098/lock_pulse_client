@@ -1,6 +1,7 @@
 import { apiRequest } from './config/api';
 
 export interface SecurityData {
+  email:string;
   vaultKdfSalt: string;
   vaultKdfParams: any;
   wrappedVaultKey: string;

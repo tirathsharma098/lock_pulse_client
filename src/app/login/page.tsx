@@ -18,7 +18,7 @@ import * as opaque from '@serenity-kit/opaque';
 import { authService, userService } from '@/services';
 import { deriveKEK, unwrapVaultKey, initSodium, decodeBase64, getEncryptedSize } from '@/lib/crypto';
 import { useVault } from '@/contexts/VaultContext';
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 import LoginPresentation from './components/LoginPresentation';
 import { z } from 'zod'; // add zod
 
@@ -113,7 +113,7 @@ export default function LoginPage() {
       const kek = await deriveKEK(password, saltBytes, securityData.vaultKdfParams);
       const vaultKey = await unwrapVaultKey(securityData.wrappedVaultKey, kek);
 
-      setVaultData(vaultKey, username);
+      setVaultData(vaultKey, username, securityData.email);
       kek.fill(0);
       setPassword('');
 
@@ -130,8 +130,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      <Toaster position="top-center" duration={1500} richColors />
-      
       {/* Presentation Side */}
       <LoginPresentation />
       

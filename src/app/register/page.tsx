@@ -18,7 +18,6 @@ import * as opaque from '@serenity-kit/opaque';
 import { authService } from '@/services'; // Updated import
 import { generateVaultKey, generateSalt, deriveKEK, wrapVaultKey, combineNonceAndCiphertext, getDefaultKdfParams, initSodium, getEncryptedSize } from '@/lib/crypto';
 import RegisterPresentation from './components/RegisterPresentation';
-import {Toaster} from 'sonner';
 import { z } from 'zod'; // add zod
 
 // local schema
@@ -133,8 +132,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex">
-      <Toaster position="top-center" duration={1500} richColors />
-      
       {/* Presentation Side */}
       <RegisterPresentation />
       

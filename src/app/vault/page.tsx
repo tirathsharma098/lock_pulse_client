@@ -32,7 +32,7 @@ import {
   Password as PasswordIcon,
   Description as PageIcon,
 } from '@mui/icons-material';
-import { Toaster, toast } from 'sonner';
+import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { authService, vaultService, type VaultItem } from '@/services';
 import { decryptCompat, initSodium } from '@/lib/crypto';
@@ -184,8 +184,6 @@ export default function VaultPage() {
 
   return (
     <>
-      <Toaster position="top-center" duration={1500} richColors />
-
       <Container maxWidth="md" className="py-8">
         {error && (
           <Alert severity="error" className="mb-4" onClose={() => setError('')}>
