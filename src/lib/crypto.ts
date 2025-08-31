@@ -100,6 +100,7 @@ export const unwrapVaultKey = async (wrappedKey: string, kek: Uint8Array): Promi
     const ciphertext = wrapped.slice(sodium.crypto_secretbox_NONCEBYTES);
     return sodium.crypto_secretbox_open_easy(ciphertext, nonce, kek);
   } catch (error: any) {
+    console.log(">> unwrap vault key error ::: ", error);
     if (error.message?.includes('verification failed')) {
       throw new Error('Invalid master password');
     }
@@ -121,13 +122,29 @@ export const encryptField = async (plaintext: string, vaultKey: Uint8Array): Pro
   };
 };
 
-export const decryptField = async (nonce: string, ciphertext: string, vaultKey: Uint8Array): Promise<string> => {
+// Add back base64 fix + compat decrypt for legacy/url-safe records
+const fixBase64 = (s: string) => {
+  if (!s) return s;
+  let t = s.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+  const pad = t.length % 4;
+  if (pad) t += '='.repeat(4 - pad);
+  return t;
+};
+
+const b64ToBytes = (s: string) => {
+  const t = fixBase64(s);
+  const bin = atob(t);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out;
+};
+
+export const decryptCompat = async (nonceB64: string, ciphertextB64: string, key: Uint8Array) => {
   await initSodium();
-  const nonceBytes = sodium.from_base64(nonce);
-  const ciphertextBytes = sodium.from_base64(ciphertext);
-  
-  const plaintext = sodium.crypto_secretbox_open_easy(ciphertextBytes, nonceBytes, vaultKey);
-  return sodium.to_string(plaintext);
+  const n = b64ToBytes(nonceB64);
+  const c = b64ToBytes(ciphertextB64);
+  const msg1 = sodium.crypto_secretbox_open_easy(c, n, key);
+  return new TextDecoder().decode(msg1);
 };
 
 export const combineNonceAndCiphertext = async (nonce: Uint8Array, ciphertext: Uint8Array): Promise<string> => {
@@ -137,4 +154,12 @@ export const combineNonceAndCiphertext = async (nonce: Uint8Array, ciphertext: U
   combined.set(nonce);
   combined.set(ciphertext, nonce.length);
   return sodium.to_base64(combined);
+};
+
+// Calculate estimated encrypted size (nonce + ciphertext + auth tag)
+export const getEncryptedSize = (plaintext: string): number => {
+  const plaintextBytes = new TextEncoder().encode(plaintext).length;
+  const nonceSize = 24; // sodium secretbox nonce size
+  const authTagSize = 16; // sodium secretbox auth tag size
+  return nonceSize + plaintextBytes + authTagSize;
 };
