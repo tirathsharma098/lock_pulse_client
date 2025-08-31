@@ -100,9 +100,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <Toaster position="top-center" duration={3000} richColors />
         <ThemeProvider defaultTheme="system">
-          <VaultProvider>
             {children}
-          </VaultProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -118,7 +118,7 @@ export default function LoginPage() {
       setPassword('');
 
       toast.success('Signed in');
-      router.replace('/vault');
+      router.replace('/account');
     } catch (err: any) {
       console.log(">> Error during login:", err);
       setError(err?.message || 'Login failed');

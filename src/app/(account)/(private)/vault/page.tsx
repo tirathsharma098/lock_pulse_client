@@ -179,7 +179,6 @@ export default function VaultPage() {
 
   return (
     <>
-      <Container maxWidth="md" className="py-8">
         {error && (
           <Alert severity="error" className="mb-4" onClose={() => setError('')}>
             {error}
@@ -296,7 +295,6 @@ export default function VaultPage() {
             </>
           )}
         </Paper>
-      </Container>
 
       <AddPasswordDialog
         open={addDialogOpen}
