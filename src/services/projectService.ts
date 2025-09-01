@@ -27,6 +27,11 @@ export interface CreateProjectRequest {
 export interface UpdateProjectRequest {
   name?: string;
   notes?: string;
+  wrappedVaultKey?: string;
+  vaultKdfSalt?: string;
+  vaultKdfParams?: any;
+  passwordNonce?: string;
+  passwordCiphertext?: string;
 }
 
 export const getAllProjects = async (): Promise<Project[]> => {
