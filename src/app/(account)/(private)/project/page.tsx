@@ -7,9 +7,11 @@ import {
   ListItemText, IconButton, Menu, MenuItem, Paper, Divider 
 } from '@mui/material';
 import { MoreVert as MoreVertIcon, Add as AddIcon } from '@mui/icons-material';
-import { getAllProjects, Project, deleteProject } from '@/services/projectService';
+import { getAllProjects, Project, deleteProject, getProject } from '@/services/projectService';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 import { toast } from 'sonner';
+import { useVault } from '@/contexts/VaultContext';
+import { decryptCompat, deriveKEK, getVaultKey, initSodium, unwrapVaultKey } from '@/lib/crypto';
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -19,6 +21,7 @@ export default function ProjectsPage() {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { vaultKey, setProjectVaultKey } = useVault();
 
   const fetchProjects = async () => {
     try {
@@ -68,8 +71,8 @@ export default function ProjectsPage() {
         await deleteProject(selectedProject.id);
         toast.success('Project deleted successfully');
         fetchProjects();
-      } catch (err) {
-        setError('Failed to delete project');
+      } catch (err:any) {
+        setError(err?.message || 'Failed to delete project');
         console.error(err);
       }
     }
@@ -88,6 +91,28 @@ export default function ProjectsPage() {
     fetchProjects();
     handleCreateDialogClose();
   };
+
+  const handleProjectClick = async (projectId: string) => {
+    if (!vaultKey) {
+      toast.error('Vault key not exist.');
+      return;
+    }
+    try {
+      const project = await getProject(projectId);
+      const currProjPass = await decryptCompat(
+        project.passwordNonce,
+        project.passwordCiphertext,
+        vaultKey
+      );
+      await initSodium();
+      const projectVaultKey = await getVaultKey(currProjPass, project.vaultKdfSalt, project.vaultKdfParams, project.wrappedVaultKey);
+      setProjectVaultKey(projectVaultKey);
+      router.push(`/project/${project.id}/service`);
+    } catch (err) {
+      console.error('Failed to access project:', err);
+      toast.error('Failed to access project. Please try again.');
+    }
+  }
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -138,7 +163,7 @@ export default function ProjectsPage() {
                   <ListItemText
                     primary={project.name}
                     secondary={project.notes || 'No description'}
-                    onClick={() => router.push(`/project/${project.id}/view`)}
+                    onClick={() => handleProjectClick(project.id)}
                     sx={{ cursor: 'pointer' }}
                   />
                 </ListItem>

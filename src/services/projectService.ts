@@ -1,3 +1,4 @@
+import { VaultKdfParams } from '@/lib/crypto';
 import { apiRequest } from './config/api';
 
 export interface Project {
@@ -6,7 +7,7 @@ export interface Project {
   notes?: string;
   wrappedVaultKey: string;
   vaultKdfSalt: string;
-  vaultKdfParams: any;
+  vaultKdfParams: VaultKdfParams;
   passwordNonce: string;
   passwordCiphertext: string;
   ownerId: string;

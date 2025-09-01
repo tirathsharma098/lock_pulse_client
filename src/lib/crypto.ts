@@ -163,3 +163,13 @@ export const getEncryptedSize = (plaintext: string): number => {
   const authTagSize = 16; // sodium secretbox auth tag size
   return nonceSize + plaintextBytes + authTagSize;
 };
+
+export const getVaultKey = async (password: string, vaultKdfSalt:string, vaultKdfParams:VaultKdfParams, wrappedVaultKey:string):Promise<Uint8Array> => {
+  if (!vaultKdfSalt || !vaultKdfParams || !wrappedVaultKey) {
+    throw new Error('Missing security parameters');
+  }
+  const saltBytes = await decodeBase64(vaultKdfSalt);
+  const kek = await deriveKEK(password, saltBytes, vaultKdfParams);
+  const vaultKey = await unwrapVaultKey(wrappedVaultKey, kek);
+  return vaultKey;
+}
