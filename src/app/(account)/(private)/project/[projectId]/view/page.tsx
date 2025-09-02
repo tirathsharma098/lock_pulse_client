@@ -2,11 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Container, Typography, Paper, Box, Button, 
-  Divider, CircularProgress, Alert, IconButton,
-  InputAdornment, TextField, Snackbar
-} from '@mui/material';
 import { useParams } from "next/navigation";
 import { 
   ArrowBack as ArrowBackIcon, 
@@ -18,6 +13,8 @@ import {
 import { useVault } from '@/contexts/VaultContext';
 import { getProject, Project } from '@/services/projectService';
 import { decryptCompat } from '@/lib/crypto';
+import { toast } from 'sonner';
+import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, IconButton } from '@/components/ui';
 
 export default function ProjectViewPage() {
   const params = useParams();
@@ -31,8 +28,6 @@ export default function ProjectViewPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -80,232 +75,180 @@ export default function ProjectViewPage() {
     }
   };
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   const handleCopyPassword = async () => {
     if (decryptedPassword) {
       try {
         await navigator.clipboard.writeText(decryptedPassword);
-        setSnackbarMessage('Password copied to clipboard');
-        setSnackbarOpen(true);
+        toast.success('Password copied to clipboard');
       } catch (err) {
         console.error('Failed to copy password:', err);
-        setSnackbarMessage('Failed to copy password');
-        setSnackbarOpen(true);
+        toast.error('Failed to copy password');
       }
     }
   };
 
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
-
-  const handleBack = () => {
-    router.push('/project');
-  };
-
-  const handleEdit = () => {
-    router.push(`/project/${projectId}/edit`);
-  };
-
   if (loading) {
     return (
-      <Container sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container sx={{ py: 4 }}>
-        <Alert severity="error">{error}</Alert>
-        <Box mt={2}>
-          <Button 
-            startIcon={<ArrowBackIcon />} 
-            onClick={handleBack}
-          >
-            Back to Projects
-          </Button>
-        </Box>
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-800">{error}</p>
+        </div>
+        <Button 
+          onClick={() => router.push('/project')}
+          className="flex items-center space-x-2"
+        >
+          <ArrowBackIcon className="w-4 h-4" />
+          <span>Back to Projects</span>
+        </Button>
+      </div>
     );
   }
 
   if (!project) {
     return (
-      <Container sx={{ py: 4 }}>
-        <Alert severity="warning">Project not found</Alert>
-        <Box mt={2}>
-          <Button 
-            startIcon={<ArrowBackIcon />} 
-            onClick={handleBack}
-          >
-            Back to Projects
-          </Button>
-        </Box>
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-yellow-800">Project not found</p>
+        </div>
+        <Button 
+          onClick={() => router.push('/project')}
+          className="flex items-center space-x-2"
+        >
+          <ArrowBackIcon className="w-4 h-4" />
+          <span>Back to Projects</span>
+        </Button>
+      </div>
     );
   }
 
-  return (<Container maxWidth="md" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" mb={2}>
-        <Button 
-          startIcon={<ArrowBackIcon />} 
-          onClick={handleBack}
-          sx={{ mr: 2 }}
-        >
-          Back
-        </Button>
-        <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
-          {project.name}
-        </Typography>
-        <Button 
-          variant="outlined" 
-          startIcon={<EditIcon />} 
-          onClick={handleEdit}
-        >
-          Edit
-        </Button>
-      </Box>
-
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Project Details
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-        
-        <Box mb={2}>
-          <Typography variant="subtitle2" color="text.secondary">
-            Created
-          </Typography>
-          <Typography>
-            {new Date(project.createdAt).toLocaleString()}
-          </Typography>
-        </Box>
-
-        <Box mb={2}>
-          <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-            Project Password
-            {project.isLong && (
-              <Typography component="span" variant="caption" color="primary" sx={{ ml: 1, fontWeight: 'bold' }}>
-                (Long Password)
-              </Typography>
-            )}
-          </Typography>
-          {passwordLoading ? (
-            <Box display="flex" alignItems="center">
-              <CircularProgress size={20} sx={{ mr: 1 }} />
-              <Typography variant="body2">Decrypting...</Typography>
-            </Box>
-          ) : passwordError ? (
-            <Alert severity="error" sx={{ mt: 1 }}>
-              {passwordError}
-            </Alert>
-          ) : (
-            project.isLong ? (
-              <TextField
-                value={showPassword ? decryptedPassword : '••••••••••••'}
-                variant="outlined"
-                size="small"
-                fullWidth
-                multiline
-                rows={4}
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleTogglePasswordVisibility}
-                        edge="end"
-                        title={showPassword ? 'Hide password' : 'Show password'}
-                      >
-                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                      </IconButton>
-                      <IconButton
-                        onClick={handleCopyPassword}
-                        edge="end"
-                        title="Copy password"
-                        disabled={!decryptedPassword}
-                      >
-                        <ContentCopyIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            ) : (
-              <TextField
-                value={showPassword ? decryptedPassword : '••••••••••••'}
-                variant="outlined"
-                size="small"
-                fullWidth
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleTogglePasswordVisibility}
-                        edge="end"
-                        title={showPassword ? 'Hide password' : 'Show password'}
-                      >
-                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                      </IconButton>
-                      <IconButton
-                        onClick={handleCopyPassword}
-                        edge="end"
-                        title="Copy password"
-                        disabled={!decryptedPassword}
-                      >
-                        <ContentCopyIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            )
-          )}
-        </Box>
-        
-        {project.notes && (
-          <Box>
-            <Typography variant="subtitle2" color="text.secondary">
-              Notes
-            </Typography>
-            <Typography sx={{ whiteSpace: 'pre-wrap' }}>
-              {project.notes}
-            </Typography>
-          </Box>
-        )}
-      </Paper>
-
-      <Paper elevation={2} sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Services
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-        
-        <Box textAlign="center" py={2}>
-          <Typography color="text.secondary" mb={2}>
-            No services added to this project yet
-          </Typography>
+  return (
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
           <Button 
-            variant="contained" 
-            onClick={() => router.push(`/project/${projectId}/service`)}
+            variant="outline"
+            onClick={() => router.push('/project')}
+            className="flex items-center space-x-2"
           >
-            Manage Services
+            <ArrowBackIcon className="w-4 h-4" />
+            <span>Back</span>
           </Button>
-        </Box>
-      </Paper>
+          <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
+        </div>
+        <Button 
+          variant="outline"
+          onClick={() => router.push(`/project/${projectId}/edit`)}
+          className="flex items-center space-x-2"
+        >
+          <EditIcon className="w-4 h-4" />
+          <span>Edit</span>
+        </Button>
+      </div>
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        message={snackbarMessage}
-      />
-    </Container>
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Project Details</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Created</label>
+                <p className="mt-1 text-gray-900">{new Date(project.createdAt).toLocaleString()}</p>
+              </div>
+
+              <div>
+                <div className="flex items-end space-x-2">
+                  <div className="flex-1">
+                    {passwordLoading ? (
+                      <div className="flex items-center space-x-2">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                        <span className="text-sm text-gray-600">Decrypting...</span>
+                      </div>
+                    ) : passwordError ? (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                        <p className="text-red-800 text-sm">{passwordError}</p>
+                      </div>
+                    ) : (
+                      project.isLong ? (
+                        <Textarea
+                          label={`Project Password${project.isLong ? ' (Long Password)' : ''}`}
+                          value={showPassword ? decryptedPassword : '••••••••••••'}
+                          rows={4}
+                          readOnly
+                        />
+                      ) : (
+                        <Input
+                          label={`Project Password${project.isLong ? ' (Long Password)' : ''}`}
+                          type={showPassword ? 'text' : 'password'}
+                          value={showPassword ? decryptedPassword : '••••••••••••'}
+                          readOnly
+                        />
+                      )
+                    )}
+                  </div>
+                  {!passwordLoading && !passwordError && (
+                    <>
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        variant="ghost"
+                        className="mb-1"
+                        title={showPassword ? 'Hide password' : 'Show password'}
+                      >
+                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                      </IconButton>
+                      <IconButton
+                        onClick={handleCopyPassword}
+                        variant="ghost"
+                        className="mb-1"
+                        title="Copy password"
+                        disabled={!decryptedPassword}
+                      >
+                        <ContentCopyIcon />
+                      </IconButton>
+                    </>
+                  )}
+                </div>
+              </div>
+              
+              {project.notes && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Notes</label>
+                  <p className="mt-1 text-gray-900 whitespace-pre-wrap">{project.notes}</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Services</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <p className="text-gray-500 mb-4">No services added to this project yet</p>
+              <Button 
+                variant="primary"
+                onClick={() => router.push(`/project/${projectId}/service`)}
+              >
+                Manage Services
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

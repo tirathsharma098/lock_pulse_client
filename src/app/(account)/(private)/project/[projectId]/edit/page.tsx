@@ -2,10 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Container, Typography, Paper, Box, Button, 
-  TextField, Alert, CircularProgress, IconButton, InputAdornment, FormControlLabel, Switch
-} from '@mui/material';
 import { useParams } from "next/navigation";
 import { 
   ArrowBack as ArrowBackIcon, 
@@ -26,6 +22,7 @@ import {
   combineNonceAndCiphertext,
 } from '@/lib/crypto';
 import { toast } from 'sonner';
+import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, Switch, IconButton } from '@/components/ui';
 
 export default function ProjectEditPage() {
   const params = useParams();
@@ -97,43 +94,31 @@ export default function ProjectEditPage() {
       setSaving(true);
       setError(null);
       
-      // Check if password has changed
-      const passwordChanged = password !== originalPassword;
+      // Unwrap the current vault key using the original password
+      const originalKdfSalt = new Uint8Array(Buffer.from(project.vaultKdfSalt, 'base64'));
+      const originalKek = await deriveKEK(originalPassword, originalKdfSalt, project.vaultKdfParams);
+      const projectVaultKey = await unwrapVaultKey(project.wrappedVaultKey, originalKek);
       
-      let updateData: any = {
+      // Encrypt the new password with user's vault key
+      const newPasswordEncrypted = await encryptField(password, vaultKey);
+      
+      // Generate new salt and wrap vault key with new password
+      const newVaultKdfSalt = await generateSalt();
+      const newKdfParams = await getDefaultKdfParams();
+      const newKek = await deriveKEK(password, newVaultKdfSalt, newKdfParams);
+      const { nonce: newNonce, ciphertext: newCiphertext } = await wrapVaultKey(projectVaultKey, newKek);
+      const newWrappedVaultKey = await combineNonceAndCiphertext(newNonce, newCiphertext);
+      
+      const updateData = {
         name: name.trim(),
-        notes: notes.trim() || undefined
+        notes: notes.trim() || undefined,
+        wrappedVaultKey: newWrappedVaultKey,
+        vaultKdfSalt: Buffer.from(newVaultKdfSalt).toString('base64'),
+        vaultKdfParams: newKdfParams,
+        passwordNonce: newPasswordEncrypted.nonce,
+        passwordCiphertext: newPasswordEncrypted.ciphertext,
+        isLong,
       };
-      
-      // If password changed, we need to re-encrypt everything
-      // if (passwordChanged) {
-        // Unwrap the current vault key using the original password
-        const originalKdfSalt = new Uint8Array(Buffer.from(project.vaultKdfSalt, 'base64'));
-        const originalKek = await deriveKEK(originalPassword, originalKdfSalt, project.vaultKdfParams);
-        const projectVaultKey = await unwrapVaultKey(project.wrappedVaultKey, originalKek);
-        
-        // Encrypt the new password with user's vault key
-        const newPasswordEncrypted = await encryptField(password, vaultKey);
-        
-        // Generate new salt and wrap vault key with new password
-        const newVaultKdfSalt = await generateSalt();
-        const newKdfParams = await getDefaultKdfParams();
-        const newKek = await deriveKEK(password, newVaultKdfSalt, newKdfParams);
-        const { nonce: newNonce, ciphertext: newCiphertext } = await wrapVaultKey(projectVaultKey, newKek);
-        const newWrappedVaultKey = await combineNonceAndCiphertext(newNonce, newCiphertext);
-        
-        updateData = {
-          ...updateData,
-          wrappedVaultKey: newWrappedVaultKey,
-          vaultKdfSalt: Buffer.from(newVaultKdfSalt).toString('base64'),
-          vaultKdfParams: newKdfParams,
-          passwordNonce: newPasswordEncrypted.nonce,
-          passwordCiphertext: newPasswordEncrypted.ciphertext,
-          isLong,
-        };
-      // } else {
-      //   updateData.isLong = isLong;
-      // }
       
       await updateProject(projectId, updateData);
       
@@ -148,140 +133,144 @@ export default function ProjectEditPage() {
     }
   };
 
-  const handleBack = () => {
-    router.push(`/project/${projectId}/view`);
-  };
-
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   if (loading) {
     return (
-      <Container sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
     );
   }
 
   if (error && !project) {
     return (
-      <Container sx={{ py: 4 }}>
-        <Alert severity="error">{error}</Alert>
-        <Box mt={2}>
-          <Button 
-            startIcon={<ArrowBackIcon />} 
-            onClick={() => router.push('/project')}
-          >
-            Back to Projects
-          </Button>
-        </Box>
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-800">{error}</p>
+        </div>
+        <Button 
+          onClick={() => router.push('/project')}
+          className="flex items-center space-x-2"
+        >
+          <ArrowBackIcon className="w-4 h-4" />
+          <span>Back to Projects</span>
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" mb={2}>
-        <Button 
-          startIcon={<ArrowBackIcon />} 
-          onClick={handleBack}
-          sx={{ mr: 2 }}
-        >
-          Back
-        </Button>
-        <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
-          Edit Project
-        </Typography>
-      </Box>
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <Button 
+            variant="outline"
+            onClick={() => router.push(`/project/${projectId}/view`)}
+            className="flex items-center space-x-2"
+          >
+            <ArrowBackIcon className="w-4 h-4" />
+            <span>Back</span>
+          </Button>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Project</h1>
+        </div>
+      </div>
 
-      <Paper elevation={2} sx={{ p: 3 }}>
-        <form onSubmit={handleSubmit}>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          
-          <Box mb={3}>
-            <TextField
-              label="Project Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              fullWidth
-              required
-              variant="outlined"
-            />
-          </Box>
-          
-          <Box mb={3}>
-            <TextField
-              label="Project Password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth
-              required
-              variant="outlined"
-              multiline={isLong}
-              rows={isLong ? 4 : 1}
-              helperText="Change this password to update project encryption"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={handleTogglePasswordVisibility}
-                      edge="end"
-                      title={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+      <Card>
+        <CardHeader>
+          <CardTitle>Project Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-800">{error}</p>
+              </div>
+            )}
+            
+            <div className="space-y-4">
+              <Input
+                label="Project Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter project name"
+                required
+              />
+              
+              <div>
+                <div className="flex items-end space-x-2">
+                  <div className="flex-1">
+                    {isLong ? (
+                      <Textarea
+                        label="Project Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter project password"
+                        required
+                        rows={4}
+                        helperText="Change this password to update project encryption"
+                      />
+                    ) : (
+                      <Input
+                        label="Project Password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Enter project password"
+                        required
+                        helperText="Change this password to update project encryption"
+                      />
+                    )}
+                  </div>
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    variant="ghost"
+                    className="mb-1"
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </div>
+              </div>
 
-          <Box mb={3}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isLong}
-                  onChange={(e) => setIsLong(e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Long Password"
-            />
-          </Box>
-          
-          <Box mb={3}>
-            <TextField
-              label="Notes (Optional)"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              fullWidth
-              multiline
-              rows={4}
-              variant="outlined"
-            />
-          </Box>
-          
-          <Box display="flex" gap={2} justifyContent="flex-end">
-            <Button 
-              variant="outlined" 
-              onClick={handleBack}
-              disabled={saving}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              startIcon={<SaveIcon />}
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </Box>
-        </form>
-      </Paper>
-    </Container>
+              <Switch
+                checked={isLong}
+                onCheckedChange={setIsLong}
+                label="Long Password"
+              />
+              
+              <Textarea
+                label="Notes (Optional)"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add any notes about this project"
+                rows={4}
+              />
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => router.push(`/project/${projectId}/view`)}
+                  disabled={saving}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="primary"
+                  disabled={saving}
+                  loading={saving}
+                  className="flex items-center space-x-2"
+                >
+                  <SaveIcon className="w-4 h-4" />
+                  <span>Save Changes</span>
+                </Button>
+              </div>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

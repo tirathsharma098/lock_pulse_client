@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useContext } from 'react';
-import { 
-  Dialog, DialogTitle, DialogContent, DialogActions, 
-  TextField, Button, Box, Alert, FormControlLabel, Switch 
-} from '@mui/material';
-import {useVault} from '@/contexts/VaultContext';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useVault } from '@/contexts/VaultContext';
 import { createProject } from '@/services/projectService';
 import { encryptField, wrapVaultKey, generateVaultKey, generateSalt, getDefaultKdfParams, deriveKEK, combineNonceAndCiphertext } from '@/lib/crypto';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch } from '@/components/ui';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -51,12 +49,12 @@ export default function CreateProjectDialog({
       // Encrypt project password with user's vault key
       const passwordEncrypted = await encryptField(password, vaultKey);
 
-        const vaultKdfSalt = await generateSalt();
-        const defaultKdfParams = await getDefaultKdfParams();
-        const kek = await deriveKEK(password, vaultKdfSalt, defaultKdfParams);
-        const { nonce, ciphertext } = await wrapVaultKey(projectVaultKey, kek);
-        // Wrap the project vault key with the project password
-        const wrappedVaultKey = await combineNonceAndCiphertext(nonce, ciphertext);
+      const vaultKdfSalt = await generateSalt();
+      const defaultKdfParams = await getDefaultKdfParams();
+      const kek = await deriveKEK(password, vaultKdfSalt, defaultKdfParams);
+      const { nonce, ciphertext } = await wrapVaultKey(projectVaultKey, kek);
+      // Wrap the project vault key with the project password
+      const wrappedVaultKey = await combineNonceAndCiphertext(nonce, ciphertext);
       // Create project in the backend
       await createProject({
         name,
@@ -94,71 +92,80 @@ export default function CreateProjectDialog({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Create New Project</DialogTitle>
+    <Dialog open={open} onClose={handleClose} className="max-w-md">
+      <DialogHeader>
+        <DialogTitle>Create New Project</DialogTitle>
+      </DialogHeader>
+      
       <form onSubmit={handleSubmit}>
         <DialogContent>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
           
-          <Box mb={2}>
-            <TextField
+          <div className="space-y-4">
+            <Input
               label="Project Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              fullWidth
+              placeholder="Enter project name"
               required
               autoFocus
             />
-          </Box>
-          
-          <Box mb={2}>
-            <TextField
-              label="Project Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth
-              required
-              multiline={isLong}
-              rows={isLong ? 4 : 1}
-              helperText="This password will be used to encrypt project data"
-            />
-          </Box>
+            
+            {isLong ? (
+              <Textarea
+                label="Project Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter project password"
+                required
+                rows={4}
+                helperText="This password will be used to encrypt project data"
+              />
+            ) : (
+              <Input
+                label="Project Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter project password"
+                required
+                helperText="This password will be used to encrypt project data"
+              />
+            )}
 
-          <Box mb={2}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isLong}
-                  onChange={(e) => setIsLong(e.target.checked)}
-                  color="primary"
-                />
-              }
+            <Switch
+              checked={isLong}
+              onCheckedChange={setIsLong}
               label="Long Password"
             />
-          </Box>
-          
-          <TextField
-            label="Notes (Optional)"
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            fullWidth
-            multiline
-            rows={3}
-          />
+            
+            <Textarea
+              label="Notes (Optional)"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add any notes about this project"
+              rows={3}
+            />
+          </div>
         </DialogContent>
         
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={loading}>
+            Cancel
+          </Button>
           <Button 
             type="submit" 
-            variant="contained" 
-            color="primary"
+            variant="primary"
             disabled={loading}
+            loading={loading}
           >
-            {loading ? 'Creating...' : 'Create Project'}
+            Create Project
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </form>
     </Dialog>
   );

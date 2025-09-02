@@ -2,11 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Container, Typography, Paper, Box, Button, 
-  Divider, CircularProgress, Alert, IconButton,
-  InputAdornment, TextField, Snackbar
-} from '@mui/material';
 import { useParams } from "next/navigation";
 import { 
   ArrowBack as ArrowBackIcon, 
@@ -18,6 +13,8 @@ import {
 import { useVault } from '@/contexts/VaultContext';
 import { getCredential, Credential } from '@/services/credentialService';
 import { decryptCompat } from '@/lib/crypto';
+import { toast } from 'sonner';
+import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, IconButton } from '@/components/ui';
 
 export default function CredentialViewPage() {
   const params = useParams();
@@ -34,8 +31,6 @@ export default function CredentialViewPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [decryptLoading, setDecryptLoading] = useState(false);
   const [decryptError, setDecryptError] = useState<string | null>(null);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     const fetchCredential = async () => {
@@ -83,20 +78,14 @@ export default function CredentialViewPage() {
     }
   };
 
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   const handleCopyTitle = async () => {
     if (decryptedTitle) {
       try {
         await navigator.clipboard.writeText(decryptedTitle);
-        setSnackbarMessage('Title copied to clipboard');
-        setSnackbarOpen(true);
+        toast.success('Title copied to clipboard');
       } catch (err) {
         console.error('Failed to copy title:', err);
-        setSnackbarMessage('Failed to copy title');
-        setSnackbarOpen(true);
+        toast.error('Failed to copy title');
       }
     }
   };
@@ -105,226 +94,172 @@ export default function CredentialViewPage() {
     if (decryptedPassword) {
       try {
         await navigator.clipboard.writeText(decryptedPassword);
-        setSnackbarMessage('Password copied to clipboard');
-        setSnackbarOpen(true);
+        toast.success('Password copied to clipboard');
       } catch (err) {
         console.error('Failed to copy password:', err);
-        setSnackbarMessage('Failed to copy password');
-        setSnackbarOpen(true);
+        toast.error('Failed to copy password');
       }
     }
   };
 
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
-
-  const handleBack = () => {
-    router.push(`/project/${projectId}/service/${serviceId}/credential`);
-  };
-
-  const handleEdit = () => {
-    router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/edit`);
-  };
-
   if (loading) {
     return (
-      <Container sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container sx={{ py: 4 }}>
-        <Alert severity="error">{error}</Alert>
-        <Box mt={2}>
-          <Button 
-            startIcon={<ArrowBackIcon />} 
-            onClick={handleBack}
-          >
-            Back to Credentials
-          </Button>
-        </Box>
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-800">{error}</p>
+        </div>
+        <Button 
+          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+          className="flex items-center space-x-2"
+        >
+          <ArrowBackIcon className="w-4 h-4" />
+          <span>Back to Credentials</span>
+        </Button>
+      </div>
     );
   }
 
   if (!credential) {
     return (
-      <Container sx={{ py: 4 }}>
-        <Alert severity="warning">Credential not found</Alert>
-        <Box mt={2}>
-          <Button 
-            startIcon={<ArrowBackIcon />} 
-            onClick={handleBack}
-          >
-            Back to Credentials
-          </Button>
-        </Box>
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-yellow-800">Credential not found</p>
+        </div>
+        <Button 
+          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+          className="flex items-center space-x-2"
+        >
+          <ArrowBackIcon className="w-4 h-4" />
+          <span>Back to Credentials</span>
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" mb={2}>
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <Button 
+            variant="outline"
+            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+            className="flex items-center space-x-2"
+          >
+            <ArrowBackIcon className="w-4 h-4" />
+            <span>Back</span>
+          </Button>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {decryptedTitle || 'Credential'}
+          </h1>
+        </div>
         <Button 
-          startIcon={<ArrowBackIcon />} 
-          onClick={handleBack}
-          sx={{ mr: 2 }}
+          variant="outline"
+          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/edit`)}
+          className="flex items-center space-x-2"
         >
-          Back
+          <EditIcon className="w-4 h-4" />
+          <span>Edit</span>
         </Button>
-        <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
-          {decryptedTitle || 'Credential'}
-        </Typography>
-        <Button 
-          variant="outlined" 
-          startIcon={<EditIcon />} 
-          onClick={handleEdit}
-        >
-          Edit
-        </Button>
-      </Box>
+      </div>
 
-      <Paper elevation={2} sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Credential Details
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
-        
-        <Box mb={2}>
-          <Typography variant="subtitle2" color="text.secondary">
-            Created
-          </Typography>
-          <Typography>
-            {new Date(credential.createdAt).toLocaleString()}
-          </Typography>
-        </Box>
+      <Card>
+        <CardHeader>
+          <CardTitle>Credential Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-gray-700">Created</label>
+              <p className="mt-1 text-gray-900">{new Date(credential.createdAt).toLocaleString()}</p>
+            </div>
 
-        {decryptLoading ? (
-          <Box display="flex" alignItems="center" justifyContent="center" py={4}>
-            <CircularProgress size={20} sx={{ mr: 1 }} />
-            <Typography variant="body2">Decrypting credential data...</Typography>
-          </Box>
-        ) : decryptError ? (
-          <Alert severity="error" sx={{ mt: 1 }}>
-            {decryptError}
-          </Alert>
-        ) : (
-          <>
-            <Box mb={2}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Title
-              </Typography>
-              <TextField
-                value={decryptedTitle}
-                variant="outlined"
-                size="small"
-                fullWidth
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleCopyTitle}
-                        edge="end"
-                        title="Copy title"
-                        disabled={!decryptedTitle}
-                      >
-                        <ContentCopyIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Box>
+            {decryptLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+                <span className="text-sm text-gray-600">Decrypting credential data...</span>
+              </div>
+            ) : decryptError ? (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-800 text-sm">{decryptError}</p>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <div className="flex items-end space-x-2">
+                    <div className="flex-1">
+                      <Input
+                        label="Title"
+                        value={decryptedTitle}
+                        readOnly
+                      />
+                    </div>
+                    <IconButton
+                      onClick={handleCopyTitle}
+                      variant="ghost"
+                      className="mb-1"
+                      title="Copy title"
+                      disabled={!decryptedTitle}
+                    >
+                      <ContentCopyIcon />
+                    </IconButton>
+                  </div>
+                </div>
 
-            <Box mb={2}>
-              <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                Password
-                {credential.isLong && (
-                  <Typography component="span" variant="caption" color="primary" sx={{ ml: 1, fontWeight: 'bold' }}>
-                    (Long Password)
-                  </Typography>
-                )}
-              </Typography>
-              {credential.isLong ? (
-                <TextField
-                  value={showPassword ? decryptedPassword : '••••••••••••'}
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  multiline
-                  rows={4}
-                  InputProps={{
-                    readOnly: true,
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={handleTogglePasswordVisibility}
-                          edge="end"
-                          title={showPassword ? 'Hide password' : 'Show password'}
-                          disabled={!decryptedPassword}
-                        >
-                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                        <IconButton
-                          onClick={handleCopyPassword}
-                          edge="end"
-                          title="Copy password"
-                          disabled={!decryptedPassword}
-                        >
-                          <ContentCopyIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              ) : (
-                <TextField
-                  value={showPassword ? decryptedPassword : '••••••••••••'}
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  InputProps={{
-                    readOnly: true,
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton
-                          onClick={handleTogglePasswordVisibility}
-                          edge="end"
-                          title={showPassword ? 'Hide password' : 'Show password'}
-                          disabled={!decryptedPassword}
-                        >
-                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                        </IconButton>
-                        <IconButton
-                          onClick={handleCopyPassword}
-                          edge="end"
-                          title="Copy password"
-                          disabled={!decryptedPassword}
-                        >
-                          <ContentCopyIcon />
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              )}
-            </Box>
-          </>
-        )}
-      </Paper>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={handleSnackbarClose}
-        message={snackbarMessage}
-      />
-    </Container>
+                <div>
+                  <div className="flex items-end space-x-2">
+                    <div className="flex-1">
+                      {credential.isLong ? (
+                        <Textarea
+                          label={`Password${credential.isLong ? ' (Long Password)' : ''}`}
+                          value={showPassword ? decryptedPassword : '••••••••••••'}
+                          rows={4}
+                          readOnly
+                        />
+                      ) : (
+                        <Input
+                          label={`Password${credential.isLong ? ' (Long Password)' : ''}`}
+                          type={showPassword ? 'text' : 'password'}
+                          value={showPassword ? decryptedPassword : '••••••••••••'}
+                          readOnly
+                        />
+                      )}
+                    </div>
+                    <IconButton
+                      onClick={() => setShowPassword(!showPassword)}
+                      variant="ghost"
+                      className="mb-1"
+                      title={showPassword ? 'Hide password' : 'Show password'}
+                      disabled={!decryptedPassword}
+                    >
+                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                    </IconButton>
+                    <IconButton
+                      onClick={handleCopyPassword}
+                      variant="ghost"
+                      className="mb-1"
+                      title="Copy password"
+                      disabled={!decryptedPassword}
+                    >
+                      <ContentCopyIcon />
+                    </IconButton>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }

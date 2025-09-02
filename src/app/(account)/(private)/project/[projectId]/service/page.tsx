@@ -2,18 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Box, Button, Container, Typography, List, ListItem, 
-  ListItemText, IconButton, Menu, MenuItem, Paper, Divider, ListItemIcon 
-} from '@mui/material';
 import { useParams } from "next/navigation";
-import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { getAllServices, Service, deleteService, getService } from '@/services/serviceService';
 import { getProject, Project } from '@/services/projectService';
 import CreateServiceDialog from '@/components/services/CreateServiceDialog';
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { decryptCompat, getVaultKey, initSodium } from '@/lib/crypto';
+import { Card, CardHeader, CardContent, CardTitle, Button, IconButton } from '@/components/ui';
 
 export default function ServicesPage() {
   const params = useParams();
@@ -24,8 +21,6 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const { projectVaultKey, setServiceVaultKey } = useVault();
 
   const fetchData = async () => {
@@ -50,58 +45,18 @@ export default function ServicesPage() {
     fetchData();
   }, [projectId]);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, service: Service) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedService(service);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedService(null);
-  };
-
-  const handleViewService = () => {
-    if (selectedService) {
-      router.push(`/project/${projectId}/service/${selectedService.id}/view`);
+  const handleDeleteService = async (serviceId: string) => {
+    try {
+      await deleteService(projectId, serviceId);
+      toast.success('Service deleted successfully');
+      fetchData();
+    } catch (err) {
+      setError('Failed to delete service');
+      console.error(err);
     }
-    handleMenuClose();
   };
 
-  const handleEditService = () => {
-    if (selectedService) {
-      router.push(`/project/${projectId}/service/${selectedService.id}/edit`);
-    }
-    handleMenuClose();
-  };
-
-  const handleDeleteService = async () => {
-    if (selectedService) {
-      try {
-        await deleteService(projectId, selectedService.id);
-        toast.success('Service deleted successfully');
-        fetchData();
-      } catch (err) {
-        setError('Failed to delete service');
-        console.error(err);
-      }
-    }
-    handleMenuClose();
-  };
-
-  const handleCreateDialogOpen = () => {
-    setOpenCreateDialog(true);
-  };
-
-  const handleCreateDialogClose = () => {
-    setOpenCreateDialog(false);
-  };
-
-  const handleServiceCreated = () => {
-    fetchData();
-    handleCreateDialogClose();
-  };
-
-  const handleCredentialRoute = async (service:any) => {
+  const handleCredentialRoute = async (service: any) => {
     if (!service || !projectVaultKey){
       toast.error('Vault key not exist.');
       return;
@@ -134,122 +89,123 @@ export default function ServicesPage() {
         console.error('Failed to unlock service:', err);
         setError('Failed to unlock service');
       }
-    handleMenuClose();
   };
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" mb={3}>
-        <Button 
-          startIcon={<ArrowBackIcon />} 
-          onClick={() => router.push('/project')}
-          sx={{ mr: 2 }}
-        >
-          Back to Projects
-        </Button>
-        <Box flexGrow={1}>
-          <Typography variant="h4" component="h1">
-            {project?.name || 'Project'} Services
-          </Typography>
-        </Box>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          startIcon={<AddIcon />}
-          onClick={handleCreateDialogOpen}
-        >
-          Create Service
-        </Button>
-      </Box>
-
+    <div className="container mx-auto p-6 max-w-4xl">
       {error && (
-        <Typography color="error" sx={{ mb: 2 }}>
-          {error}
-        </Typography>
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="flex justify-between items-center">
+            <p className="text-red-800">{error}</p>
+            <button 
+              onClick={() => setError(null)}
+              className="text-red-500 hover:text-red-700"
+            >
+              ×
+            </button>
+          </div>
+        </div>
       )}
 
-      {loading ? (
-        <Typography>Loading services...</Typography>
-      ) : services.length === 0 ? (
-        <Paper sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="body1">
-            No services created yet. Create your first service to get started.
-          </Typography>
-        </Paper>
-      ) : (
-        <Paper elevation={2}>
-          <List>
-            {services.map((service, index) => (
-              <Box key={service.id}>
-                {index > 0 && <Divider />}
-                <ListItem
-                  secondaryAction={
-                    <IconButton 
-                      edge="end" 
-                      onClick={(e) => handleMenuOpen(e, service)}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  }
-                >
-                  <ListItemIcon>
-                    {service.isLong ? <PageIcon /> : <PasswordIcon />}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={service.name}
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          {service.notes || 'No description'}
-                        </Typography>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="outline"
+                onClick={() => router.push('/project')}
+                className="flex items-center space-x-2"
+              >
+                <ArrowBackIcon className="w-4 h-4" />
+                <span>Back to Projects</span>
+              </Button>
+              <CardTitle>{project?.name || 'Project'} Services</CardTitle>
+            </div>
+            <Button
+              variant="primary"
+              onClick={() => setOpenCreateDialog(true)}
+              className="flex items-center space-x-2"
+            >
+              <AddIcon className="w-4 h-4" />
+              <span>Create Service</span>
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-gray-600">Loading...</p>
+            </div>
+          ) : services.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No services created yet
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Create your first service to get started.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {services.map((service) => (
+                <div key={service.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleCredentialRoute(service)}>
+                    <div className="text-gray-400">
+                      {service.isLong ? <PageIcon /> : <PasswordIcon />}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 hover:text-blue-600">{service.name}</h4>
+                      <p className="text-sm text-gray-500">
+                        {service.notes || 'No description'}
                         {service.isLong && (
-                          <Typography variant="caption" color="primary" sx={{ fontWeight: 'bold' }}>
+                          <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded font-medium">
                             Long Password
-                          </Typography>
+                          </span>
                         )}
-                      </Box>
-                    }
-                    onClick={()=> handleCredentialRoute(service)}
-                    sx={{ 
-                      cursor: 'pointer',
-                      '&:hover .MuiListItemText-primary': {
-                        color: 'primary.main',
-                        textDecoration: 'underline'
-                      }
-                    }}
-                  />
-                </ListItem>
-              </Box>
-            ))}
-          </List>
-        </Paper>
-      )}
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleViewService}>
-          <ViewIcon sx={{ mr: 1, color: 'action.active' }} />
-          View
-        </MenuItem>
-        <MenuItem onClick={handleEditService}>
-          <EditIcon sx={{ mr: 1, color: 'action.active' }} />
-          Edit
-        </MenuItem>
-        <MenuItem onClick={handleDeleteService}>
-          <DeleteIcon sx={{ mr: 1, color: 'error.main' }} />
-          Delete
-        </MenuItem>
-      </Menu>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <IconButton 
+                      onClick={() => router.push(`/project/${projectId}/service/${service.id}/view`)}
+                      variant="ghost"
+                      title="View details"
+                    >
+                      <ViewIcon />
+                    </IconButton>
+                    <IconButton 
+                      onClick={() => router.push(`/project/${projectId}/service/${service.id}/edit`)}
+                      variant="ghost"
+                      title="Edit details"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton 
+                      onClick={() => handleDeleteService(service.id)}
+                      variant="destructive"
+                      title="Delete"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <CreateServiceDialog 
         open={openCreateDialog}
-        onClose={handleCreateDialogClose}
-        onServiceCreated={handleServiceCreated}
+        onClose={() => setOpenCreateDialog(false)}
+        onServiceCreated={() => {
+          fetchData();
+          setOpenCreateDialog(false);
+        }}
         projectId={projectId}
       />
-    </Container>
+    </div>
   );
 }

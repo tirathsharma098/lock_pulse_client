@@ -1,13 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Dialog, DialogTitle, DialogContent, DialogActions, 
-  TextField, Button, Box, Alert, FormControlLabel, Switch 
-} from '@mui/material';
+import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { createCredential } from '@/services/credentialService';
 import { encryptField } from '@/lib/crypto';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch } from '@/components/ui';
 
 interface CreateCredentialDialogProps {
   open: boolean;
@@ -84,63 +82,72 @@ export default function CreateCredentialDialog({
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Create New Credential</DialogTitle>
+    <Dialog open={open} onClose={handleClose} className="max-w-md">
+      <DialogHeader>
+        <DialogTitle>Create New Credential</DialogTitle>
+      </DialogHeader>
+      
       <form onSubmit={handleSubmit}>
         <DialogContent>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-800 text-sm">{error}</p>
+            </div>
+          )}
           
-          <Box mb={2}>
-            <TextField
+          <div className="space-y-4">
+            <Input
               label="Credential Title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              fullWidth
+              placeholder="e.g., Email, Admin Account, API Key, etc."
               required
               autoFocus
-              helperText="e.g., Email, Admin Account, API Key, etc."
             />
-          </Box>
-          
-          <Box mb={2}>
-            <TextField
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth
-              required
-              multiline={isLong}
-              rows={isLong ? 4 : 1}
-              helperText="The password or value for this credential"
-            />
-          </Box>
+            
+            {isLong ? (
+              <Textarea
+                label="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="The password or value for this credential"
+                required
+                rows={4}
+                helperText="The password or value for this credential"
+              />
+            ) : (
+              <Input
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="The password or value for this credential"
+                required
+                helperText="The password or value for this credential"
+              />
+            )}
 
-          <Box mb={2}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isLong}
-                  onChange={(e) => setIsLong(e.target.checked)}
-                  color="primary"
-                />
-              }
+            <Switch
+              checked={isLong}
+              onCheckedChange={setIsLong}
               label="Long Password"
             />
-          </Box>
+          </div>
         </DialogContent>
         
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+        <DialogFooter>
+          <Button variant="outline" onClick={handleClose} disabled={loading}>
+            Cancel
+          </Button>
           <Button 
             type="submit" 
-            variant="contained" 
-            color="primary"
+            variant="primary"
             disabled={loading}
+            loading={loading}
           >
-            {loading ? 'Creating...' : 'Create Credential'}
+            Create Credential
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </form>
     </Dialog>
   );

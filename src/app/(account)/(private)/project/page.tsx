@@ -2,16 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Box, Button, Container, Typography, List, ListItem, 
-  ListItemText, IconButton, Menu, MenuItem, Paper, Divider, ListItemIcon 
-} from '@mui/material';
-import { MoreVert as MoreVertIcon, Add as AddIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon } from '@mui/icons-material';
 import { getAllProjects, Project, deleteProject, getProject } from '@/services/projectService';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { decryptCompat, deriveKEK, getVaultKey, initSodium, unwrapVaultKey } from '@/lib/crypto';
+import { Card, CardHeader, CardContent, CardTitle, Button, IconButton } from '@/components/ui';
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -19,8 +16,8 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<{ [key: string]: HTMLElement | null }>({});
   const { vaultKey, setProjectVaultKey } = useVault();
 
   const fetchProjects = async () => {
@@ -41,55 +38,15 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, project: Project) => {
-    setAnchorEl(event.currentTarget);
-    setSelectedProject(project);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-    setSelectedProject(null);
-  };
-
-  const handleViewProject = () => {
-    if (selectedProject) {
-      router.push(`/project/${selectedProject.id}/view`);
+  const handleDeleteProject = async (projectId: string) => {
+    try {
+      await deleteProject(projectId);
+      toast.success('Project deleted successfully');
+      fetchProjects();
+    } catch (err: any) {
+      setError(err?.message || 'Failed to delete project');
+      console.error(err);
     }
-    handleMenuClose();
-  };
-
-  const handleEditProject = () => {
-    if (selectedProject) {
-      router.push(`/project/${selectedProject.id}/edit`);
-    }
-    handleMenuClose();
-  };
-
-  const handleDeleteProject = async () => {
-    if (selectedProject) {
-      try {
-        await deleteProject(selectedProject.id);
-        toast.success('Project deleted successfully');
-        fetchProjects();
-      } catch (err:any) {
-        setError(err?.message || 'Failed to delete project');
-        console.error(err);
-      }
-    }
-    handleMenuClose();
-  };
-
-  const handleCreateDialogOpen = () => {
-    setOpenCreateDialog(true);
-  };
-
-  const handleCreateDialogClose = () => {
-    setOpenCreateDialog(false);
-  };
-
-  const handleProjectCreated = () => {
-    fetchProjects();
-    handleCreateDialogClose();
   };
 
   const handleProjectClick = async (projectId: string) => {
@@ -115,108 +72,109 @@ export default function ProjectsPage() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4" component="h1">
-          My Projects
-        </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
-          startIcon={<AddIcon />}
-          onClick={handleCreateDialogOpen}
-        >
-          Create Project
-        </Button>
-      </Box>
-
+    <div className="container mx-auto p-6 max-w-4xl">
       {error && (
-        <Typography color="error" sx={{ mb: 2 }}>
-          {error}
-        </Typography>
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="flex justify-between items-center">
+            <p className="text-red-800">{error}</p>
+            <button 
+              onClick={() => setError(null)}
+              className="text-red-500 hover:text-red-700"
+            >
+              ×
+            </button>
+          </div>
+        </div>
       )}
 
-      {loading ? (
-        <Typography>Loading projects...</Typography>
-      ) : projects.length === 0 ? (
-        <Paper sx={{ p: 3, textAlign: 'center' }}>
-          <Typography variant="body1">
-            You don't have any projects yet. Create your first project to get started.
-          </Typography>
-        </Paper>
-      ) : (
-        <Paper elevation={2}>
-          <List>
-            {projects.map((project, index) => (
-              <Box key={project.id}>
-                {index > 0 && <Divider />}
-                <ListItem
-                  secondaryAction={
-                    <IconButton 
-                      edge="end" 
-                      onClick={(e) => handleMenuOpen(e, project)}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  }
-                >
-                  <ListItemIcon>
-                    {project.isLong ? <PageIcon /> : <PasswordIcon />}
-                  </ListItemIcon>
-                  <ListItemText
-                    primary={project.name}
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          {project.notes || 'No description'}
-                        </Typography>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>My Projects</CardTitle>
+            <Button
+              variant="primary"
+              onClick={() => setOpenCreateDialog(true)}
+              className="flex items-center space-x-2"
+            >
+              <AddIcon className="w-4 h-4" />
+              <span>Create Project</span>
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-gray-600">Loading...</p>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                You don't have any projects yet
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Create your first project to get started.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {projects.map((project) => (
+                <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                  <div className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleProjectClick(project.id)}>
+                    <div className="text-gray-400">
+                      {project.isLong ? <PageIcon /> : <PasswordIcon />}
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-gray-900 hover:text-blue-600">{project.name}</h4>
+                      <p className="text-sm text-gray-500">
+                        {project.notes || 'No description'}
                         {project.isLong && (
-                          <Typography variant="caption" color="primary" sx={{ fontWeight: 'bold' }}>
+                          <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded font-medium">
                             Long Password
-                          </Typography>
+                          </span>
                         )}
-                      </Box>
-                    }
-                    onClick={() => handleProjectClick(project.id)}
-                    sx={{ 
-                      cursor: 'pointer',
-                      '&:hover .MuiListItemText-primary': {
-                        color: 'primary.main',
-                        textDecoration: 'underline'
-                      }
-                    }}
-                  />
-                </ListItem>
-              </Box>
-            ))}
-          </List>
-        </Paper>
-      )}
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-      >
-        <MenuItem onClick={handleViewProject}>
-          <ViewIcon sx={{ mr: 1, color: 'action.active' }} />
-          View
-        </MenuItem>
-        <MenuItem onClick={handleEditProject}>
-          <EditIcon sx={{ mr: 1, color: 'action.active' }} />
-          Edit
-        </MenuItem>
-        <MenuItem onClick={handleDeleteProject}>
-          <DeleteIcon sx={{ mr: 1, color: 'error.main' }} />
-          Delete
-        </MenuItem>
-      </Menu>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <IconButton 
+                      onClick={() => router.push(`/project/${project.id}/view`)}
+                      variant="ghost"
+                      title="View details"
+                    >
+                      <ViewIcon />
+                    </IconButton>
+                    <IconButton 
+                      onClick={() => router.push(`/project/${project.id}/edit`)}
+                      variant="ghost"
+                      title="Edit details"
+                    >
+                      <EditIcon />
+                    </IconButton>
+                    <IconButton 
+                      onClick={() => handleDeleteProject(project.id)}
+                      variant="destructive"
+                      title="Delete"
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <CreateProjectDialog 
         open={openCreateDialog}
-        onClose={handleCreateDialogClose}
-        onProjectCreated={handleProjectCreated}
+        onClose={() => setOpenCreateDialog(false)}
+        onProjectCreated={() => {
+          fetchProjects();
+          setOpenCreateDialog(false);
+        }}
       />
-    </Container>
+    </div>
   );
 }

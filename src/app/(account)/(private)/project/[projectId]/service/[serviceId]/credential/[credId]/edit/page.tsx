@@ -2,11 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Container, Typography, Paper, Box, Button, 
-  TextField, Alert, CircularProgress, IconButton, InputAdornment,
-  FormControlLabel, Switch
-} from '@mui/material';
 import { useParams } from "next/navigation";
 import { 
   ArrowBack as ArrowBackIcon, 
@@ -18,6 +13,7 @@ import { useVault } from '@/contexts/VaultContext';
 import { getCredential, updateCredential, Credential } from '@/services/credentialService';
 import { decryptCompat, encryptField } from '@/lib/crypto';
 import { toast } from 'sonner';
+import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, Switch, IconButton } from '@/components/ui';
 
 export default function CredentialEditPage() {
   const params = useParams();
@@ -110,129 +106,137 @@ export default function CredentialEditPage() {
     }
   };
 
-  const handleBack = () => {
-    router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`);
-  };
-
-  const handleTogglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   if (loading) {
     return (
-      <Container sx={{ py: 4, textAlign: 'center' }}>
-        <CircularProgress />
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="text-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Loading...</p>
+        </div>
+      </div>
     );
   }
 
   if (error && !credential) {
     return (
-      <Container sx={{ py: 4 }}>
-        <Alert severity="error">{error}</Alert>
-        <Box mt={2}>
-          <Button 
-            startIcon={<ArrowBackIcon />} 
-            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
-          >
-            Back to Credentials
-          </Button>
-        </Box>
-      </Container>
+      <div className="container mx-auto p-6 max-w-4xl">
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-red-800">{error}</p>
+        </div>
+        <Button 
+          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+          className="flex items-center space-x-2"
+        >
+          <ArrowBackIcon className="w-4 h-4" />
+          <span>Back to Credentials</span>
+        </Button>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
-      <Box display="flex" alignItems="center" mb={2}>
-        <Button 
-          startIcon={<ArrowBackIcon />} 
-          onClick={handleBack}
-          sx={{ mr: 2 }}
-        >
-          Back
-        </Button>
-        <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
-          Edit Credential
-        </Typography>
-      </Box>
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-4">
+          <Button 
+            variant="outline"
+            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`)}
+            className="flex items-center space-x-2"
+          >
+            <ArrowBackIcon className="w-4 h-4" />
+            <span>Back</span>
+          </Button>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Credential</h1>
+        </div>
+      </div>
 
-      <Paper elevation={2} sx={{ p: 3 }}>
-        <form onSubmit={handleSubmit}>
-          {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-          
-          <Box mb={3}>
-            <TextField
-              label="Credential Title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              fullWidth
-              required
-              variant="outlined"
-              helperText="e.g., Email, Admin Account, API Key, etc."
-            />
-          </Box>
-          
-          <Box mb={3}>
-            <TextField
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              fullWidth
-              required
-              variant="outlined"
-              multiline={isLong}
-              rows={isLong ? 4 : 1}
-              helperText="The password or value for this credential"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={handleTogglePasswordVisibility}
-                      edge="end"
-                      title={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </Box>
+      <Card>
+        <CardHeader>
+          <CardTitle>Credential Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-red-800">{error}</p>
+              </div>
+            )}
+            
+            <div className="space-y-4">
+              <Input
+                label="Credential Title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g., Email, Admin Account, API Key, etc."
+                required
+                helperText="e.g., Email, Admin Account, API Key, etc."
+              />
+              
+              <div>
+                <div className="flex items-end space-x-2">
+                  <div className="flex-1">
+                    {isLong ? (
+                      <Textarea
+                        label="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="The password or value for this credential"
+                        required
+                        rows={4}
+                        helperText="The password or value for this credential"
+                      />
+                    ) : (
+                      <Input
+                        label="Password"
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="The password or value for this credential"
+                        required
+                        helperText="The password or value for this credential"
+                      />
+                    )}
+                  </div>
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    variant="ghost"
+                    className="mb-1"
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                  </IconButton>
+                </div>
+              </div>
 
-          <Box mb={3}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={isLong}
-                  onChange={(e) => setIsLong(e.target.checked)}
-                  color="primary"
-                />
-              }
-              label="Long Password"
-            />
-          </Box>
-          
-          <Box display="flex" gap={2} justifyContent="flex-end">
-            <Button 
-              variant="outlined" 
-              onClick={handleBack}
-              disabled={saving}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              variant="contained" 
-              startIcon={<SaveIcon />}
-              disabled={saving}
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </Box>
-        </form>
-      </Paper>
-    </Container>
+              <Switch
+                checked={isLong}
+                onCheckedChange={setIsLong}
+                label="Long Password"
+              />
+              
+              <div className="flex justify-end space-x-2 pt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`)}
+                  disabled={saving}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  variant="primary"
+                  disabled={saving}
+                  loading={saving}
+                  className="flex items-center space-x-2"
+                >
+                  <SaveIcon className="w-4 h-4" />
+                  <span>Save Changes</span>
+                </Button>
+              </div>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
