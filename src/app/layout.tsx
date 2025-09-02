@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+// import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from './components/theme-provider'
 import { VaultProvider } from '@/contexts/VaultContext'
 import { Toaster } from 'sonner'
 
-const inter = Inter({ subsets: ['latin'] })
+// const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'LockPulse - Zero-Knowledge Password Manager | 100% Secure Password Storage',
@@ -97,7 +97,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={inter.className}>
+      <body className="font-sans">{/* {inter.className} */}
         <Toaster position="top-center" duration={3000} richColors />
         <ThemeProvider defaultTheme="system">
             {children}
