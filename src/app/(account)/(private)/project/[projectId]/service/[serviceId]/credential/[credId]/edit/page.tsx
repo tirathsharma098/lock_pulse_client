@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Container, Typography, Paper, Box, Button, 
-  TextField, Alert, CircularProgress, IconButton, InputAdornment
+  TextField, Alert, CircularProgress, IconButton, InputAdornment,
+  FormControlLabel, Switch
 } from '@mui/material';
 import { useParams } from "next/navigation";
 import { 
@@ -30,6 +31,7 @@ export default function CredentialEditPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLong, setIsLong] = useState(false);
   
   // Form fields
   const [title, setTitle] = useState('');
@@ -40,6 +42,7 @@ export default function CredentialEditPage() {
       try {
         const data = await getCredential(projectId, serviceId, credId);
         setCredential(data);
+        setIsLong(data.isLong || false);
         
         // Decrypt the credential data
         if (data && serviceVaultKey) {
@@ -93,6 +96,7 @@ export default function CredentialEditPage() {
         titleCiphertext: titleEncrypted.ciphertext,
         passwordNonce: passwordEncrypted.nonce,
         passwordCiphertext: passwordEncrypted.ciphertext,
+        isLong,
       });
       
       toast.success('Credential updated successfully');
@@ -192,6 +196,19 @@ export default function CredentialEditPage() {
                   </InputAdornment>
                 ),
               }}
+            />
+          </Box>
+
+          <Box mb={3}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isLong}
+                  onChange={(e) => setIsLong(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Long Password"
             />
           </Box>
           

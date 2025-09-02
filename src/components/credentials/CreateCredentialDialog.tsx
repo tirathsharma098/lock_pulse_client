@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
-  TextField, Button, Box, Alert 
+  TextField, Button, Box, Alert, FormControlLabel, Switch 
 } from '@mui/material';
 import { useVault } from '@/contexts/VaultContext';
 import { createCredential } from '@/services/credentialService';
@@ -29,6 +29,7 @@ export default function CreateCredentialDialog({
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isLong, setIsLong] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,11 +58,13 @@ export default function CreateCredentialDialog({
         titleCiphertext: titleEncrypted.ciphertext,
         passwordNonce: passwordEncrypted.nonce,
         passwordCiphertext: passwordEncrypted.ciphertext,
+        isLong,
       });
       
       // Reset form
       setTitle('');
       setPassword('');
+      setIsLong(false);
       
       onCredentialCreated();
     } catch (err) {
@@ -75,6 +78,7 @@ export default function CreateCredentialDialog({
   const handleClose = () => {
     setTitle('');
     setPassword('');
+    setIsLong(false);
     setError(null);
     onClose();
   };
@@ -107,6 +111,19 @@ export default function CreateCredentialDialog({
               fullWidth
               required
               helperText="The password or value for this credential"
+            />
+          </Box>
+
+          <Box mb={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isLong}
+                  onChange={(e) => setIsLong(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Long Password"
             />
           </Box>
         </DialogContent>

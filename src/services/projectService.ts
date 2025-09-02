@@ -10,6 +10,7 @@ export interface Project {
   vaultKdfParams: VaultKdfParams;
   passwordNonce: string;
   passwordCiphertext: string;
+  isLong?: boolean;
   ownerId: string;
   createdAt: string;
   updatedAt: string;
@@ -22,6 +23,7 @@ export interface CreateProjectRequest {
   vaultKdfParams: any;
   passwordNonce: string;
   passwordCiphertext: string;
+  isLong?: boolean;
   notes?: string;
 }
 
@@ -33,6 +35,7 @@ export interface UpdateProjectRequest {
   vaultKdfParams?: any;
   passwordNonce?: string;
   passwordCiphertext?: string;
+  isLong?: boolean;
 }
 
 export const getAllProjects = async (): Promise<Project[]> => {

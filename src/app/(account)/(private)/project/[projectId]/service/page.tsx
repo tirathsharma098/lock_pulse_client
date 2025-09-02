@@ -7,7 +7,7 @@ import {
   ListItemText, IconButton, Menu, MenuItem, Paper, Divider 
 } from '@mui/material';
 import { useParams } from "next/navigation";
-import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, TextFields as ShortIcon, Subject as LongIcon } from '@mui/icons-material';
 import { getAllServices, Service, deleteService, getService } from '@/services/serviceService';
 import { getProject, Project } from '@/services/projectService';
 import CreateServiceDialog from '@/components/services/CreateServiceDialog';
@@ -193,8 +193,24 @@ export default function ServicesPage() {
                   }
                 >
                   <ListItemText
-                    primary={service.name}
-                    secondary={service.notes || 'No description'}
+                    primary={
+                      <Box display="flex" alignItems="center" gap={1}>
+                        {service.isLong ? <LongIcon fontSize="small" /> : <ShortIcon fontSize="small" />}
+                        {service.name}
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {service.notes || 'No description'}
+                        </Typography>
+                        {service.isLong && (
+                          <Typography variant="caption" color="primary" sx={{ fontWeight: 'bold' }}>
+                            Long Password
+                          </Typography>
+                        )}
+                      </Box>
+                    }
                     onClick={()=> handleCredentialRoute(service)}
                     sx={{ cursor: 'pointer' }}
                   />

@@ -245,36 +245,75 @@ export default function CredentialViewPage() {
             <Box mb={2}>
               <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                 Password
+                {credential.isLong && (
+                  <Typography component="span" variant="caption" color="primary" sx={{ ml: 1, fontWeight: 'bold' }}>
+                    (Long Password)
+                  </Typography>
+                )}
               </Typography>
-              <TextField
-                value={showPassword ? decryptedPassword : '••••••••••••'}
-                variant="outlined"
-                size="small"
-                fullWidth
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={handleTogglePasswordVisibility}
-                        edge="end"
-                        title={showPassword ? 'Hide password' : 'Show password'}
-                        disabled={!decryptedPassword}
-                      >
-                        {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                      </IconButton>
-                      <IconButton
-                        onClick={handleCopyPassword}
-                        edge="end"
-                        title="Copy password"
-                        disabled={!decryptedPassword}
-                      >
-                        <ContentCopyIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              {credential.isLong ? (
+                <TextField
+                  value={showPassword ? decryptedPassword : '••••••••••••'}
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  InputProps={{
+                    readOnly: true,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                          title={showPassword ? 'Hide password' : 'Show password'}
+                          disabled={!decryptedPassword}
+                        >
+                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                        </IconButton>
+                        <IconButton
+                          onClick={handleCopyPassword}
+                          edge="end"
+                          title="Copy password"
+                          disabled={!decryptedPassword}
+                        >
+                          <ContentCopyIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              ) : (
+                <TextField
+                  value={showPassword ? decryptedPassword : '••••••••••••'}
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={handleTogglePasswordVisibility}
+                          edge="end"
+                          title={showPassword ? 'Hide password' : 'Show password'}
+                          disabled={!decryptedPassword}
+                        >
+                          {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                        </IconButton>
+                        <IconButton
+                          onClick={handleCopyPassword}
+                          edge="end"
+                          title="Copy password"
+                          disabled={!decryptedPassword}
+                        >
+                          <ContentCopyIcon />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              )}
             </Box>
           </>
         )}

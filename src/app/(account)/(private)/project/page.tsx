@@ -6,7 +6,7 @@ import {
   Box, Button, Container, Typography, List, ListItem, 
   ListItemText, IconButton, Menu, MenuItem, Paper, Divider 
 } from '@mui/material';
-import { MoreVert as MoreVertIcon, Add as AddIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, TextFields as ShortIcon, Subject as LongIcon } from '@mui/icons-material';
 import { getAllProjects, Project, deleteProject, getProject } from '@/services/projectService';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 import { toast } from 'sonner';
@@ -161,8 +161,24 @@ export default function ProjectsPage() {
                   }
                 >
                   <ListItemText
-                    primary={project.name}
-                    secondary={project.notes || 'No description'}
+                    primary={
+                      <Box display="flex" alignItems="center" gap={1}>
+                        {project.isLong ? <LongIcon fontSize="small" /> : <ShortIcon fontSize="small" />}
+                        {project.name}
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {project.notes || 'No description'}
+                        </Typography>
+                        {project.isLong && (
+                          <Typography variant="caption" color="primary" sx={{ fontWeight: 'bold' }}>
+                            Long Password
+                          </Typography>
+                        )}
+                      </Box>
+                    }
                     onClick={() => handleProjectClick(project.id)}
                     sx={{ cursor: 'pointer' }}
                   />

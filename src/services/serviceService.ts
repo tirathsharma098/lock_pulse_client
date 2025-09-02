@@ -9,6 +9,7 @@ export interface Service {
   vaultKdfParams: any;
   passwordNonce: string;
   passwordCiphertext: string;
+  isLong?: boolean;
   projectId: string;
   createdAt: string;
   updatedAt: string;
@@ -21,6 +22,7 @@ export interface CreateServiceRequest {
   vaultKdfParams: any;
   passwordNonce: string;
   passwordCiphertext: string;
+  isLong?: boolean;
   notes?: string;
 }
 
@@ -32,6 +34,7 @@ export interface UpdateServiceRequest {
   vaultKdfParams?: any;
   passwordNonce?: string;
   passwordCiphertext?: string;
+  isLong?: boolean;
 }
 
 export const getAllServices = async (projectId: string): Promise<Service[]> => {

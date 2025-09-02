@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Container, Typography, Paper, Box, Button, 
-  TextField, Alert, CircularProgress, IconButton, InputAdornment
+  TextField, Alert, CircularProgress, IconButton, InputAdornment, FormControlLabel, Switch
 } from '@mui/material';
 import { useParams } from "next/navigation";
 import { 
@@ -37,6 +37,7 @@ export default function ProjectEditPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLong, setIsLong] = useState(false);
   
   // Form fields
   const [name, setName] = useState('');
@@ -51,6 +52,7 @@ export default function ProjectEditPage() {
         setProject(data);
         setName(data.name);
         setNotes(data.notes || '');
+        setIsLong(data.isLong || false);
         
         // Decrypt the original password
         if (data && vaultKey) {
@@ -104,7 +106,7 @@ export default function ProjectEditPage() {
       };
       
       // If password changed, we need to re-encrypt everything
-      if (passwordChanged) {
+      // if (passwordChanged) {
         // Unwrap the current vault key using the original password
         const originalKdfSalt = new Uint8Array(Buffer.from(project.vaultKdfSalt, 'base64'));
         const originalKek = await deriveKEK(originalPassword, originalKdfSalt, project.vaultKdfParams);
@@ -127,8 +129,11 @@ export default function ProjectEditPage() {
           vaultKdfParams: newKdfParams,
           passwordNonce: newPasswordEncrypted.nonce,
           passwordCiphertext: newPasswordEncrypted.ciphertext,
+          isLong,
         };
-      }
+      // } else {
+      //   updateData.isLong = isLong;
+      // }
       
       await updateProject(projectId, updateData);
       
@@ -228,6 +233,19 @@ export default function ProjectEditPage() {
                   </InputAdornment>
                 ),
               }}
+            />
+          </Box>
+
+          <Box mb={3}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isLong}
+                  onChange={(e) => setIsLong(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Long Password"
             />
           </Box>
           

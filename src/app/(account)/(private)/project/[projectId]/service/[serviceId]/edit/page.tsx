@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Container, Typography, Paper, Box, Button, 
-  TextField, Alert, CircularProgress, IconButton, InputAdornment
+  TextField, Alert, CircularProgress, IconButton, InputAdornment,
+  FormControlLabel, Switch
 } from '@mui/material';
 import { useParams } from "next/navigation";
 import { 
@@ -38,6 +39,7 @@ export default function ServiceEditPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLong, setIsLong] = useState(false);
   
   // Form fields
   const [name, setName] = useState('');
@@ -52,6 +54,7 @@ export default function ServiceEditPage() {
         setService(data);
         setName(data.name);
         setNotes(data.notes || '');
+        setIsLong(data.isLong || false);
         
         // Decrypt the original password
         if (data && projectVaultKey) {
@@ -128,7 +131,10 @@ export default function ServiceEditPage() {
           vaultKdfParams: newKdfParams,
           passwordNonce: newPasswordEncrypted.nonce,
           passwordCiphertext: newPasswordEncrypted.ciphertext,
+          isLong,
         };
+      } else {
+        updateData.isLong = isLong;
       }
       
       await updateService(projectId, serviceId, updateData);
@@ -229,6 +235,19 @@ export default function ServiceEditPage() {
                   </InputAdornment>
                 ),
               }}
+            />
+          </Box>
+
+          <Box mb={3}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isLong}
+                  onChange={(e) => setIsLong(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Long Password"
             />
           </Box>
           

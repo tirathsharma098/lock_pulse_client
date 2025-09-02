@@ -7,7 +7,7 @@ import {
   ListItemText, IconButton, Menu, MenuItem, Paper, Divider 
 } from '@mui/material';
 import { useParams } from "next/navigation";
-import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, TextFields as ShortIcon, Subject as LongIcon } from '@mui/icons-material';
 import { getAllCredentials, Credential, deleteCredential } from '@/services/credentialService';
 import { getService, Service } from '@/services/serviceService';
 import CreateCredentialDialog from '@/components/credentials/CreateCredentialDialog';
@@ -185,8 +185,24 @@ export default function CredentialsPage() {
                   }
                 >
                   <ListItemText
-                    primary={decryptedTitles[credential.id] || 'Loading...'}
-                    secondary={new Date(credential.createdAt).toLocaleDateString()}
+                    primary={
+                      <Box display="flex" alignItems="center" gap={1}>
+                        {credential.isLong ? <LongIcon fontSize="small" /> : <ShortIcon fontSize="small" />}
+                        {decryptedTitles[credential.id] || 'Loading...'}
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {new Date(credential.createdAt).toLocaleDateString()}
+                        </Typography>
+                        {credential.isLong && (
+                          <Typography variant="caption" color="primary" sx={{ fontWeight: 'bold' }}>
+                            Long Password
+                          </Typography>
+                        )}
+                      </Box>
+                    }
                     onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/view`)}
                     sx={{ cursor: 'pointer' }}
                   />

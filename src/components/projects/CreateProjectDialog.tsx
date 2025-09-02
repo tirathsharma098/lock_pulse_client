@@ -3,7 +3,7 @@
 import { useState, useContext } from 'react';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
-  TextField, Button, Box, Alert 
+  TextField, Button, Box, Alert, FormControlLabel, Switch 
 } from '@mui/material';
 import {useVault} from '@/contexts/VaultContext';
 import { createProject } from '@/services/projectService';
@@ -26,6 +26,7 @@ export default function CreateProjectDialog({
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isLong, setIsLong] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,6 +65,7 @@ export default function CreateProjectDialog({
         vaultKdfParams: defaultKdfParams,
         passwordNonce: passwordEncrypted.nonce,
         passwordCiphertext: passwordEncrypted.ciphertext,
+        isLong,
         notes: notes || undefined
       });
       
@@ -71,6 +73,7 @@ export default function CreateProjectDialog({
       setName('');
       setPassword('');
       setNotes('');
+      setIsLong(false);
       
       onProjectCreated();
     } catch (err) {
@@ -85,6 +88,7 @@ export default function CreateProjectDialog({
     setName('');
     setPassword('');
     setNotes('');
+    setIsLong(false);
     setError(null);
     onClose();
   };
@@ -116,6 +120,19 @@ export default function CreateProjectDialog({
               fullWidth
               required
               helperText="This password will be used to encrypt project data"
+            />
+          </Box>
+
+          <Box mb={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isLong}
+                  onChange={(e) => setIsLong(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Long Password"
             />
           </Box>
           

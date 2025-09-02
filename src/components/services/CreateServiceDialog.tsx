@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { 
   Dialog, DialogTitle, DialogContent, DialogActions, 
-  TextField, Button, Box, Alert 
+  TextField, Button, Box, Alert, FormControlLabel, Switch 
 } from '@mui/material';
 import { useVault } from '@/contexts/VaultContext';
 import { createService } from '@/services/serviceService';
@@ -31,6 +31,7 @@ export default function CreateServiceDialog({
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isLong, setIsLong] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +71,7 @@ export default function CreateServiceDialog({
         vaultKdfParams: defaultKdfParams,
         passwordNonce: passwordEncrypted.nonce,
         passwordCiphertext: passwordEncrypted.ciphertext,
+        isLong,
         notes: notes || undefined
       });
       
@@ -77,6 +79,7 @@ export default function CreateServiceDialog({
       setName('');
       setPassword('');
       setNotes('');
+      setIsLong(false);
       
       onServiceCreated();
     } catch (err) {
@@ -91,6 +94,7 @@ export default function CreateServiceDialog({
     setName('');
     setPassword('');
     setNotes('');
+    setIsLong(false);
     setError(null);
     onClose();
   };
@@ -122,6 +126,19 @@ export default function CreateServiceDialog({
               fullWidth
               required
               helperText="This password will be used to encrypt service data"
+            />
+          </Box>
+
+          <Box mb={2}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isLong}
+                  onChange={(e) => setIsLong(e.target.checked)}
+                  color="primary"
+                />
+              }
+              label="Long Password"
             />
           </Box>
           
