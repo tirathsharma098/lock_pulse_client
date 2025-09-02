@@ -1,29 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-  TextField,
-  Chip,
-  CircularProgress,
-} from '@mui/material';
-import {
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
-  ContentCopy as CopyIcon,
-} from '@mui/icons-material';
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { vaultService} from '@/services';
 import { decryptCompat, getEncryptedSize, initSodium } from '@/lib/crypto';
 import { DecryptedItem } from '@/services/vault.service';
+import {
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  ContentCopy as CopyIcon,
+} from '@mui/icons-material';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, IconButton } from '@/components/ui';
 
 interface ViewPasswordDialogProps {
   open: boolean;
@@ -100,98 +88,104 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
   };
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>
-        <Box className="flex items-center justify-between">
-          Password Details
+    <Dialog open={open} onClose={handleClose} className="max-w-md">
+      <DialogHeader>
+        <div className="flex items-center justify-between">
+          <DialogTitle>Password Details</DialogTitle>
           {item?.isLong && (
-            <Chip label="Long Text" color="info" size="small" />
+            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+              Long Text
+            </span>
           )}
-        </Box>
-      </DialogTitle>
+        </div>
+      </DialogHeader>
       
       <DialogContent>
         {loading ? (
-          <Box className="flex justify-center py-8">
-            <CircularProgress />
-          </Box>
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
         ) : item ? (
-          <Box className="space-y-4">
-            <Box>
-              <Typography variant="subtitle2" className="mb-1">
-                Title
-              </Typography>
-              <Box className="flex items-center gap-2">
-                <TextField
-                  fullWidth
-                  value={item.title}
-                  variant="outlined"
-                  size="small"
-                  InputProps={{ readOnly: true }}
-                />
+          <div className="space-y-4">
+            <div>
+              <div className="flex items-end space-x-2">
+                <div className="flex-1">
+                  <Input
+                    label="Title"
+                    value={item.title}
+                    readOnly
+                  />
+                </div>
                 <IconButton 
                   onClick={() => copyToClipboard(item.title, 'Title')}
-                  size="small"
+                  variant="ghost"
+                  className="mb-1"
                 >
                   <CopyIcon />
                 </IconButton>
-              </Box>
+              </div>
               {item.titleSize && (
-                <Typography variant="caption" color="textSecondary" className="mt-1 block">
+                <p className="text-xs text-gray-500 mt-1">
                   Encrypted size: {item.titleSize} bytes
-                </Typography>
+                </p>
               )}
-            </Box>
+            </div>
 
-            <Box>
-              <Typography variant="subtitle2" className="mb-1">
-                Password
-              </Typography>
-              <Box className="flex items-center gap-2">
-                <TextField
-                  fullWidth
-                  type={showPassword ? 'text' : 'password'}
-                  value={item.password}
-                  variant="outlined"
-                  size="small"
-                  multiline={item.isLong && showPassword}
-                  rows={item.isLong && showPassword ? 10 : 1}
-                  InputProps={{ readOnly: true }}
-                />
+            <div>
+              <div className="flex items-end space-x-2">
+                <div className="flex-1">
+                  {item.isLong && showPassword ? (
+                    <Textarea
+                      label="Password"
+                      value={item.password}
+                      rows={10}
+                      readOnly
+                    />
+                  ) : (
+                    <Input
+                      label="Password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={item.password}
+                      readOnly
+                    />
+                  )}
+                </div>
                 <IconButton 
                   onClick={() => setShowPassword(!showPassword)}
-                  size="small"
+                  variant="ghost"
+                  className="mb-1"
                 >
                   {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                 </IconButton>
                 <IconButton 
                   onClick={() => copyToClipboard(item.password, 'Password')}
-                  size="small"
+                  variant="ghost"
+                  className="mb-1"
                 >
                   <CopyIcon />
                 </IconButton>
-              </Box>
+              </div>
               {item.passwordSize && (
-                <Typography variant="caption" color="textSecondary" className="mt-1 block">
+                <p className="text-xs text-gray-500 mt-1">
                   Encrypted size: {item.passwordSize} bytes
-                </Typography>
+                </p>
               )}
-            </Box>
+            </div>
 
-            <Box>
-              <Typography variant="subtitle2" color="textSecondary">
+            <div>
+              <p className="text-sm text-gray-600">
                 Created: {new Date(item.createdAt).toLocaleString()}
-              </Typography>
-            </Box>
-          </Box>
+              </p>
+            </div>
+          </div>
         ) : (
-          <Typography>No item data available</Typography>
+          <p className="text-gray-500">No item data available</p>
         )}
       </DialogContent>
       
-      <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-      </DialogActions>
+      <DialogFooter>
+        <Button variant="outline" onClick={handleClose}>Close</Button>
+      </DialogFooter>
     </Dialog>
   );
 }

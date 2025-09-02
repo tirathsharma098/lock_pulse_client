@@ -1,29 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  FormControlLabel,
-  Switch,
-  Box,
-  Typography,
-  IconButton,
-} from '@mui/material';
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { vaultService, type VaultItemData } from '@/services';
 import { decryptCompat, encryptField, getEncryptedSize, initSodium } from '@/lib/crypto';
-import { z } from 'zod'; // add zod
+import { z } from 'zod';
 import { DecryptedItem } from '@/services/vault.service';
-import {
-  Visibility as VisibilityIcon,
-  VisibilityOff as VisibilityOffIcon,
-} from '@mui/icons-material';
+import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from '@mui/icons-material';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch, IconButton } from '@/components/ui';
 
 // local schema
 const addPasswordSchema = z.object({
@@ -183,13 +168,15 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
   const passwordSize = password ? getEncryptedSize(password) : 0;
 
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Add New Password</DialogTitle>
+    <Dialog open={open} onClose={handleClose} className="max-w-md">
+      <DialogHeader>
+        <DialogTitle>Edit Password</DialogTitle>
+      </DialogHeader>
+      
       <DialogContent>
-        <Box className="space-y-4 pt-2">
-          <Box>
-            <TextField
-              fullWidth
+        <div className="space-y-4">
+          <div>
+            <Input
               label="Title"
               value={title}
               onChange={(e) => {
@@ -197,64 +184,83 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
                 if (fieldErrors.title) setFieldErrors((p) => ({ ...p, title: undefined }));
               }}
               placeholder="e.g., Gmail Account"
+              error={fieldErrors.title}
               autoFocus
-              error={!!fieldErrors.title}
-              helperText={fieldErrors.title ?? ''}
             />
-            {password && (
-              <Typography variant="caption" color="textSecondary" className="mt-1 block">
+            {title && (
+              <p className="text-xs text-gray-500 mt-1">
                 Encrypted size: {titleSize} bytes
-              </Typography>
+              </p>
             )}
-          </Box>
-          <Box>
-            <Box className="flex items-center gap-2">
-            <TextField
-              fullWidth
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
-              }}
-              placeholder="Enter password"
-              multiline={longMode}
-              rows={longMode ? 10 : 1}
-              error={!!fieldErrors.password}
-              helperText={fieldErrors.password ?? ''}
-            />
-            <IconButton
-              onClick={() => setShowPassword(!showPassword)}
-              size="small"
-            >
-              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-            </IconButton>
-            </Box>
+          </div>
+          
+          <div>
+            <div className="flex items-end space-x-2">
+              {longMode ? (
+                <div className="flex-1">
+                  <Textarea
+                    label="Password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
+                    }}
+                    placeholder="Enter password"
+                    rows={10}
+                    error={fieldErrors.password}
+                  />
+                </div>
+              ) : (
+                <div className="flex-1">
+                  <Input
+                    label="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
+                    }}
+                    placeholder="Enter password"
+                    error={fieldErrors.password}
+                  />
+                </div>
+              )}
+              <IconButton
+                onClick={() => setShowPassword(!showPassword)}
+                variant="ghost"
+                className="mb-1"
+              >
+                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+              </IconButton>
+            </div>
             {password && (
-              <Typography variant="caption" color="textSecondary" className="mt-1 block">
+              <p className="text-xs text-gray-500 mt-1">
                 Encrypted size: {passwordSize} bytes
-              </Typography>
+              </p>
             )}
-          </Box>
-          <FormControlLabel
-            control={<Switch checked={longMode} onChange={(e) => setLongMode(e.target.checked)} />}
+          </div>
+          
+          <Switch
+            checked={longMode}
+            onCheckedChange={setLongMode}
             label="Long text mode (for notes, keys, etc.)"
           />
-        </Box>
+        </div>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} disabled={loading}>
+      
+      <DialogFooter>
+        <Button variant="outline" onClick={handleClose} disabled={loading}>
           Cancel
         </Button>
         <Button
+          variant="primary"
           onClick={handleSubmit}
-          variant="contained"
           disabled={loading || !title || !password}
+          loading={loading}
         >
-          {loading ? 'Updating...' : 'Update Password'}
+          Update Password
         </Button>
-      </DialogActions>
+      </DialogFooter>
     </Dialog>
   );
 }
