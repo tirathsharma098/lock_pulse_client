@@ -8,10 +8,12 @@ import {
 } from '@mui/material';
 import { useParams } from "next/navigation";
 import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon } from '@mui/icons-material';
-import { getAllServices, Service, deleteService } from '@/services/serviceService';
+import { getAllServices, Service, deleteService, getService } from '@/services/serviceService';
 import { getProject, Project } from '@/services/projectService';
 import CreateServiceDialog from '@/components/services/CreateServiceDialog';
 import { toast } from 'sonner';
+import { useVault } from '@/contexts/VaultContext';
+import { decryptCompat, getVaultKey, initSodium } from '@/lib/crypto';
 
 export default function ServicesPage() {
   const params = useParams();
@@ -24,6 +26,7 @@ export default function ServicesPage() {
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const { projectVaultKey, setServiceVaultKey } = useVault();
 
   const fetchData = async () => {
     try {
@@ -98,6 +101,42 @@ export default function ServicesPage() {
     handleCreateDialogClose();
   };
 
+  const handleCredentialRoute = async (service:any) => {
+    if (!service || !projectVaultKey){
+      toast.error('Vault key not exist.');
+      return;
+    }
+    console.log(">>>>>> service got :: ", service);
+      try {
+        const gotCurrService = await getService(projectId, service.id);
+        // Decrypt service password
+        const servicePassword = await decryptCompat(
+          gotCurrService.passwordNonce,
+          gotCurrService.passwordCiphertext,
+          projectVaultKey,
+        );
+        
+        // Unwrap service vault key
+        await initSodium();
+        const serviceVaultKey = await getVaultKey(
+          servicePassword,
+          gotCurrService.vaultKdfSalt,
+          service.vaultKdfParams,
+          gotCurrService.wrappedVaultKey,
+        );
+        
+        // Store service vault key in context
+        setServiceVaultKey(serviceVaultKey);
+        
+        // Navigate to credentials page
+        router.push(`/project/${projectId}/service/${service.id}/credential`);
+      } catch (err) {
+        console.error('Failed to unlock service:', err);
+        setError('Failed to unlock service');
+      }
+    handleMenuClose();
+  };
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Box display="flex" alignItems="center" mb={3}>
@@ -156,7 +195,7 @@ export default function ServicesPage() {
                   <ListItemText
                     primary={service.name}
                     secondary={service.notes || 'No description'}
-                    onClick={() => router.push(`/project/${projectId}/service/${service.id}/view`)}
+                    onClick={()=> handleCredentialRoute(service)}
                     sx={{ cursor: 'pointer' }}
                   />
                 </ListItem>
