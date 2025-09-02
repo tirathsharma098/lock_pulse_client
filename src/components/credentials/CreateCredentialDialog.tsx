@@ -110,6 +110,8 @@ export default function CreateCredentialDialog({
               onChange={(e) => setPassword(e.target.value)}
               fullWidth
               required
+              multiline={isLong}
+              rows={isLong ? 4 : 1}
               helperText="The password or value for this credential"
             />
           </Box>

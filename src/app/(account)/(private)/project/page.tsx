@@ -6,7 +6,7 @@ import {
   Box, Button, Container, Typography, List, ListItem, 
   ListItemText, IconButton, Menu, MenuItem, Paper, Divider, ListItemIcon 
 } from '@mui/material';
-import { MoreVert as MoreVertIcon, Add as AddIcon, Password as PasswordIcon, Description as PageIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { getAllProjects, Project, deleteProject, getProject } from '@/services/projectService';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 import { toast } from 'sonner';
@@ -178,7 +178,13 @@ export default function ProjectsPage() {
                       </Box>
                     }
                     onClick={() => handleProjectClick(project.id)}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover .MuiListItemText-primary': {
+                        color: 'primary.main',
+                        textDecoration: 'underline'
+                      }
+                    }}
                   />
                 </ListItem>
               </Box>
@@ -192,9 +198,18 @@ export default function ProjectsPage() {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleViewProject}>View</MenuItem>
-        <MenuItem onClick={handleEditProject}>Edit</MenuItem>
-        <MenuItem onClick={handleDeleteProject}>Delete</MenuItem>
+        <MenuItem onClick={handleViewProject}>
+          <ViewIcon sx={{ mr: 1, color: 'action.active' }} />
+          View
+        </MenuItem>
+        <MenuItem onClick={handleEditProject}>
+          <EditIcon sx={{ mr: 1, color: 'action.active' }} />
+          Edit
+        </MenuItem>
+        <MenuItem onClick={handleDeleteProject}>
+          <DeleteIcon sx={{ mr: 1, color: 'error.main' }} />
+          Delete
+        </MenuItem>
       </Menu>
 
       <CreateProjectDialog 

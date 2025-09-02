@@ -7,7 +7,7 @@ import {
   ListItemText, IconButton, Menu, MenuItem, Paper, Divider, ListItemIcon 
 } from '@mui/material';
 import { useParams } from "next/navigation";
-import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { getAllCredentials, Credential, deleteCredential } from '@/services/credentialService';
 import { getService, Service } from '@/services/serviceService';
 import CreateCredentialDialog from '@/components/credentials/CreateCredentialDialog';
@@ -202,7 +202,13 @@ export default function CredentialsPage() {
                       </Box>
                     }
                     onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/view`)}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover .MuiListItemText-primary': {
+                        color: 'primary.main',
+                        textDecoration: 'underline'
+                      }
+                    }}
                   />
                 </ListItem>
               </Box>
@@ -216,9 +222,18 @@ export default function CredentialsPage() {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleViewCredential}>View</MenuItem>
-        <MenuItem onClick={handleEditCredential}>Edit</MenuItem>
-        <MenuItem onClick={handleDeleteCredential}>Delete</MenuItem>
+        <MenuItem onClick={handleViewCredential}>
+          <ViewIcon sx={{ mr: 1, color: 'action.active' }} />
+          View
+        </MenuItem>
+        <MenuItem onClick={handleEditCredential}>
+          <EditIcon sx={{ mr: 1, color: 'action.active' }} />
+          Edit
+        </MenuItem>
+        <MenuItem onClick={handleDeleteCredential}>
+          <DeleteIcon sx={{ mr: 1, color: 'error.main' }} />
+          Delete
+        </MenuItem>
       </Menu>
 
       <CreateCredentialDialog 

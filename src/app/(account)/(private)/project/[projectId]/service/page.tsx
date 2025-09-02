@@ -7,7 +7,7 @@ import {
   ListItemText, IconButton, Menu, MenuItem, Paper, Divider, ListItemIcon 
 } from '@mui/material';
 import { useParams } from "next/navigation";
-import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { getAllServices, Service, deleteService, getService } from '@/services/serviceService';
 import { getProject, Project } from '@/services/projectService';
 import CreateServiceDialog from '@/components/services/CreateServiceDialog';
@@ -210,7 +210,13 @@ export default function ServicesPage() {
                       </Box>
                     }
                     onClick={()=> handleCredentialRoute(service)}
-                    sx={{ cursor: 'pointer' }}
+                    sx={{ 
+                      cursor: 'pointer',
+                      '&:hover .MuiListItemText-primary': {
+                        color: 'primary.main',
+                        textDecoration: 'underline'
+                      }
+                    }}
                   />
                 </ListItem>
               </Box>
@@ -224,9 +230,18 @@ export default function ServicesPage() {
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleViewService}>View</MenuItem>
-        <MenuItem onClick={handleEditService}>Edit</MenuItem>
-        <MenuItem onClick={handleDeleteService}>Delete</MenuItem>
+        <MenuItem onClick={handleViewService}>
+          <ViewIcon sx={{ mr: 1, color: 'action.active' }} />
+          View
+        </MenuItem>
+        <MenuItem onClick={handleEditService}>
+          <EditIcon sx={{ mr: 1, color: 'action.active' }} />
+          Edit
+        </MenuItem>
+        <MenuItem onClick={handleDeleteService}>
+          <DeleteIcon sx={{ mr: 1, color: 'error.main' }} />
+          Delete
+        </MenuItem>
       </Menu>
 
       <CreateServiceDialog 

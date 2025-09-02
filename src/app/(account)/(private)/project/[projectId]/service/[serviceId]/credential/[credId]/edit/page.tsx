@@ -182,6 +182,8 @@ export default function CredentialEditPage() {
               fullWidth
               required
               variant="outlined"
+              multiline={isLong}
+              rows={isLong ? 4 : 1}
               helperText="The password or value for this credential"
               InputProps={{
                 endAdornment: (

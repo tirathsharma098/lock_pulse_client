@@ -119,6 +119,8 @@ export default function CreateProjectDialog({
               onChange={(e) => setPassword(e.target.value)}
               fullWidth
               required
+              multiline={isLong}
+              rows={isLong ? 4 : 1}
               helperText="This password will be used to encrypt project data"
             />
           </Box>

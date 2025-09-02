@@ -221,6 +221,8 @@ export default function ServiceEditPage() {
               fullWidth
               required
               variant="outlined"
+              multiline={isLong}
+              rows={isLong ? 4 : 1}
               helperText="Change this password to update service encryption"
               InputProps={{
                 endAdornment: (

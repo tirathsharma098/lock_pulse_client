@@ -219,6 +219,8 @@ export default function ProjectEditPage() {
               fullWidth
               required
               variant="outlined"
+              multiline={isLong}
+              rows={isLong ? 4 : 1}
               helperText="Change this password to update project encryption"
               InputProps={{
                 endAdornment: (
