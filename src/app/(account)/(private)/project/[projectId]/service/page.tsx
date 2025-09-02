@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Box, Button, Container, Typography, List, ListItem, 
-  ListItemText, IconButton, Menu, MenuItem, Paper, Divider 
+  ListItemText, IconButton, Menu, MenuItem, Paper, Divider, ListItemIcon 
 } from '@mui/material';
 import { useParams } from "next/navigation";
-import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, TextFields as ShortIcon, Subject as LongIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon } from '@mui/icons-material';
 import { getAllServices, Service, deleteService, getService } from '@/services/serviceService';
 import { getProject, Project } from '@/services/projectService';
 import CreateServiceDialog from '@/components/services/CreateServiceDialog';
@@ -192,13 +192,11 @@ export default function ServicesPage() {
                     </IconButton>
                   }
                 >
+                  <ListItemIcon>
+                    {service.isLong ? <PageIcon /> : <PasswordIcon />}
+                  </ListItemIcon>
                   <ListItemText
-                    primary={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        {service.isLong ? <LongIcon fontSize="small" /> : <ShortIcon fontSize="small" />}
-                        {service.name}
-                      </Box>
-                    }
+                    primary={service.name}
                     secondary={
                       <Box>
                         <Typography variant="body2" color="text.secondary">

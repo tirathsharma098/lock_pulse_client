@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Box, Button, Container, Typography, List, ListItem, 
-  ListItemText, IconButton, Menu, MenuItem, Paper, Divider 
+  ListItemText, IconButton, Menu, MenuItem, Paper, Divider, ListItemIcon 
 } from '@mui/material';
-import { MoreVert as MoreVertIcon, Add as AddIcon, TextFields as ShortIcon, Subject as LongIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, Password as PasswordIcon, Description as PageIcon } from '@mui/icons-material';
 import { getAllProjects, Project, deleteProject, getProject } from '@/services/projectService';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 import { toast } from 'sonner';
@@ -160,13 +160,11 @@ export default function ProjectsPage() {
                     </IconButton>
                   }
                 >
+                  <ListItemIcon>
+                    {project.isLong ? <PageIcon /> : <PasswordIcon />}
+                  </ListItemIcon>
                   <ListItemText
-                    primary={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        {project.isLong ? <LongIcon fontSize="small" /> : <ShortIcon fontSize="small" />}
-                        {project.name}
-                      </Box>
-                    }
+                    primary={project.name}
                     secondary={
                       <Box>
                         <Typography variant="body2" color="text.secondary">

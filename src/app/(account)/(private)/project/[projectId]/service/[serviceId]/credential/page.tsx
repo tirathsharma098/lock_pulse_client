@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Box, Button, Container, Typography, List, ListItem, 
-  ListItemText, IconButton, Menu, MenuItem, Paper, Divider 
+  ListItemText, IconButton, Menu, MenuItem, Paper, Divider, ListItemIcon 
 } from '@mui/material';
 import { useParams } from "next/navigation";
-import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, TextFields as ShortIcon, Subject as LongIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon } from '@mui/icons-material';
 import { getAllCredentials, Credential, deleteCredential } from '@/services/credentialService';
 import { getService, Service } from '@/services/serviceService';
 import CreateCredentialDialog from '@/components/credentials/CreateCredentialDialog';
@@ -184,13 +184,11 @@ export default function CredentialsPage() {
                     </IconButton>
                   }
                 >
+                  <ListItemIcon>
+                    {credential.isLong ? <PageIcon /> : <PasswordIcon />}
+                  </ListItemIcon>
                   <ListItemText
-                    primary={
-                      <Box display="flex" alignItems="center" gap={1}>
-                        {credential.isLong ? <LongIcon fontSize="small" /> : <ShortIcon fontSize="small" />}
-                        {decryptedTitles[credential.id] || 'Loading...'}
-                      </Box>
-                    }
+                    primary={decryptedTitles[credential.id] || 'Loading...'}
                     secondary={
                       <Box>
                         <Typography variant="body2" color="text.secondary">
