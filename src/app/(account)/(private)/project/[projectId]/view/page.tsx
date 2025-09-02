@@ -73,7 +73,7 @@ export default function ProjectViewPage() {
       name: 'createdAt',
       label: 'Created',
       type: 'datetime',
-      format: (value) => new Date(value).toLocaleString()
+      format: (value: any) => new Date(value).toLocaleString()
     },
     {
       name: 'password',
