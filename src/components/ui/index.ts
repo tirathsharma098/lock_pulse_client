@@ -6,3 +6,4 @@ export { Card, CardHeader, CardContent, CardTitle } from './card';
 export { Switch } from './switch';
 export { Select, type Option } from './select';
 export { IconButton } from './icon-button';
+export { Pagination } from './pagination';

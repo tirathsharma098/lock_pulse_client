@@ -17,7 +17,7 @@ import AddPasswordDialog from './components/AddPasswordDialog';
 import ViewPasswordDialog from './components/ViewPasswordDialog';
 import { Edit2Icon, EditIcon } from 'lucide-react';
 import EditPasswordDialog from './components/EditPasswordDialog';
-import { Card, CardHeader, CardContent, CardTitle, Button, Select, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, IconButton } from '@/components/ui';
+import { Card, CardHeader, CardContent, CardTitle, Button, Select, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, IconButton, Pagination } from '@/components/ui';
 
 interface DecryptedVaultItem extends VaultItem {
   title: string;
@@ -280,25 +280,15 @@ export default function VaultPage() {
               </div>
 
               {totalPages > 1 && (
-                <div className="flex justify-center mt-6">
-                  <div className="flex space-x-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
-                      <button
-                        key={pageNum}
-                        onClick={() => {
-                          setPage(pageNum);
-                          loadItems(pageNum);
-                        }}
-                        className={`px-3 py-1 rounded ${
-                          page === pageNum
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                        }`}
-                      >
-                        {pageNum}
-                      </button>
-                    ))}
-                  </div>
+                <div className="mt-6">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={(newPage) => {
+                      setPage(newPage);
+                      loadItems(newPage);
+                    }}
+                  />
                 </div>
               )}
             </>
