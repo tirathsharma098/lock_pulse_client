@@ -10,7 +10,7 @@ import CreateServiceDialog from '@/components/projects/services/CreateServiceDia
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { decryptCompat, getVaultKey, initSodium } from '@/lib/crypto';
-import { Card, CardHeader, CardContent, CardTitle, Button, IconButton } from '@/components/ui';
+import { Card, CardHeader, CardContent, CardTitle, Button, IconButton, Select, Pagination } from '@/components/ui';
 
 export default function ServicesPage() {
   const params = useParams();
@@ -21,17 +21,28 @@ export default function ServicesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
+  const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
   const { projectVaultKey, setServiceVaultKey } = useVault();
 
-  const fetchData = async () => {
+  const fetchData = async (
+    page: number = 1,
+    overrideType?: 'all' | 'normal' | 'long',
+    overrideSortDir?: 'ASC' | 'DESC'
+  ) => {
     try {
       setLoading(true);
-      const [projectData, servicesData] = await Promise.all([
+      const typeToUse = overrideType ?? filterType;
+      const sortDirToUse = overrideSortDir ?? sortDir;
+      const [projectData, servicesResponse] = await Promise.all([
         getProject(projectId),
-        getAllServices(projectId)
+        getAllServices(projectId, `page=${page}&type=${encodeURIComponent(typeToUse)}&sortDir=${encodeURIComponent(sortDirToUse)}`)
       ]);
       setProject(projectData);
-      setServices(servicesData);
+      setServices(servicesResponse.items);
+      setTotalPages(Math.ceil(servicesResponse.total / 10));
       setError(null);
     } catch (err) {
       setError('Failed to load services');
@@ -42,8 +53,8 @@ export default function ServicesPage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [projectId]);
+    fetchData(page);
+  }, [projectId, page]);
 
   const handleDeleteService = async (serviceId: string) => {
     try {
@@ -61,34 +72,28 @@ export default function ServicesPage() {
       toast.error('Vault key not exist.');
       return;
     }
-    console.log(">>>>>> service got :: ", service);
-      try {
-        const gotCurrService = await getService(projectId, service.id);
-        // Decrypt service password
-        const servicePassword = await decryptCompat(
-          gotCurrService.passwordNonce,
-          gotCurrService.passwordCiphertext,
-          projectVaultKey,
-        );
-        
-        // Unwrap service vault key
-        await initSodium();
-        const serviceVaultKey = await getVaultKey(
-          servicePassword,
-          gotCurrService.vaultKdfSalt,
-          service.vaultKdfParams,
-          gotCurrService.wrappedVaultKey,
-        );
-        
-        // Store service vault key in context
-        setServiceVaultKey(serviceVaultKey);
-        
-        // Navigate to credentials page
-        router.push(`/project/${projectId}/service/${service.id}/credential`);
-      } catch (err) {
-        console.error('Failed to unlock service:', err);
-        setError('Failed to unlock service');
-      }
+    try {
+      const gotCurrService = await getService(projectId, service.id);
+      const servicePassword = await decryptCompat(
+        gotCurrService.passwordNonce,
+        gotCurrService.passwordCiphertext,
+        projectVaultKey,
+      );
+      
+      await initSodium();
+      const serviceVaultKey = await getVaultKey(
+        servicePassword,
+        gotCurrService.vaultKdfSalt,
+        service.vaultKdfParams,
+        gotCurrService.wrappedVaultKey,
+      );
+      
+      setServiceVaultKey(serviceVaultKey);
+      router.push(`/project/${projectId}/service/${service.id}/credential`);
+    } catch (err) {
+      console.error('Failed to unlock service:', err);
+      setError('Failed to unlock service');
+    }
   };
 
   return (
@@ -133,6 +138,38 @@ export default function ServicesPage() {
         </CardHeader>
 
         <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <Select
+              label="Filter"
+              value={filterType}
+              onValueChange={(value) => {
+                const nextType = value as 'all' | 'normal' | 'long';
+                setFilterType(nextType);
+                setPage(1);
+                fetchData(1, nextType, sortDir);
+              }}
+              options={[
+                { value: 'all', label: 'All' },
+                { value: 'normal', label: 'Normal' },
+                { value: 'long', label: 'Long' }
+              ]}
+            />
+            <Select
+              label="Order (by date)"
+              value={sortDir}
+              onValueChange={(value) => {
+                const nextDir = value.toUpperCase() as 'ASC' | 'DESC';
+                setSortDir(nextDir);
+                setPage(1);
+                fetchData(1, filterType, nextDir);
+              }}
+              options={[
+                { value: 'DESC', label: 'Newest first' },
+                { value: 'ASC', label: 'Oldest first' }
+              ]}
+            />
+          </div>
+
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -148,51 +185,66 @@ export default function ServicesPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {services.map((service) => (
-                <div key={service.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                  <div className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleCredentialRoute(service)}>
-                    <div className="text-gray-400">
-                      {service.isLong ? <PageIcon /> : <PasswordIcon />}
+            <>
+              <div className="space-y-3">
+                {services.map((service) => (
+                  <div key={service.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleCredentialRoute(service)}>
+                      <div className="text-gray-400">
+                        {service.isLong ? <PageIcon /> : <PasswordIcon />}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 hover:text-blue-600">{service.name}</h4>
+                        <p className="text-sm text-gray-500">
+                          {service.notes || 'No description'}
+                          {service.isLong && (
+                            <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded font-medium">
+                              Long Password
+                            </span>
+                          )}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900 hover:text-blue-600">{service.name}</h4>
-                      <p className="text-sm text-gray-500">
-                        {service.notes || 'No description'}
-                        {service.isLong && (
-                          <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded font-medium">
-                            Long Password
-                          </span>
-                        )}
-                      </p>
+                    <div className="flex items-center space-x-1">
+                      <IconButton 
+                        onClick={() => router.push(`/project/${projectId}/service/${service.id}/view`)}
+                        variant="ghost"
+                        title="View details"
+                      >
+                        <ViewIcon />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => router.push(`/project/${projectId}/service/${service.id}/edit`)}
+                        variant="ghost"
+                        title="Edit details"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => handleDeleteService(service.id)}
+                        variant="destructive"
+                        title="Delete"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <IconButton 
-                      onClick={() => router.push(`/project/${projectId}/service/${service.id}/view`)}
-                      variant="ghost"
-                      title="View details"
-                    >
-                      <ViewIcon />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => router.push(`/project/${projectId}/service/${service.id}/edit`)}
-                      variant="ghost"
-                      title="Edit details"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => handleDeleteService(service.id)}
-                      variant="destructive"
-                      title="Delete"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </div>
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-6">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={(newPage) => {
+                      setPage(newPage);
+                      fetchData(newPage);
+                    }}
+                  />
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

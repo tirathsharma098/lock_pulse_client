@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Add as AddIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon, MoreVert as MoreVertIcon } from '@mui/icons-material';
+import { Add as AddIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { getAllProjects, Project, deleteProject, getProject } from '@/services/projectService';
 import CreateProjectDialog from '@/components/projects/CreateProjectDialog';
 import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
-import { decryptCompat, deriveKEK, getVaultKey, initSodium, unwrapVaultKey } from '@/lib/crypto';
-import { Card, CardHeader, CardContent, CardTitle, Button, IconButton } from '@/components/ui';
+import { decryptCompat, getVaultKey, initSodium } from '@/lib/crypto';
+import { Card, CardHeader, CardContent, CardTitle, Button, IconButton, Select, Pagination } from '@/components/ui';
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -16,15 +16,26 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [menuAnchor, setMenuAnchor] = useState<{ [key: string]: HTMLElement | null }>({});
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
+  const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
   const { vaultKey, setProjectVaultKey } = useVault();
 
-  const fetchProjects = async () => {
+  const fetchProjects = async (
+    page: number = 1,
+    overrideType?: 'all' | 'normal' | 'long',
+    overrideSortDir?: 'ASC' | 'DESC'
+  ) => {
     try {
       setLoading(true);
-      const data = await getAllProjects();
-      setProjects(data);
+      const typeToUse = overrideType ?? filterType;
+      const sortDirToUse = overrideSortDir ?? sortDir;
+      const response = await getAllProjects(
+        `page=${page}&type=${encodeURIComponent(typeToUse)}&sortDir=${encodeURIComponent(sortDirToUse)}`
+      );
+      setProjects(response.items);
+      setTotalPages(Math.ceil(response.total / 10));
       setError(null);
     } catch (err) {
       setError('Failed to load projects');
@@ -35,8 +46,8 @@ export default function ProjectsPage() {
   };
 
   useEffect(() => {
-    fetchProjects();
-  }, []);
+    fetchProjects(page);
+  }, [page]);
 
   const handleDeleteProject = async (projectId: string) => {
     try {
@@ -103,6 +114,38 @@ export default function ProjectsPage() {
         </CardHeader>
 
         <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <Select
+              label="Filter"
+              value={filterType}
+              onValueChange={(value) => {
+                const nextType = value as 'all' | 'normal' | 'long';
+                setFilterType(nextType);
+                setPage(1);
+                fetchProjects(1, nextType, sortDir);
+              }}
+              options={[
+                { value: 'all', label: 'All' },
+                { value: 'normal', label: 'Normal' },
+                { value: 'long', label: 'Long' }
+              ]}
+            />
+            <Select
+              label="Order (by date)"
+              value={sortDir}
+              onValueChange={(value) => {
+                const nextDir = value.toUpperCase() as 'ASC' | 'DESC';
+                setSortDir(nextDir);
+                setPage(1);
+                fetchProjects(1, filterType, nextDir);
+              }}
+              options={[
+                { value: 'DESC', label: 'Newest first' },
+                { value: 'ASC', label: 'Oldest first' }
+              ]}
+            />
+          </div>
+
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -118,51 +161,66 @@ export default function ProjectsPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {projects.map((project) => (
-                <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                  <div className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleProjectClick(project.id)}>
-                    <div className="text-gray-400">
-                      {project.isLong ? <PageIcon /> : <PasswordIcon />}
+            <>
+              <div className="space-y-3">
+                {projects.map((project) => (
+                  <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleProjectClick(project.id)}>
+                      <div className="text-gray-400">
+                        {project.isLong ? <PageIcon /> : <PasswordIcon />}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 hover:text-blue-600">{project.name}</h4>
+                        <p className="text-sm text-gray-500">
+                          {project.notes || 'No description'}
+                          {project.isLong && (
+                            <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded font-medium">
+                              Long Password
+                            </span>
+                          )}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900 hover:text-blue-600">{project.name}</h4>
-                      <p className="text-sm text-gray-500">
-                        {project.notes || 'No description'}
-                        {project.isLong && (
-                          <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded font-medium">
-                            Long Password
-                          </span>
-                        )}
-                      </p>
+                    <div className="flex items-center space-x-1">
+                      <IconButton 
+                        onClick={() => router.push(`/project/${project.id}/view`)}
+                        variant="ghost"
+                        title="View details"
+                      >
+                        <ViewIcon />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => router.push(`/project/${project.id}/edit`)}
+                        variant="ghost"
+                        title="Edit details"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => handleDeleteProject(project.id)}
+                        variant="destructive"
+                        title="Delete"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <IconButton 
-                      onClick={() => router.push(`/project/${project.id}/view`)}
-                      variant="ghost"
-                      title="View details"
-                    >
-                      <ViewIcon />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => router.push(`/project/${project.id}/edit`)}
-                      variant="ghost"
-                      title="Edit details"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => handleDeleteProject(project.id)}
-                      variant="destructive"
-                      title="Delete"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </div>
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-6">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={(newPage) => {
+                      setPage(newPage);
+                      fetchProjects(newPage);
+                    }}
+                  />
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

@@ -38,8 +38,9 @@ export interface UpdateProjectRequest {
   isLong?: boolean;
 }
 
-export const getAllProjects = async (): Promise<Project[]> => {
-  const response = await apiRequest('/projects', {
+export const getAllProjects = async (queryParams?: string): Promise<{ items: Project[]; total: number; page: number }> => {
+  const url = queryParams ? `/projects?${queryParams}` : '/projects';
+  const response = await apiRequest(url, {
     method: 'GET',
   });
   return response;

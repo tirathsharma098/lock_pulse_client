@@ -37,8 +37,9 @@ export interface UpdateServiceRequest {
   isLong?: boolean;
 }
 
-export const getAllServices = async (projectId: string): Promise<Service[]> => {
-  const response = await apiRequest(`/projects/${projectId}/services`, {
+export const getAllServices = async (projectId: string, queryParams?: string): Promise<{ items: Service[]; total: number; page: number }> => {
+  const url = queryParams ? `/projects/${projectId}/services?${queryParams}` : `/projects/${projectId}/services`;
+  const response = await apiRequest(url, {
     method: 'GET',
   });
   return response;

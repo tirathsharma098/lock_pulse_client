@@ -28,8 +28,9 @@ export interface UpdateCredentialRequest {
   isLong?: boolean;
 }
 
-export const getAllCredentials = async (projectId: string, serviceId: string): Promise<Credential[]> => {
-  const response = await apiRequest(`/projects/${projectId}/services/${serviceId}/credentials`, {
+export const getAllCredentials = async (projectId: string, serviceId: string, queryParams?: string): Promise<{ items: Credential[]; total: number; page: number }> => {
+  const url = queryParams ? `/projects/${projectId}/services/${serviceId}/credentials?${queryParams}` : `/projects/${projectId}/services/${serviceId}/credentials`;
+  const response = await apiRequest(url, {
     method: 'GET',
   });
   return response;

@@ -10,7 +10,7 @@ import CreateCredentialDialog from '@/components/projects/services/credentials/C
 import { useVault } from '@/contexts/VaultContext';
 import { decryptCompat } from '@/lib/crypto';
 import { toast } from 'sonner';
-import { Card, CardHeader, CardContent, CardTitle, Button, IconButton } from '@/components/ui';
+import { Card, CardHeader, CardContent, CardTitle, Button, IconButton, Select, Pagination } from '@/components/ui';
 
 export default function CredentialsPage() {
   const params = useParams();
@@ -24,20 +24,31 @@ export default function CredentialsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
+  const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
 
-  const fetchData = async () => {
+  const fetchData = async (
+    page: number = 1,
+    overrideType?: 'all' | 'normal' | 'long',
+    overrideSortDir?: 'ASC' | 'DESC'
+  ) => {
     try {
       setLoading(true);
-      const [serviceData, credentialsData] = await Promise.all([
+      const typeToUse = overrideType ?? filterType;
+      const sortDirToUse = overrideSortDir ?? sortDir;
+      const [serviceData, credentialsResponse] = await Promise.all([
         getService(projectId, serviceId),
-        getAllCredentials(projectId, serviceId)
+        getAllCredentials(projectId, serviceId, `page=${page}&type=${encodeURIComponent(typeToUse)}&sortDir=${encodeURIComponent(sortDirToUse)}`)
       ]);
       setService(serviceData);
-      setCredentials(credentialsData);
+      setCredentials(credentialsResponse.items);
+      setTotalPages(Math.ceil(credentialsResponse.total / 10));
       
       // Decrypt credential titles
-      if (serviceVaultKey && credentialsData.length > 0) {
-        await decryptCredentialTitles(credentialsData);
+      if (serviceVaultKey && credentialsResponse.items.length > 0) {
+        await decryptCredentialTitles(credentialsResponse.items);
       }
       
       setError(null);
@@ -70,8 +81,8 @@ export default function CredentialsPage() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [projectId, serviceId, serviceVaultKey]);
+    fetchData(page);
+  }, [projectId, serviceId, serviceVaultKey, page]);
 
   const handleDeleteCredential = async (credentialId: string) => {
     try {
@@ -126,6 +137,38 @@ export default function CredentialsPage() {
         </CardHeader>
 
         <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <Select
+              label="Filter"
+              value={filterType}
+              onValueChange={(value) => {
+                const nextType = value as 'all' | 'normal' | 'long';
+                setFilterType(nextType);
+                setPage(1);
+                fetchData(1, nextType, sortDir);
+              }}
+              options={[
+                { value: 'all', label: 'All' },
+                { value: 'normal', label: 'Normal' },
+                { value: 'long', label: 'Long' }
+              ]}
+            />
+            <Select
+              label="Order (by date)"
+              value={sortDir}
+              onValueChange={(value) => {
+                const nextDir = value.toUpperCase() as 'ASC' | 'DESC';
+                setSortDir(nextDir);
+                setPage(1);
+                fetchData(1, filterType, nextDir);
+              }}
+              options={[
+                { value: 'DESC', label: 'Newest first' },
+                { value: 'ASC', label: 'Oldest first' }
+              ]}
+            />
+          </div>
+
           {loading ? (
             <div className="text-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
@@ -141,56 +184,71 @@ export default function CredentialsPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {credentials.map((credential) => (
-                <div key={credential.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                  <div 
-                    className="flex items-center space-x-3 flex-1 cursor-pointer" 
-                    onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/view`)}
-                  >
-                    <div className="text-gray-400">
-                      {credential.isLong ? <PageIcon /> : <PasswordIcon />}
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900 hover:text-blue-600">
-                        {decryptedTitles[credential.id] || 'Loading...'}
-                      </h4>
-                      <p className="text-sm text-gray-500">
-                        {new Date(credential.createdAt).toLocaleDateString()}
-                        {credential.isLong && (
-                          <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded font-medium">
-                            Long Password
-                          </span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <IconButton 
+            <>
+              <div className="space-y-3">
+                {credentials.map((credential) => (
+                  <div key={credential.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div 
+                      className="flex items-center space-x-3 flex-1 cursor-pointer" 
                       onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/view`)}
-                      variant="ghost"
-                      title="View details"
                     >
-                      <ViewIcon />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/edit`)}
-                      variant="ghost"
-                      title="Edit details"
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => handleDeleteCredential(credential.id)}
-                      variant="destructive"
-                      title="Delete"
-                    >
-                      <DeleteIcon />
-                    </IconButton>
+                      <div className="text-gray-400">
+                        {credential.isLong ? <PageIcon /> : <PasswordIcon />}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900 hover:text-blue-600">
+                          {decryptedTitles[credential.id] || 'Loading...'}
+                        </h4>
+                        <p className="text-sm text-gray-500">
+                          {new Date(credential.createdAt).toLocaleDateString()}
+                          {credential.isLong && (
+                            <span className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded font-medium">
+                              Long Password
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <IconButton 
+                        onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/view`)}
+                        variant="ghost"
+                        title="View details"
+                      >
+                        <ViewIcon />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/edit`)}
+                        variant="ghost"
+                        title="Edit details"
+                      >
+                        <EditIcon />
+                      </IconButton>
+                      <IconButton 
+                        onClick={() => handleDeleteCredential(credential.id)}
+                        variant="destructive"
+                        title="Delete"
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </div>
                   </div>
+                ))}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-6">
+                  <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={(newPage) => {
+                      setPage(newPage);
+                      fetchData(newPage);
+                    }}
+                  />
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
