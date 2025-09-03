@@ -180,7 +180,7 @@ export default function ServiceEditPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/view`)}
+            onClick={() => router.push(`/project/${projectId}/service`)}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -232,18 +232,19 @@ export default function ServiceEditPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="Enter service password"
                         required
-                        helperText="Change this password to update service encryption"
+                        // helperText="Change this password to update service encryption"
                       />
                     )}
                   </div>
-                  <IconButton
+                  {!isLong && <IconButton
                     onClick={() => setShowPassword(!showPassword)}
                     variant="ghost"
-                    className="mb-1"
+                    // className="mb-1"
+                    type='button'
                     title={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                  </IconButton>
+                  </IconButton>}
                 </div>
               </div>
 
@@ -266,6 +267,7 @@ export default function ServiceEditPage() {
                   variant="outline" 
                   onClick={() => router.push(`/project/${projectId}/service/${serviceId}/view`)}
                   disabled={saving}
+                  type='button'
                 >
                   Cancel
                 </Button>

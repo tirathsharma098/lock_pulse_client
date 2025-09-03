@@ -140,7 +140,7 @@ export default function CredentialEditPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`)}
+            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -193,18 +193,19 @@ export default function CredentialEditPage() {
                         onChange={(e) => setPassword(e.target.value)}
                         placeholder="The password or value for this credential"
                         required
-                        helperText="The password or value for this credential"
+                        // helperText="The password or value for this credential"
                       />
                     )}
                   </div>
-                  <IconButton
+                  {!isLong && <IconButton
                     onClick={() => setShowPassword(!showPassword)}
                     variant="ghost"
-                    className="mb-1"
+                    type='button'
+                    // className="mb-1"
                     title={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                  </IconButton>
+                  </IconButton>}
                 </div>
               </div>
 
@@ -217,6 +218,7 @@ export default function CredentialEditPage() {
               <div className="flex justify-end space-x-2 pt-4">
                 <Button 
                   variant="outline" 
+                  type='button'
                   onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`)}
                   disabled={saving}
                 >

@@ -225,13 +225,13 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
                   />
                 </div>
               )}
-              <IconButton
-                onClick={() => setShowPassword(!showPassword)}
+              {!longMode && <IconButton
+                onClick={() => setShowPassword(prev => !prev)}
                 variant="ghost"
                 className="mb-1"
               >
                 {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-              </IconButton>
+              </IconButton>}
             </div>
             {password && (
               <p className="text-xs text-gray-500 mt-1">

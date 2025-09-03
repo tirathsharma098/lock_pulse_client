@@ -125,9 +125,9 @@ export default function ProjectEditPage() {
       toast.success('Project updated successfully');
       router.push(`/project/${projectId}/view`);
       
-    } catch (err) {
+    } catch (err:any) {
       console.error('Failed to update project:', err);
-      setError('Failed to update project. Please try again.');
+      setError(err?.message || 'Failed to update project. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -167,7 +167,7 @@ export default function ProjectEditPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project/${projectId}/view`)}
+            onClick={() => router.push(`/project`)}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -199,7 +199,7 @@ export default function ProjectEditPage() {
               />
               
               <div>
-                <div className="flex items-end space-x-2">
+                <div className="flex items-center space-x-2">
                   <div className="flex-1">
                     {isLong ? (
                       <Textarea
@@ -223,14 +223,15 @@ export default function ProjectEditPage() {
                       />
                     )}
                   </div>
-                  <IconButton
+                  {!isLong && <IconButton
                     onClick={() => setShowPassword(!showPassword)}
                     variant="ghost"
-                    className="mb-1"
+                    className="mt-1"
+                    type='button'
                     title={showPassword ? 'Hide password' : 'Show password'}
                   >
                     {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                  </IconButton>
+                  </IconButton>}
                 </div>
               </div>
 
