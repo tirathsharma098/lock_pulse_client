@@ -26,9 +26,9 @@ const cards = [
     bg: "bg-gradient-to-br from-blue-500 to-indigo-600",
   },
   {
-    title: "Sharing",
+    title: "Collaboration",
     desc: "Manage shared resources and access.",
-    href: "/sharing",
+    href: "/collaborate",
     icon: Share2,
     bg: "bg-gradient-to-br from-pink-500 to-rose-600",
   },
