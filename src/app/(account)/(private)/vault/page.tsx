@@ -13,10 +13,10 @@ import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { authService, vaultService, type VaultItem } from '@/services';
 import { decryptCompat, initSodium } from '@/lib/crypto';
-import AddPasswordDialog from './components/AddPasswordDialog';
-import ViewPasswordDialog from './components/ViewPasswordDialog';
+import AddPasswordDialog from '@/components/vault/AddPasswordDialog';
+import ViewPasswordDialog from '@/components/vault/ViewPasswordDialog';
 import { Edit2Icon, EditIcon } from 'lucide-react';
-import EditPasswordDialog from './components/EditPasswordDialog';
+import EditPasswordDialog from '@/components/vault/EditPasswordDialog';
 import { Card, CardHeader, CardContent, CardTitle, Button, Select, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, IconButton, Pagination } from '@/components/ui';
 
 interface DecryptedVaultItem extends VaultItem {

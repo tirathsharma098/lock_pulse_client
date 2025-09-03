@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { Add as AddIcon, ArrowBack as ArrowBackIcon, Password as PasswordIcon, Description as PageIcon, Visibility as ViewIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { getAllCredentials, Credential, deleteCredential } from '@/services/credentialService';
 import { getService, Service } from '@/services/serviceService';
-import CreateCredentialDialog from '@/components/credentials/CreateCredentialDialog';
+import CreateCredentialDialog from '@/components/projects/services/credentials/CreateCredentialDialog';
 import { useVault } from '@/contexts/VaultContext';
 import { decryptCompat } from '@/lib/crypto';
 import { toast } from 'sonner';
