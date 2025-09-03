@@ -74,9 +74,9 @@ export default function CreateProjectDialog({
       setIsLong(false);
       
       onProjectCreated();
-    } catch (err) {
+    } catch (err:any) {
       console.error('Failed to create project:', err);
-      setError('Failed to create project. Please try again.');
+      setError(err?.message || 'Failed to create project. Please try again.');
     } finally {
       setLoading(false);
     }
