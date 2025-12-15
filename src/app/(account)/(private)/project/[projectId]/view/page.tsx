@@ -1,8 +1,39 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useParams } from "next/navigation";
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  Box,
+  Typography,
+  Paper,
+  IconButton,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Autocomplete,
+  Chip,
+  Snackbar,
+  Alert,
+} from '@mui/material';
+import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
+import ShareIcon from '@mui/icons-material/Share';
+import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import { debounce } from 'lodash';
+import { 
+  getSharedUsers, 
+  shareProject, 
+  unshareProject, 
+  searchUsers 
+} from '@/services/collaborationService';
+import { useVault } from '@/contexts/VaultContext';
+import { getProject, Project } from '@/services/projectService';
+import { decryptCompat } from '@/lib/crypto';
+import { toast } from 'sonner';
+import { Card, CardHeader, CardContent, CardTitle, Input, Textarea, IconButton as CustomIconButton } from '@/components/ui';
 import { 
   ArrowBack as ArrowBackIcon, 
   Edit as EditIcon,
@@ -10,17 +41,27 @@ import {
   VisibilityOff as VisibilityOffIcon,
   ContentCopy as ContentCopyIcon
 } from '@mui/icons-material';
-import { useVault } from '@/contexts/VaultContext';
-import { getProject, Project } from '@/services/projectService';
-import { decryptCompat } from '@/lib/crypto';
-import { toast } from 'sonner';
-import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, IconButton } from '@/components/ui';
+
+interface SharedUser {
+  sr: number;
+  id: string;
+  username: string;
+  email: string;
+  sharedAt: string;
+}
+
+interface UserOption {
+  id: string;
+  username: string;
+  email: string;
+}
 
 export default function ProjectViewPage() {
   const params = useParams();
-  const projectId = params.projectId as string;
   const router = useRouter();
-  const { vaultKey } = useVault();
+  const { vaultKey, setIsCollaborating } = useVault();
+  const projectId = params.projectId as string;
+
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,13 +70,23 @@ export default function ProjectViewPage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
+  const [sharedUsers, setSharedUsers] = useState<SharedUser[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [userOptions, setUserOptions] = useState<UserOption[]>([]);
+  const [selectedUser, setSelectedUser] = useState<UserOption | null>(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
+
+  useEffect(() => {
+    setIsCollaborating(false);
+  }, [setIsCollaborating]);
+
   useEffect(() => {
     const fetchProject = async () => {
       try {
         const data = await getProject(projectId);
         setProject(data);
         
-        // Decrypt the project password
         if (data && vaultKey) {
           await decryptProjectPassword(data);
         }
@@ -87,6 +138,93 @@ export default function ProjectViewPage() {
     }
   };
 
+  const debouncedSearch = useMemo(
+    () => debounce(async (query: string) => {
+      try {
+        setLoading(true);
+        const users = await getSharedUsers(projectId, query);
+        setSharedUsers(users);
+      } catch (error) {
+        console.error('Failed to fetch shared users:', error);
+        setSnackbar({ open: true, message: 'Failed to fetch shared users', severity: 'error' });
+      } finally {
+        setLoading(false);
+      }
+    }, 500),
+    [projectId]
+  );
+
+  const debouncedUserSearch = useMemo(
+    () => debounce(async (query: string) => {
+      if (query.length < 2) {
+        setUserOptions([]);
+        return;
+      }
+      try {
+        const users = await searchUsers(query);
+        setUserOptions(users);
+      } catch (error) {
+        console.error('Failed to search users:', error);
+      }
+    }, 300),
+    []
+  );
+
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
+
+  const handleShare = async (userId: string) => {
+    try {
+      await shareProject({ projectId, collaboratorId: userId });
+      setSnackbar({ open: true, message: 'Project shared successfully', severity: 'success' });
+      debouncedSearch(searchQuery);
+    } catch (error) {
+      console.error('Failed to share project:', error);
+      setSnackbar({ open: true, message: 'Failed to share project', severity: 'error' });
+    }
+  };
+
+  const handleUnshare = async (userId: string) => {
+    try {
+      await unshareProject({ projectId, collaboratorId: userId });
+      setSnackbar({ open: true, message: 'Project unshared successfully', severity: 'success' });
+      debouncedSearch(searchQuery);
+    } catch (error) {
+      console.error('Failed to unshare project:', error);
+      setSnackbar({ open: true, message: 'Failed to unshare project', severity: 'error' });
+    }
+  };
+
+  const handleShareDialogSubmit = async () => {
+    if (!selectedUser) return;
+    
+    await handleShare(selectedUser.id);
+    setShareDialogOpen(false);
+    setSelectedUser(null);
+  };
+
+  const columns: GridColDef[] = [
+    { field: 'sr', headerName: 'Sr', width: 70 },
+    { field: 'username', headerName: 'Username', width: 200 },
+    { field: 'email', headerName: 'Email', width: 250 },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 100,
+      getActions: (params:any) => [
+        <GridActionsCellItem
+          key="unshare"
+          icon={<PersonRemoveIcon />}
+          label="Unshare"
+          onClick={() => handleUnshare(params.row.id)}
+          // color="error"
+        />
+      ],
+    },
+  ];
+
   if (loading) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
@@ -136,8 +274,8 @@ export default function ProjectViewPage() {
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
-          <Button 
-            variant="outline"
+          <Button
+            // variant="outline"
             onClick={() => router.push('/project')}
             className="flex items-center space-x-2"
           >
@@ -147,7 +285,7 @@ export default function ProjectViewPage() {
           <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
         </div>
         <Button 
-          variant="outline"
+          // variant="outline"
           onClick={() => router.push(`/project/${projectId}/edit`)}
           className="flex items-center space-x-2"
         >
@@ -200,15 +338,15 @@ export default function ProjectViewPage() {
                   </div>
                   {!passwordLoading && !passwordError && (
                     <>
-                      <IconButton
+                      <CustomIconButton
                         onClick={() => setShowPassword(!showPassword)}
                         variant="ghost"
                         className="mb-1"
                         title={showPassword ? 'Hide password' : 'Show password'}
                       >
                         {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                      </IconButton>
-                      <IconButton
+                      </CustomIconButton>
+                      <CustomIconButton
                         onClick={handleCopyPassword}
                         variant="ghost"
                         className="mb-1"
@@ -216,7 +354,7 @@ export default function ProjectViewPage() {
                         disabled={!decryptedPassword}
                       >
                         <ContentCopyIcon />
-                      </IconButton>
+                      </CustomIconButton>
                     </>
                   )}
                 </div>
@@ -240,12 +378,106 @@ export default function ProjectViewPage() {
             <div className="text-center py-8">
               <p className="text-gray-500 mb-4">No services added to this project yet</p>
               <Button 
-                variant="primary"
+                // variant="primary"
                 onClick={() => router.push(`/project/${projectId}/service`)}
               >
                 Manage Services
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Project Sharing</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Box sx={{ p: 3 }}>
+              <Paper sx={{ p: 3, mb: 3 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="h6">Shared Users</Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<PersonAddIcon />}
+                    onClick={() => setShareDialogOpen(true)}
+                  >
+                    Share Project
+                  </Button>
+                </Box>
+
+                <TextField
+                  fullWidth
+                  label="Search shared users"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  sx={{ mb: 2 }}
+                />
+
+                <DataGrid
+                  rows={sharedUsers}
+                  columns={columns}
+                  loading={loading}
+                  pageSizeOptions={[10]}
+                  initialState={{
+                    pagination: { paginationModel: { pageSize: 10 } },
+                  }}
+                  disableRowSelectionOnClick
+                  sx={{ height: 400 }}
+                />
+              </Paper>
+
+              <Dialog open={shareDialogOpen} onClose={() => setShareDialogOpen(false)} maxWidth="sm" fullWidth>
+                <DialogTitle>Share Project</DialogTitle>
+                <DialogContent>
+                  <Autocomplete
+                    options={userOptions}
+                    getOptionLabel={(option) => `${option.username} (${option.email})`}
+                    value={selectedUser}
+                    onChange={(_, newValue) => setSelectedUser(newValue)}
+                    onInputChange={(_, newInputValue) => debouncedUserSearch(newInputValue)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Search users"
+                        placeholder="Type username or email..."
+                        fullWidth
+                        margin="normal"
+                      />
+                    )}
+                    renderOption={(props, option) => (
+                      <Box component="li" {...props}>
+                        <Box>
+                          <Typography variant="body1">{option.username}</Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {option.email}
+                          </Typography>
+                        </Box>
+                      </Box>
+                    )}
+                  />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={() => setShareDialogOpen(false)}>Cancel</Button>
+                  <Button 
+                    onClick={handleShareDialogSubmit} 
+                    variant="contained"
+                    disabled={!selectedUser}
+                  >
+                    Share
+                  </Button>
+                </DialogActions>
+              </Dialog>
+
+              <Snackbar
+                open={snackbar.open}
+                autoHideDuration={6000}
+                onClose={() => setSnackbar({ ...snackbar, open: false })}
+              >
+                <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+                  {snackbar.message}
+                </Alert>
+              </Snackbar>
+            </Box>
           </CardContent>
         </Card>
       </div>

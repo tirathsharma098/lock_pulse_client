@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from './components/theme-provider'
-import { VaultProvider } from '@/contexts/VaultContext'
 import { Toaster } from 'sonner'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -98,10 +97,10 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <Toaster position="top-center" duration={3000} richColors />
-        <ThemeProvider defaultTheme="system">
-            {children}
-        </ThemeProvider>
+          <Toaster position="top-center" duration={3000} richColors />
+          <ThemeProvider defaultTheme="system">
+              {children}
+          </ThemeProvider>
       </body>
     </html>
   )

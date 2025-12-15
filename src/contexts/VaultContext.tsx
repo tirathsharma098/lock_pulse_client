@@ -13,6 +13,8 @@ interface VaultContextType {
   setServiceVaultKey: (key: Uint8Array | null) => void;
   isUnlocked: boolean;
   wipeVaultKey: () => void;
+  isCollaborating: boolean;
+  setIsCollaborating: (value: boolean) => void;
 }
 
 const VaultContext = createContext<VaultContextType | undefined>(undefined);
@@ -31,6 +33,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [serviceVaultKey, setServiceVaultKey] = useState<Uint8Array | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [isCollaborating, setIsCollaborating] = useState<boolean>(false);
 
   const setVaultData = (key: Uint8Array | null, username: string, email: string) => {
     console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
@@ -85,6 +88,8 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setServiceVaultKey,
     isUnlocked: vaultKey !== null,
     wipeVaultKey,
+    isCollaborating, 
+    setIsCollaborating,
   };
 
   return <VaultContext.Provider value={value}>{children}</VaultContext.Provider>;

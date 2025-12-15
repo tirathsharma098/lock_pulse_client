@@ -72,6 +72,7 @@ export default function ProjectsPage() {
         project.passwordCiphertext,
         vaultKey
       );
+      console.log(">>> Current Project Password:", currProjPass);
       await initSodium();
       const projectVaultKey = await getVaultKey(currProjPass, project.vaultKdfSalt, project.vaultKdfParams, project.wrappedVaultKey);
       setProjectVaultKey(projectVaultKey);
