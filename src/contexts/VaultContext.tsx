@@ -15,6 +15,8 @@ interface VaultContextType {
   wipeVaultKey: () => void;
   isCollaborating: boolean;
   setIsCollaborating: (value: boolean) => void;
+  collaboratorId?: string | null;
+  setCollaboratorId: (id: string) => void;
 }
 
 const VaultContext = createContext<VaultContextType | undefined>(undefined);
@@ -34,6 +36,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [username, setUsername] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [isCollaborating, setIsCollaborating] = useState<boolean>(false);
+  const [collaboratorId, setCollaboratorId] = useState<string | null>(null);
 
   const setVaultData = (key: Uint8Array | null, username: string, email: string) => {
     console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
@@ -90,6 +93,8 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     wipeVaultKey,
     isCollaborating, 
     setIsCollaborating,
+    collaboratorId,
+    setCollaboratorId,
   };
 
   return <VaultContext.Provider value={value}>{children}</VaultContext.Provider>;

@@ -36,8 +36,8 @@ interface SharedProject {
 export default function CollaboratorProjectsPage() {
   const params = useParams();
   const router = useRouter();
-  const { setIsCollaborating, setProjectVaultKey } = useVault();
-  const userId = params.userId as string;
+  const { setCollaboratorId, setIsCollaborating, setProjectVaultKey } = useVault();
+  const userId:string = params.userId as string;
 
   const [projects, setProjects] = useState<SharedProject[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,7 +99,7 @@ export default function CollaboratorProjectsPage() {
       // Set collaboration context
       setProjectVaultKey(vaultKey);
       setIsCollaborating(true);
-
+      setCollaboratorId(userId as string);
       // Navigate to project services
       router.push(`/project/${projectId}/service`);
       
