@@ -3,29 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Container,
-  Paper,
-  Typography,
-  Button,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Alert,
-  Box,
-  Pagination,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  ListItemIcon,
-} from '@mui/material';
-import {
   Add as AddIcon,
   Visibility as ViewIcon,
   Delete as DeleteIcon,
@@ -36,10 +13,11 @@ import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { authService, vaultService, type VaultItem } from '@/services';
 import { decryptCompat, initSodium } from '@/lib/crypto';
-import AddPasswordDialog from './components/AddPasswordDialog';
-import ViewPasswordDialog from './components/ViewPasswordDialog';
+import AddPasswordDialog from '@/components/vault/AddPasswordDialog';
+import ViewPasswordDialog from '@/components/vault/ViewPasswordDialog';
 import { Edit2Icon, EditIcon } from 'lucide-react';
-import EditPasswordDialog from './components/EditPasswordDialog';
+import EditPasswordDialog from '@/components/vault/EditPasswordDialog';
+import { Card, CardHeader, CardContent, CardTitle, Button, Select, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, IconButton, Pagination } from '@/components/ui';
 
 interface DecryptedVaultItem extends VaultItem {
   title: string;
@@ -178,91 +156,112 @@ export default function VaultPage() {
   };
 
   return (
-    <>
-        {error && (
-          <Alert severity="error" className="mb-4" onClose={() => setError('')}>
-            {error}
-          </Alert>
-        )}
-
-        <Paper elevation={2} className="p-6">
-          <Box className="flex justify-between items-center mb-4">
-            <Typography variant="h5" component="h1">
-              Password Vault
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setAddDialogOpen(true)}
+    <div className="container mx-auto p-6 max-w-4xl">
+      {error && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+          <div className="flex justify-between items-center">
+            <p className="text-red-800">{error}</p>
+            <button 
+              onClick={() => setError('')}
+              className="text-red-500 hover:text-red-700"
             >
-              Add Password
-            </Button>
-          </Box>
+              ×
+            </button>
+          </div>
+        </div>
+      )}
 
-          <Box className="flex flex-col sm:flex-row gap-3 mb-4">
-            <FormControl size="small" fullWidth>
-              <InputLabel>Filter</InputLabel>
-              <Select
-                label="Filter"
-                value={filterType}
-                onChange={(e) => {
-                  const nextType = e.target.value as 'all' | 'normal' | 'long';
-                  setFilterType(nextType);
-                  setPage(1);
-                  loadItems(1, nextType, sortDir);
-                }}
-              >
-                <MenuItem value="all">All</MenuItem>
-                <MenuItem value="normal">Normal</MenuItem>
-                <MenuItem value="long">Long</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl size="small" fullWidth>
-              <InputLabel>Order (by date)</InputLabel>
-              <Select
-                label="Order (by date)"
-                value={sortDir}
-                onChange={(e) => {
-                  const nextDir = (e.target.value as string).toUpperCase() as 'ASC' | 'DESC';
-                  setSortDir(nextDir);
-                  setPage(1);
-                  loadItems(1, filterType, nextDir);
-                }}
-              >
-                <MenuItem value="DESC">Newest first</MenuItem>
-                <MenuItem value="ASC">Oldest first</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
+      <Card>
+        <CardHeader>
+          <div className="flex justify-between items-center">
+            <CardTitle>Password Vault</CardTitle>
+            <Button
+              variant="primary"
+              onClick={() => setAddDialogOpen(true)}
+              className="flex items-center space-x-2"
+            >
+              <AddIcon className="w-4 h-4" />
+              <span>Add Password</span>
+            </Button>
+          </div>
+        </CardHeader>
+
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <Select
+              label="Filter"
+              value={filterType}
+              onValueChange={(value) => {
+                const nextType = value as 'all' | 'normal' | 'long';
+                setFilterType(nextType);
+                setPage(1);
+                loadItems(1, nextType, sortDir);
+              }}
+              options={[
+                { value: 'all', label: 'All' },
+                { value: 'normal', label: 'Normal' },
+                { value: 'long', label: 'Long' }
+              ]}
+            />
+            <Select
+              label="Order (by date)"
+              value={sortDir}
+              onValueChange={(value) => {
+                const nextDir = value.toUpperCase() as 'ASC' | 'DESC';
+                setSortDir(nextDir);
+                setPage(1);
+                loadItems(1, filterType, nextDir);
+              }}
+              options={[
+                { value: 'DESC', label: 'Newest first' },
+                { value: 'ASC', label: 'Oldest first' }
+              ]}
+            />
+          </div>
 
           {loading ? (
-            <Typography>Loading...</Typography>
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-2 text-gray-600">Loading...</p>
+            </div>
           ) : items.length === 0 ? (
-            <Box className="text-center py-8">
-              <Typography variant="h6" color="textSecondary">
+            <div className="text-center py-12">
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No passwords saved yet
-              </Typography>
-              <Typography variant="body2" color="textSecondary" className="mt-2">
-                Click &quot;Add Password&quot; to create your first entry
-              </Typography>
-            </Box>
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Click "Add Password" to create your first entry
+              </p>
+            </div>
           ) : (
             <>
-              <List>
+              <div className="space-y-3">
                 {items.map((item) => (
-                  <ListItem key={item.id} divider>
-                    <ListItemIcon>
-                      {item.isLong ? <PageIcon /> : <PasswordIcon />}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={item.title}
-                      secondary={`Password: •••••••• • ${new Date(item.createdAt).toLocaleDateString()}`}
-                    />
-                    <ListItemSecondaryAction>
-                      <IconButton onClick={() => handleViewItem(item.id)} className="mr-2" aria-label="view details">
+                  <div key={item.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-3">
+                      <div className="text-gray-400">
+                        {item.isLong ? <PageIcon /> : <PasswordIcon />}
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-gray-900">{item.title}</h4>
+                        <p className="text-sm text-gray-500">
+                          Password: •••••••• • {new Date(item.createdAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <IconButton 
+                        onClick={() => handleViewItem(item.id)} 
+                        variant="ghost"
+                        title="View details"
+                      >
                         <ViewIcon />
                       </IconButton>
-                      <IconButton onClick={() => handleEditItem(item.id)} className="mr-2" aria-label="update details">
+                      <IconButton 
+                        onClick={() => handleEditItem(item.id)} 
+                        variant="ghost"
+                        title="Edit details"
+                      >
                         <EditIcon />
                       </IconButton>
                       <IconButton 
@@ -270,36 +269,37 @@ export default function VaultPage() {
                           setItemToDelete(item.id);
                           setDeleteDialogOpen(true);
                         }}
-                        color="error"
-                        aria-label="delete"
+                        variant="destructive"
+                        title="Delete"
                       >
                         <DeleteIcon />
                       </IconButton>
-                    </ListItemSecondaryAction>
-                  </ListItem>
+                    </div>
+                  </div>
                 ))}
-              </List>
+              </div>
 
               {totalPages > 1 && (
-                <Box className="flex justify-center mt-4">
+                <div className="mt-6">
                   <Pagination
-                    count={totalPages}
-                    page={page}
-                    onChange={(_, newPage) => {
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={(newPage) => {
                       setPage(newPage);
                       loadItems(newPage);
                     }}
                   />
-                </Box>
+                </div>
               )}
             </>
           )}
-        </Paper>
+        </CardContent>
+      </Card>
 
       <AddPasswordDialog
         open={addDialogOpen}
         onClose={() => setAddDialogOpen(false)}
-        onAdd={() => loadItems()} // Refresh list after adding
+        onAdd={() => loadItems()}
       />
 
       <ViewPasswordDialog
@@ -307,7 +307,8 @@ export default function VaultPage() {
         onClose={() => setViewDialogOpen(false)}
         itemId={selectedItemId}
       />
-       {editDialogOpen && <EditPasswordDialog
+      
+      {editDialogOpen && <EditPasswordDialog
         open={editDialogOpen}
         onEdit={() => loadItems()}
         onClose={() => setEditDialogOpen(false)}
@@ -315,19 +316,23 @@ export default function VaultPage() {
       />}
 
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Password</DialogTitle>
+        <DialogHeader>
+          <DialogTitle>Delete Password</DialogTitle>
+        </DialogHeader>
         <DialogContent>
-          <Typography>
+          <p className="text-gray-700">
             Are you sure you want to delete this password? This action cannot be undone.
-          </Typography>
+          </p>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDeleteItem} color="error" variant="contained">
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button variant="destructive" onClick={handleDeleteItem}>
             Delete
           </Button>
-        </DialogActions>
+        </DialogFooter>
       </Dialog>
-    </>
+    </div>
   );
 }

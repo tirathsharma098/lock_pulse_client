@@ -49,6 +49,9 @@ export default function LoginPage() {
     if (searchParams.get('registered') === 'true') {
       setSuccess('Account created successfully! Please sign in.');
     }
+    if (searchParams.get('reason') === 'expired') {
+      toast.info("Session expired. Please log in again.");
+    }
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -4,11 +4,19 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface VaultContextType {
   vaultKey: Uint8Array | null;
+  projectVaultKey: Uint8Array | null;
+  serviceVaultKey: Uint8Array | null;
   username: string | null;
   email: string | null;
   setVaultData: (key: Uint8Array | null, username: string, email: string) => void;
+  setProjectVaultKey: (key: Uint8Array | null) => void;
+  setServiceVaultKey: (key: Uint8Array | null) => void;
   isUnlocked: boolean;
   wipeVaultKey: () => void;
+  isCollaborating: boolean;
+  setIsCollaborating: (value: boolean) => void;
+  collaboratorId?: string | null;
+  setCollaboratorId: (id: string) => void;
 }
 
 const VaultContext = createContext<VaultContextType | undefined>(undefined);
@@ -23,8 +31,12 @@ export const useVault = () => {
 
 export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [vaultKey, setVaultKeyState] = useState<Uint8Array | null>(null);
+  const [projectVaultKey, setProjectVaultKey] = useState<Uint8Array | null>(null);
+  const [serviceVaultKey, setServiceVaultKey] = useState<Uint8Array | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [isCollaborating, setIsCollaborating] = useState<boolean>(false);
+  const [collaboratorId, setCollaboratorId] = useState<string | null>(null);
 
   const setVaultData = (key: Uint8Array | null, username: string, email: string) => {
     console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
@@ -70,11 +82,19 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const value: VaultContextType = {
     vaultKey,
+    projectVaultKey,
+    serviceVaultKey,
     username,
     email,
     setVaultData,
+    setProjectVaultKey,
+    setServiceVaultKey,
     isUnlocked: vaultKey !== null,
     wipeVaultKey,
+    isCollaborating, 
+    setIsCollaborating,
+    collaboratorId,
+    setCollaboratorId,
   };
 
   return <VaultContext.Provider value={value}>{children}</VaultContext.Provider>;
