@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, UserPlus, Zap, Star, CheckCircle, ArrowRight, Sparkles } from 'lucide-react';
 import styles from './RegisterPresentation.module.css';
+import Link from 'next/link';
 
 export default function RegisterPresentation() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -77,7 +78,7 @@ export default function RegisterPresentation() {
             <span className="text-sm font-medium">Welcome to the Future</span>
           </div>
           <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
-            Join LockPulse
+            Join <Link href='/' >LockPulse</Link>
           </h1>
           <p className="text-xl text-blue-100 font-light">
             Where your passwords are truly yours

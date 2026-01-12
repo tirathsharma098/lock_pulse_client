@@ -19,6 +19,8 @@ import { authService } from '@/services'; // Updated import
 import { generateVaultKey, generateSalt, deriveKEK, wrapVaultKey, combineNonceAndCiphertext, getDefaultKdfParams, initSodium, getEncryptedSize } from '@/lib/crypto';
 import RegisterPresentation from './components/RegisterPresentation';
 import { z } from 'zod'; // add zod
+import { Shield } from 'lucide-react';
+import styles from '@/app/(account)/(auth)/login/components/LoginPresentation.module.css';
 
 // local schema
 const registerSchema = z.object({
@@ -139,7 +141,16 @@ export default function RegisterPage() {
       <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Container maxWidth="sm">
           <Paper elevation={3} className="p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
-            <Typography variant="h4" component="h1" className="!mb-6 text-center font-bold text-gray-800">
+          <div className='lg:hidden'>
+              <div className="flex items-center justify-center mb-4">
+                <Link href='/' >
+                  <div className={`${styles.logoContainer} animate-pulse`}>
+                    <Shield className="h-16 w-16 text-blue-600 drop-shadow-lg" />
+                  </div>
+                </Link>
+              </div>
+            </div>
+            <Typography variant="h4" component="h1" className="!mt-5 !mb-6 text-center font-bold text-gray-800">
               Create Account
             </Typography>
 
