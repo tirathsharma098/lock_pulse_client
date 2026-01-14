@@ -40,7 +40,7 @@ export default function ProjectsPage() {
       setError(null);
     } catch (err) {
       setError('Failed to load projects');
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
@@ -57,7 +57,7 @@ export default function ProjectsPage() {
       fetchProjects();
     } catch (err: any) {
       setError(err?.message || 'Failed to delete project');
-      console.error(err);
+      // console.error(err);
     }
   };
 
@@ -73,13 +73,13 @@ export default function ProjectsPage() {
         project.passwordCiphertext,
         vaultKey
       );
-      console.log(">>> Current Project Password:", currProjPass);
+      // console.log(">>> Current Project Password:", currProjPass);
       await initSodium();
       const projectVaultKey = await getVaultKey(currProjPass, project.vaultKdfSalt, project.vaultKdfParams, project.wrappedVaultKey);
       setProjectVaultKey(projectVaultKey);
       router.push(`/project/${project.id}/service`);
     } catch (err) {
-      console.error('Failed to access project:', err);
+      // console.error('Failed to access project');
       toast.error('Failed to access project. Please try again.');
     }
   }

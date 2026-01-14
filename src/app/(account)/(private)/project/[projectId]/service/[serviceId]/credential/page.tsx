@@ -55,7 +55,7 @@ export default function CredentialsPage() {
       setError(null);
     } catch (err) {
       setError('Failed to load credentials');
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ export default function CredentialsPage() {
         );
         titles[credential.id] = decryptedTitle;
       } catch (err) {
-        console.error(`Failed to decrypt title for credential ${credential.id}:`, err);
+        // console.error(`Failed to decrypt title for credential ${credential.id}`);
         titles[credential.id] = 'Unable to decrypt title';
       }
     }
@@ -92,7 +92,7 @@ export default function CredentialsPage() {
       fetchData();
     } catch (err) {
       setError('Failed to delete credential');
-      console.error(err);
+      // console.error(err);
     }
   };
 

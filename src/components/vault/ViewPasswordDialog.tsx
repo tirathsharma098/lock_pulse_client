@@ -59,7 +59,7 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
       
       setItem(decryptedItem);
     } catch (err: any) {
-      console.error('Failed to load item:', err);
+      // console.error('Failed to load item:', err);
       if (err?.status === 401) {
         toast.error('Session expired. Please log in again.');
         wipeVaultKey();

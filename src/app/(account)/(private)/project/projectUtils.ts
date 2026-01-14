@@ -19,7 +19,7 @@ export const handleProjectClick = async (
       project.passwordCiphertext,
       vaultKey
     );
-    console.log(">>> Current Project Password:", currProjPass);
+    // console.log(">>> Current Project Password:", currProjPass);
     await initSodium();
     const projectVaultKey = await getVaultKey(
       currProjPass,
@@ -30,7 +30,7 @@ export const handleProjectClick = async (
     setProjectVaultKey(projectVaultKey);
     router.push(`/project/${project.id}/service`);
   } catch (err) {
-    console.error('Failed to access project:', err);
+    // console.error('Failed to access project');
     toast.error('Failed to access project. Please try again.');
   }
 };

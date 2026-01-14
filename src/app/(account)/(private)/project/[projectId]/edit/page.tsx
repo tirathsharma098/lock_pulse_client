@@ -62,7 +62,7 @@ export default function ProjectEditPage() {
           setPassword(decryptedPassword);
         }
       } catch (err) {
-        console.error('Error fetching project:', err);
+        // console.error('Error fetching project',);
         setError('Failed to load project details');
       } finally {
         setLoading(false);
@@ -126,7 +126,7 @@ export default function ProjectEditPage() {
       router.replace(`/project/${projectId}/view`);
       
     } catch (err:any) {
-      console.error('Failed to update project:', err);
+      // console.error('Failed to update project');
       setError(err?.message || 'Failed to update project. Please try again.');
     } finally {
       setSaving(false);

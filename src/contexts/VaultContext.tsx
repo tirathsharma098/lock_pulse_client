@@ -39,7 +39,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [collaboratorId, setCollaboratorId] = useState<string | null>(null);
 
   const setVaultData = (key: Uint8Array | null, username: string, email: string) => {
-    console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
+    // console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
     setVaultKeyState(key);
     setUsername(username);
     setEmail(email);

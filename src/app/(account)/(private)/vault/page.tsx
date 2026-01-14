@@ -44,7 +44,7 @@ export default function VaultPage() {
   const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
 
   const clearVaultStateData = () => {
-    console.debug('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
+    // console.debug('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
     setItems([]);
     setSelectedItemId(null);
     setAddDialogOpen(false);
@@ -62,7 +62,7 @@ export default function VaultPage() {
     if (!isUnlocked) {
       return clearVaultStateData();
     }
-    console.debug('[vault] useEffect loadItems page=', page, 'isUnlocked=', isUnlocked, 'vaultKeyLen=', vaultKey?.length);
+    // console.debug('[vault] useEffect loadItems page=', page, 'isUnlocked=', isUnlocked, 'vaultKeyLen=', vaultKey?.length);
     loadItems(page);
   }, [isUnlocked, page]);
 
@@ -78,20 +78,20 @@ export default function VaultPage() {
     try {
       setLoading(true);
       await initSodium();
-      console.debug('[vault] initSodium done. Fetching items page=', page);
+      // console.debug('[vault] initSodium done. Fetching items page=', page);
 
       const typeToUse = overrideType ?? filterType;
       const sortDirToUse = overrideSortDir ?? sortDir;
       const response = await vaultService.getItems(
         `page=${page}&type=${encodeURIComponent(typeToUse)}&sortDir=${encodeURIComponent(sortDirToUse)}`
       );
-      console.debug('[vault] api.getItems ok:', {
-        page: response.page,
-        count: response.items?.length,
-        total: response.total,
-        type: typeToUse,
-        sortDir: sortDirToUse,
-      });
+      // console.debug('[vault] api.getItems ok:', {
+      //   page: response.page,
+      //   count: response.items?.length,
+      //   total: response.total,
+      //   type: typeToUse,
+      //   sortDir: sortDirToUse,
+      // });
 
       const decryptedItems = [];
       for (const item of response.items) {
@@ -103,7 +103,7 @@ export default function VaultPage() {
             vaultKey
           );
         } catch (err: any) {
-          console.debug("> Compact decryption failed :: ", err);
+          // console.debug("> Compact decryption failed :: ", err);
           title = "Decryption failed";
         }
         decryptedItems.push({ ...item, title });
@@ -113,7 +113,7 @@ export default function VaultPage() {
       setTotalPages(Math.ceil(response.total / 10));
       setError('');
     }catch(err:any){
-      console.debug("Api Error:: ", err);
+      // console.debug("Api Error:: ", err);
       if (err?.status === 401 || err?.response?.status === 401) {
         toast.info("Session expired. Please log in again.");
         clearVaultStateData();

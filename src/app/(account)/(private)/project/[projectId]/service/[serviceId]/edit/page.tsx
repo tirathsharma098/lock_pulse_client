@@ -63,7 +63,7 @@ export default function ServiceEditPage() {
           setPassword(decryptedPassword);
         }
       } catch (err) {
-        console.error('Error fetching service:', err);
+        // console.error('Error fetching service:', err);
         setError('Failed to load service details');
       } finally {
         setLoading(false);
@@ -75,7 +75,7 @@ export default function ServiceEditPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(">>> Submitting service update...");
+    // console.log(">>> Submitting service update...");
     if (!name.trim()) {
       setError('Service name is required');
       return;
@@ -129,7 +129,7 @@ export default function ServiceEditPage() {
       toast.success('Service updated successfully');
       router.replace(`/project/${projectId}/service/${serviceId}/view`);
     } catch (err) {
-      console.error('Failed to update service:', err);
+      // console.error('Failed to update service:', err);
       setError('Failed to update service. Please try again.');
     } finally {
       setSaving(false);

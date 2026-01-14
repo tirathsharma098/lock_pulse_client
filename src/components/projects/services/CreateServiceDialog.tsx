@@ -81,7 +81,7 @@ export default function CreateServiceDialog({
       
       onServiceCreated();
     } catch (err:any) {
-      console.error('Failed to create service:', err);
+      // console.error('Failed to create service:', err);
       setError(err?.message || 'Failed to create service. Please try again.');
     } finally {
       setLoading(false);

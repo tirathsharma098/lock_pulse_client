@@ -91,7 +91,7 @@ export default function ProjectViewPage() {
           await decryptProjectPassword(data);
         }
       } catch (err) {
-        console.error('Error fetching project:', err);
+        // console.error('Error fetching project:', err);
         setError('Failed to load project details');
       } finally {
         setLoading(false);
@@ -119,7 +119,7 @@ export default function ProjectViewPage() {
       
       setDecryptedPassword(password);
     } catch (err) {
-      console.error('Failed to decrypt project password:', err);
+      // console.error('Failed to decrypt project password:', err);
       setPasswordError('Failed to decrypt project password');
     } finally {
       setPasswordLoading(false);
@@ -132,7 +132,7 @@ export default function ProjectViewPage() {
         await navigator.clipboard.writeText(decryptedPassword);
         toast.success('Password copied to clipboard');
       } catch (err) {
-        console.error('Failed to copy password:', err);
+        // console.error('Failed to copy password:', err);
         toast.error('Failed to copy password');
       }
     }
@@ -145,7 +145,7 @@ export default function ProjectViewPage() {
         const users = await getSharedUsers(projectId, query);
         setSharedUsers(users);
       } catch (error) {
-        console.error('Failed to fetch shared users:', error);
+        // console.error('Failed to fetch shared users:', error);
         setSnackbar({ open: true, message: 'Failed to fetch shared users', severity: 'error' });
       } finally {
         setLoading(false);
@@ -163,8 +163,9 @@ export default function ProjectViewPage() {
       try {
         const users = await searchUsers(query);
         setUserOptions(users);
-      } catch (error) {
-        console.error('Failed to search users:', error);
+      } catch {
+        // console.error('Failed to search users:', error);
+        // toast.error('Failed to search users');
       }
     }, 300),
     []
@@ -180,7 +181,7 @@ export default function ProjectViewPage() {
       setSnackbar({ open: true, message: 'Project shared successfully', severity: 'success' });
       debouncedSearch(searchQuery);
     } catch (error) {
-      console.error('Failed to share project:', error);
+      // console.error('Failed to share project:', error);
       setSnackbar({ open: true, message: 'Failed to share project', severity: 'error' });
     }
   };
@@ -191,7 +192,7 @@ export default function ProjectViewPage() {
       setSnackbar({ open: true, message: 'Project unshared successfully', severity: 'success' });
       debouncedSearch(searchQuery);
     } catch (error) {
-      console.error('Failed to unshare project:', error);
+      // console.error('Failed to unshare project:', error);
       setSnackbar({ open: true, message: 'Failed to unshare project', severity: 'error' });
     }
   };

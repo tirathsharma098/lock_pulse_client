@@ -66,7 +66,7 @@ export default function CreateCredentialDialog({
       
       onCredentialCreated();
     } catch (err) {
-      console.error('Failed to create credential:', err);
+      // console.error('Failed to create credential:', err);
       setError('Failed to create credential. Please try again.');
     } finally {
       setLoading(false);

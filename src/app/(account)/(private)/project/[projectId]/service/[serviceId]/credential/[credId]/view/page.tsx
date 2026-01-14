@@ -43,7 +43,7 @@ export default function CredentialViewPage() {
           await decryptCredentialData(data);
         }
       } catch (err) {
-        console.error('Error fetching credential:', err);
+        // console.error('Error fetching credential:', err);
         setError('Failed to load credential details');
       } finally {
         setLoading(false);
@@ -71,7 +71,7 @@ export default function CredentialViewPage() {
       setDecryptedTitle(title);
       setDecryptedPassword(password);
     } catch (err) {
-      console.error('Failed to decrypt credential data:', err);
+      // console.error('Failed to decrypt credential data:', err);
       setDecryptError('Failed to decrypt credential data');
     } finally {
       setDecryptLoading(false);
@@ -84,7 +84,7 @@ export default function CredentialViewPage() {
         await navigator.clipboard.writeText(decryptedTitle);
         toast.success('Title copied to clipboard');
       } catch (err) {
-        console.error('Failed to copy title:', err);
+        // console.error('Failed to copy title:', err);
         toast.error('Failed to copy title');
       }
     }
@@ -96,7 +96,7 @@ export default function CredentialViewPage() {
         await navigator.clipboard.writeText(decryptedPassword);
         toast.success('Password copied to clipboard');
       } catch (err) {
-        console.error('Failed to copy password:', err);
+        // console.error('Failed to copy password:', err);
         toast.error('Failed to copy password');
       }
     }

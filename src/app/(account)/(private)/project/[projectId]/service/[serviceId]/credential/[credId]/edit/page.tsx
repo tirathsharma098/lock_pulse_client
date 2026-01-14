@@ -51,7 +51,7 @@ export default function CredentialEditPage() {
           setPassword(decryptedPassword);
         }
       } catch (err) {
-        console.error('Error fetching credential:', err);
+        // console.error('Error fetching credential:', err);
         setError('Failed to load credential details');
       } finally {
         setLoading(false);
@@ -99,7 +99,7 @@ export default function CredentialEditPage() {
       router.replace(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`);
       
     } catch (err) {
-      console.error('Failed to update credential:', err);
+      // console.error('Failed to update credential:', err);
       setError('Failed to update credential. Please try again.');
     } finally {
       setSaving(false);

@@ -35,14 +35,14 @@ export default function ServiceViewPage() {
       try {
         const data = await getService(projectId, serviceId);
         setService(data);
-        console.log(">>> Fetched service data: ",projectVaultKey);
+        // console.log(">>> Fetched service data: ",projectVaultKey);
         // Decrypt the service password
         if (data && projectVaultKey) {
-          console.log(">>> Decrypting service password...");
+          // console.log(">>> Decrypting service password...");
           await decryptServicePassword(data);
         }
       } catch (err) {
-        console.error('Error fetching service:', err);
+        // console.error('Error fetching service:', err);
         setError('Failed to load service details');
       } finally {
         setLoading(false);
@@ -67,10 +67,10 @@ export default function ServiceViewPage() {
         serviceData.passwordCiphertext,
         projectVaultKey
       );
-      console.log(">> Decrypted password: ", password);
+      // console.log(">> Decrypted password: ", password);
       setDecryptedPassword(password);
     } catch (err) {
-      console.error('Failed to decrypt service password:', err);
+      // console.error('Failed to decrypt service password:', err);
       setPasswordError('Failed to decrypt service password');
     } finally {
       setPasswordLoading(false);
@@ -83,7 +83,7 @@ export default function ServiceViewPage() {
         await navigator.clipboard.writeText(decryptedPassword);
         toast.success('Password copied to clipboard');
       } catch (err) {
-        console.error('Failed to copy password:', err);
+        // console.error('Failed to copy password:', err);
         toast.error('Failed to copy password');
       }
     }

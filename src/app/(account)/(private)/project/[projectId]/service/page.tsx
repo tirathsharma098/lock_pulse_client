@@ -47,7 +47,7 @@ export default function ServicesPage() {
       setError(null);
     } catch (err) {
       setError('Failed to load services');
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export default function ServicesPage() {
       fetchData();
     } catch (err) {
       setError('Failed to delete service');
-      console.error(err);
+      // console.error(err);
     }
   };
 
@@ -92,7 +92,7 @@ export default function ServicesPage() {
       setServiceVaultKey(serviceVaultKey);
       router.push(`/project/${projectId}/service/${service.id}/credential`);
     } catch (err) {
-      console.error('Failed to unlock service:', err);
+      // console.error('Failed to unlock service');
       setError('Failed to unlock service');
     }
   };

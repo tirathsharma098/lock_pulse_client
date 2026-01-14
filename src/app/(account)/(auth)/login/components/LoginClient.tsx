@@ -94,7 +94,7 @@ export default function LoginClient() {
         loginResponse,
         password,
       });
-      console.log(">> OPAQUE loginResult:", loginResult);
+      // console.log(">> OPAQUE loginResult:", loginResult);
       if (!loginResult) {
         throw new Error("Username or password is incorrect");
       }
@@ -125,7 +125,7 @@ export default function LoginClient() {
       toast.success('Signed in');
       router.replace('/account');
     } catch (err: any) {
-      console.log(">> Error during login:", err);
+      // console.log(">> Error during login:", err);
       setError(err?.message || 'Login failed');
       toast.error(err?.message || 'Login failed');
     } finally {

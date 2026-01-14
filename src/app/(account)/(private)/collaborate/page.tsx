@@ -30,7 +30,7 @@ export default function CollaboratePage() {
         const data = await getCollaboratorsForUser();
         setCollaborators(data);
       } catch (error) {
-        console.error('Failed to fetch collaborators:', error);
+        // console.error('Failed to fetch collaborators');
       } finally {
         setLoading(false);
       }
