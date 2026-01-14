@@ -120,7 +120,7 @@ export default function CredentialViewPage() {
           <p className="text-red-800">{error}</p>
         </div>
         <Button 
-          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+          onClick={() => router.back(/*`/project/${projectId}/service/${serviceId}/credential`*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -137,7 +137,7 @@ export default function CredentialViewPage() {
           <p className="text-yellow-800">Credential not found</p>
         </div>
         <Button 
-          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+          onClick={() => router.back(/*`/project/${projectId}/service/${serviceId}/credential`*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function CredentialViewPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+            onClick={() => router.back(/*`/project/${projectId}/service/${serviceId}/credential`*/)}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -165,7 +165,7 @@ export default function CredentialViewPage() {
         </div>
         <Button 
           variant="outline"
-          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/edit`)}
+          onClick={() => router.replace(`/project/${projectId}/service/${serviceId}/credential/${credId}/edit`)}
           className="flex items-center space-x-2"
         >
           <EditIcon className="w-4 h-4" />

@@ -96,7 +96,7 @@ export default function CredentialEditPage() {
       });
       
       toast.success('Credential updated successfully');
-      router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`);
+      router.replace(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`);
       
     } catch (err) {
       console.error('Failed to update credential:', err);
@@ -124,7 +124,7 @@ export default function CredentialEditPage() {
           <p className="text-red-800">{error}</p>
         </div>
         <Button 
-          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+          onClick={() => router.back(/*`/project/${projectId}/service/${serviceId}/credential`*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -140,7 +140,7 @@ export default function CredentialEditPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+            onClick={() => router.back(/*`/project/${projectId}/service/${serviceId}/credential`*/)}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -219,7 +219,7 @@ export default function CredentialEditPage() {
                 <Button 
                   variant="outline" 
                   type='button'
-                  onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`)}
+                  onClick={() => router.replace(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`)}
                   disabled={saving}
                 >
                   Cancel

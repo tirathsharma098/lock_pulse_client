@@ -220,6 +220,7 @@ export default function ProjectViewPage() {
           label="Unshare"
           onClick={() => handleUnshare(params.row.id)}
           // color="error"
+          title='Unshare Project'
         />
       ],
     },
@@ -243,7 +244,7 @@ export default function ProjectViewPage() {
           <p className="text-red-800">{error}</p>
         </div>
         <Button 
-          onClick={() => router.push('/project')}
+          onClick={() => router.back(/*'/project'*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -260,7 +261,7 @@ export default function ProjectViewPage() {
           <p className="text-yellow-800">Project not found</p>
         </div>
         <Button 
-          onClick={() => router.push('/project')}
+          onClick={() => router.back(/*'/project'*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -276,7 +277,7 @@ export default function ProjectViewPage() {
         <div className="flex items-center space-x-4">
           <Button
             // variant="outline"
-            onClick={() => router.push('/project')}
+            onClick={() => router.back()}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -286,7 +287,7 @@ export default function ProjectViewPage() {
         </div>
         <Button 
           // variant="outline"
-          onClick={() => router.push(`/project/${projectId}/edit`)}
+          onClick={() => router.replace(`/project/${projectId}/edit`)}
           className="flex items-center space-x-2"
         >
           <EditIcon className="w-4 h-4" />
@@ -370,7 +371,7 @@ export default function ProjectViewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Services</CardTitle>
           </CardHeader>
@@ -385,7 +386,7 @@ export default function ProjectViewPage() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card>
           <CardHeader>

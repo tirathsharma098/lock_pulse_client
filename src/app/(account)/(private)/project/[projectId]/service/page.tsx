@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { decryptCompat, getVaultKey, initSodium } from '@/lib/crypto';
 import { Card, CardHeader, CardContent, CardTitle, Button, IconButton, Select, Pagination } from '@/components/ui';
+import Box from '@mui/material/Box';
 
 export default function ServicesPage() {
   const params = useParams();
@@ -25,7 +26,7 @@ export default function ServicesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
   const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
-  const { projectVaultKey, setServiceVaultKey, isCollaborating, setIsCollaborating } = useVault();
+  const { projectVaultKey, setServiceVaultKey, isCollaborating } = useVault();
 
   const fetchData = async (
     page: number = 1,
@@ -55,13 +56,6 @@ export default function ServicesPage() {
   useEffect(() => {
     fetchData(page);
   }, [projectId, page]);
-
-  useEffect(() => {
-    // If accessed directly, ensure we're not in collaboration mode
-    if (!isCollaborating) {
-      setIsCollaborating(false);
-    }
-  }, [isCollaborating, setIsCollaborating]);
 
   const handleDeleteService = async (serviceId: string) => {
     try {
@@ -103,15 +97,16 @@ export default function ServicesPage() {
     }
   };
 
-  const handleBackNavigation = () => {
-    if (isCollaborating) {
-      // Navigate back to collaborator page (you'll need to store the collaborator ID)
-      router.back(); // or router.push('/collaborate');
-    } else {
-      // Normal navigation
-      router.push('/project');
-    }
-  };
+  // const handleBackNavigation = () => {
+  //   router.back();
+  //   // if (isCollaborating) {
+  //   //   // Navigate back to collaborator page (you'll need to store the collaborator ID)
+  //   //   router.back();
+  //   // } else {
+  //   //   // Normal navigation
+  //   //   router.push('/project');
+  //   // }
+  // };
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
@@ -135,7 +130,7 @@ export default function ServicesPage() {
             <div className="flex items-center space-x-4">
               <Button 
                 variant="outline"
-                onClick={handleBackNavigation}
+                onClick={() => router.back()}
                 className="flex items-center space-x-2"
               >
                 <ArrowBackIcon className="w-4 h-4" />
@@ -206,7 +201,7 @@ export default function ServicesPage() {
               <div className="space-y-3">
                 {services.map((service) => (
                   <div key={service.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                    <div className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleCredentialRoute(service)}>
+                    <Box className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleCredentialRoute(service)} title="Manage Service">
                       <div className="text-gray-400">
                         {service.isLong ? <PageIcon /> : <PasswordIcon />}
                       </div>
@@ -221,7 +216,7 @@ export default function ServicesPage() {
                           )}
                         </p>
                       </div>
-                    </div>
+                    </Box>
                     <div className="flex items-center space-x-1">
                       <IconButton 
                         onClick={() => router.push(`/project/${projectId}/service/${service.id}/view`)}
