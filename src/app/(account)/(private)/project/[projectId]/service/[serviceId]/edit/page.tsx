@@ -95,21 +95,12 @@ export default function ServiceEditPage() {
       setSaving(true);
       setError(null);
       
-      // Check if password has changed
-      const passwordChanged = password !== originalPassword;
-      
       let updateData: any = {
         name: name.trim(),
         notes: notes.trim() || undefined,
-        wrappedVaultKey: service.wrappedVaultKey,
-          vaultKdfSalt: service.vaultKdfSalt,
-          vaultKdfParams: service.vaultKdfParams,
-          passwordNonce: service.passwordNonce,
-          passwordCiphertext: service.passwordCiphertext,
       };
       
-      // If password changed, we need to re-encrypt everything
-      if (passwordChanged) {
+      // We need to re-encrypt everything even if password is not changed, to ensure consistency
         // Unwrap the current service vault key using the original password
         const originalKdfSalt = new Uint8Array(Buffer.from(service.vaultKdfSalt, 'base64'));
         const originalKek = await deriveKEK(originalPassword, originalKdfSalt, service.vaultKdfParams);
@@ -134,15 +125,9 @@ export default function ServiceEditPage() {
           passwordCiphertext: newPasswordEncrypted.ciphertext,
           isLong,
         };
-      } else {
-        updateData.isLong = isLong;
-      }
-      console.log(">>> Update data: ", updateData);
       await updateService(projectId, serviceId, updateData);
-      
       toast.success('Service updated successfully');
       router.replace(`/project/${projectId}/service/${serviceId}/view`);
-      
     } catch (err) {
       console.error('Failed to update service:', err);
       setError('Failed to update service. Please try again.');
