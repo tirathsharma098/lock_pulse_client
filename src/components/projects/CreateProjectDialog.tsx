@@ -154,7 +154,7 @@ export default function CreateProjectDialog({
         </DialogContent>
         
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={loading}>
+          <Button variant="outline" onClick={handleClose} disabled={loading} type='button'>
             Cancel
           </Button>
           <Button 

@@ -6,7 +6,6 @@ import {
   Box,
   Typography,
   Paper,
-  IconButton,
   TextField,
   Dialog,
   DialogTitle,
@@ -14,12 +13,10 @@ import {
   DialogActions,
   Button,
   Autocomplete,
-  Chip,
   Snackbar,
   Alert,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
-import ShareIcon from '@mui/icons-material/Share';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { debounce } from 'lodash';
@@ -64,6 +61,7 @@ export default function ProjectViewPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isUserLoading, setIsUserLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [decryptedPassword, setDecryptedPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
@@ -141,14 +139,14 @@ export default function ProjectViewPage() {
   const debouncedSearch = useMemo(
     () => debounce(async (query: string) => {
       try {
-        setLoading(true);
+        setIsUserLoading(true);
         const users = await getSharedUsers(projectId, query);
         setSharedUsers(users);
       } catch (error) {
         // console.error('Failed to fetch shared users:', error);
         setSnackbar({ open: true, message: 'Failed to fetch shared users', severity: 'error' });
       } finally {
-        setLoading(false);
+        setIsUserLoading(false);
       }
     }, 500),
     [projectId]
@@ -418,7 +416,7 @@ export default function ProjectViewPage() {
                 <DataGrid
                   rows={sharedUsers}
                   columns={columns}
-                  loading={loading}
+                  loading={isUserLoading}
                   pageSizeOptions={[10]}
                   initialState={{
                     pagination: { paginationModel: { pageSize: 10 } },
