@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { decryptCompat, getVaultKey, initSodium } from '@/lib/crypto';
 import { Card, CardHeader, CardContent, CardTitle, Button, IconButton, Select, Pagination } from '@/components/ui';
+import { Box } from '@mui/material';
 
 export default function ProjectsPage() {
   const router = useRouter();
@@ -39,7 +40,7 @@ export default function ProjectsPage() {
       setError(null);
     } catch (err) {
       setError('Failed to load projects');
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
@@ -56,7 +57,7 @@ export default function ProjectsPage() {
       fetchProjects();
     } catch (err: any) {
       setError(err?.message || 'Failed to delete project');
-      console.error(err);
+      // console.error(err);
     }
   };
 
@@ -72,13 +73,13 @@ export default function ProjectsPage() {
         project.passwordCiphertext,
         vaultKey
       );
-      console.log(">>> Current Project Password:", currProjPass);
+      // console.log(">>> Current Project Password:", currProjPass);
       await initSodium();
       const projectVaultKey = await getVaultKey(currProjPass, project.vaultKdfSalt, project.vaultKdfParams, project.wrappedVaultKey);
       setProjectVaultKey(projectVaultKey);
       router.push(`/project/${project.id}/service`);
     } catch (err) {
-      console.error('Failed to access project:', err);
+      // console.error('Failed to access project');
       toast.error('Failed to access project. Please try again.');
     }
   }
@@ -166,7 +167,7 @@ export default function ProjectsPage() {
               <div className="space-y-3">
                 {projects.map((project) => (
                   <div key={project.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                    <div className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleProjectClick(project.id)}>
+                    <Box className="flex items-center space-x-3 flex-1 cursor-pointer" onClick={() => handleProjectClick(project.id)} title="Manage Project">
                       <div className="text-gray-400">
                         {project.isLong ? <PageIcon /> : <PasswordIcon />}
                       </div>
@@ -181,7 +182,7 @@ export default function ProjectsPage() {
                           )}
                         </p>
                       </div>
-                    </div>
+                    </Box>
                     <div className="flex items-center space-x-1">
                       <IconButton 
                         onClick={() => router.push(`/project/${project.id}/view`)}

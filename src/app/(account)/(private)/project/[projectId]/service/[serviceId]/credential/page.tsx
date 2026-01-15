@@ -11,6 +11,7 @@ import { useVault } from '@/contexts/VaultContext';
 import { decryptCompat } from '@/lib/crypto';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardContent, CardTitle, Button, IconButton, Select, Pagination } from '@/components/ui';
+import { Box } from '@mui/material';
 
 export default function CredentialsPage() {
   const params = useParams();
@@ -54,7 +55,7 @@ export default function CredentialsPage() {
       setError(null);
     } catch (err) {
       setError('Failed to load credentials');
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
@@ -73,7 +74,7 @@ export default function CredentialsPage() {
         );
         titles[credential.id] = decryptedTitle;
       } catch (err) {
-        console.error(`Failed to decrypt title for credential ${credential.id}:`, err);
+        // console.error(`Failed to decrypt title for credential ${credential.id}`);
         titles[credential.id] = 'Unable to decrypt title';
       }
     }
@@ -91,7 +92,7 @@ export default function CredentialsPage() {
       fetchData();
     } catch (err) {
       setError('Failed to delete credential');
-      console.error(err);
+      // console.error(err);
     }
   };
 
@@ -117,7 +118,7 @@ export default function CredentialsPage() {
             <div className="flex items-center space-x-4">
               <Button 
                 variant="outline"
-                onClick={() => router.push(`/project/${projectId}/service`)}
+                onClick={() => router.back(/*`/project/${projectId}/service`*/)}
                 className="flex items-center space-x-2"
               >
                 <ArrowBackIcon className="w-4 h-4" />
@@ -188,9 +189,10 @@ export default function CredentialsPage() {
               <div className="space-y-3">
                 {credentials.map((credential) => (
                   <div key={credential.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
-                    <div 
+                    <Box 
                       className="flex items-center space-x-3 flex-1 cursor-pointer" 
                       onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/view`)}
+                      title="View Credential"
                     >
                       <div className="text-gray-400">
                         {credential.isLong ? <PageIcon /> : <PasswordIcon />}
@@ -208,7 +210,7 @@ export default function CredentialsPage() {
                           )}
                         </p>
                       </div>
-                    </div>
+                    </Box>
                     <div className="flex items-center space-x-1">
                       <IconButton 
                         onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/view`)}

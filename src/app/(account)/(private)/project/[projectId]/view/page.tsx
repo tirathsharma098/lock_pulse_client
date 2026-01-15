@@ -6,7 +6,6 @@ import {
   Box,
   Typography,
   Paper,
-  IconButton,
   TextField,
   Dialog,
   DialogTitle,
@@ -14,12 +13,10 @@ import {
   DialogActions,
   Button,
   Autocomplete,
-  Chip,
   Snackbar,
   Alert,
 } from '@mui/material';
 import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid';
-import ShareIcon from '@mui/icons-material/Share';
 import PersonRemoveIcon from '@mui/icons-material/PersonRemove';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { debounce } from 'lodash';
@@ -64,6 +61,7 @@ export default function ProjectViewPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isUserLoading, setIsUserLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [decryptedPassword, setDecryptedPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
@@ -91,7 +89,7 @@ export default function ProjectViewPage() {
           await decryptProjectPassword(data);
         }
       } catch (err) {
-        console.error('Error fetching project:', err);
+        // console.error('Error fetching project:', err);
         setError('Failed to load project details');
       } finally {
         setLoading(false);
@@ -119,7 +117,7 @@ export default function ProjectViewPage() {
       
       setDecryptedPassword(password);
     } catch (err) {
-      console.error('Failed to decrypt project password:', err);
+      // console.error('Failed to decrypt project password:', err);
       setPasswordError('Failed to decrypt project password');
     } finally {
       setPasswordLoading(false);
@@ -132,7 +130,7 @@ export default function ProjectViewPage() {
         await navigator.clipboard.writeText(decryptedPassword);
         toast.success('Password copied to clipboard');
       } catch (err) {
-        console.error('Failed to copy password:', err);
+        // console.error('Failed to copy password:', err);
         toast.error('Failed to copy password');
       }
     }
@@ -141,14 +139,14 @@ export default function ProjectViewPage() {
   const debouncedSearch = useMemo(
     () => debounce(async (query: string) => {
       try {
-        setLoading(true);
+        setIsUserLoading(true);
         const users = await getSharedUsers(projectId, query);
         setSharedUsers(users);
       } catch (error) {
-        console.error('Failed to fetch shared users:', error);
+        // console.error('Failed to fetch shared users:', error);
         setSnackbar({ open: true, message: 'Failed to fetch shared users', severity: 'error' });
       } finally {
-        setLoading(false);
+        setIsUserLoading(false);
       }
     }, 500),
     [projectId]
@@ -163,8 +161,9 @@ export default function ProjectViewPage() {
       try {
         const users = await searchUsers(query);
         setUserOptions(users);
-      } catch (error) {
-        console.error('Failed to search users:', error);
+      } catch {
+        // console.error('Failed to search users:', error);
+        // toast.error('Failed to search users');
       }
     }, 300),
     []
@@ -180,7 +179,7 @@ export default function ProjectViewPage() {
       setSnackbar({ open: true, message: 'Project shared successfully', severity: 'success' });
       debouncedSearch(searchQuery);
     } catch (error) {
-      console.error('Failed to share project:', error);
+      // console.error('Failed to share project:', error);
       setSnackbar({ open: true, message: 'Failed to share project', severity: 'error' });
     }
   };
@@ -191,7 +190,7 @@ export default function ProjectViewPage() {
       setSnackbar({ open: true, message: 'Project unshared successfully', severity: 'success' });
       debouncedSearch(searchQuery);
     } catch (error) {
-      console.error('Failed to unshare project:', error);
+      // console.error('Failed to unshare project:', error);
       setSnackbar({ open: true, message: 'Failed to unshare project', severity: 'error' });
     }
   };
@@ -220,6 +219,7 @@ export default function ProjectViewPage() {
           label="Unshare"
           onClick={() => handleUnshare(params.row.id)}
           // color="error"
+          title='Unshare Project'
         />
       ],
     },
@@ -243,7 +243,7 @@ export default function ProjectViewPage() {
           <p className="text-red-800">{error}</p>
         </div>
         <Button 
-          onClick={() => router.push('/project')}
+          onClick={() => router.back(/*'/project'*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -260,7 +260,7 @@ export default function ProjectViewPage() {
           <p className="text-yellow-800">Project not found</p>
         </div>
         <Button 
-          onClick={() => router.push('/project')}
+          onClick={() => router.back(/*'/project'*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -276,7 +276,7 @@ export default function ProjectViewPage() {
         <div className="flex items-center space-x-4">
           <Button
             // variant="outline"
-            onClick={() => router.push('/project')}
+            onClick={() => router.back()}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -286,7 +286,7 @@ export default function ProjectViewPage() {
         </div>
         <Button 
           // variant="outline"
-          onClick={() => router.push(`/project/${projectId}/edit`)}
+          onClick={() => router.replace(`/project/${projectId}/edit`)}
           className="flex items-center space-x-2"
         >
           <EditIcon className="w-4 h-4" />
@@ -370,7 +370,7 @@ export default function ProjectViewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Services</CardTitle>
           </CardHeader>
@@ -385,7 +385,7 @@ export default function ProjectViewPage() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card>
           <CardHeader>
@@ -416,7 +416,7 @@ export default function ProjectViewPage() {
                 <DataGrid
                   rows={sharedUsers}
                   columns={columns}
-                  loading={loading}
+                  loading={isUserLoading}
                   pageSizeOptions={[10]}
                   initialState={{
                     pagination: { paginationModel: { pageSize: 10 } },

@@ -42,7 +42,7 @@ export default function ProfilePage() {
       setIsEditingEmail(false);
       toast.success('Email updated successfully');
     }catch(err){
-      console.error('Failed to update email', err);
+      // console.error('Failed to update email');
       setTempEmail('');
       setIsEditingEmail(false);
       toast.error('Email updated failed');

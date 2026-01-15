@@ -59,7 +59,7 @@ export default function CollaboratorProjectsPage() {
         const data = await getSharedProjects(userId);
         setProjects(data);
       } catch (error) {
-        console.error('Failed to fetch shared projects:', error);
+        // console.error('Failed to fetch shared projects');
         setSnackbar({ 
           open: true, 
           message: 'Failed to fetch shared projects', 
@@ -106,7 +106,7 @@ export default function CollaboratorProjectsPage() {
       setPasswordDialog({ open: false, project: null });
       setPassword('');
     } catch (error) {
-      console.error('Failed to unlock project:', error);
+      // console.error('Failed to unlock project');
       setSnackbar({ 
         open: true, 
         message: 'Invalid password or failed to unlock project', 

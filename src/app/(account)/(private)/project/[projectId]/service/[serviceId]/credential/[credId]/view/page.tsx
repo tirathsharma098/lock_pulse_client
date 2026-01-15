@@ -43,7 +43,7 @@ export default function CredentialViewPage() {
           await decryptCredentialData(data);
         }
       } catch (err) {
-        console.error('Error fetching credential:', err);
+        // console.error('Error fetching credential:', err);
         setError('Failed to load credential details');
       } finally {
         setLoading(false);
@@ -71,7 +71,7 @@ export default function CredentialViewPage() {
       setDecryptedTitle(title);
       setDecryptedPassword(password);
     } catch (err) {
-      console.error('Failed to decrypt credential data:', err);
+      // console.error('Failed to decrypt credential data:', err);
       setDecryptError('Failed to decrypt credential data');
     } finally {
       setDecryptLoading(false);
@@ -84,7 +84,7 @@ export default function CredentialViewPage() {
         await navigator.clipboard.writeText(decryptedTitle);
         toast.success('Title copied to clipboard');
       } catch (err) {
-        console.error('Failed to copy title:', err);
+        // console.error('Failed to copy title:', err);
         toast.error('Failed to copy title');
       }
     }
@@ -96,7 +96,7 @@ export default function CredentialViewPage() {
         await navigator.clipboard.writeText(decryptedPassword);
         toast.success('Password copied to clipboard');
       } catch (err) {
-        console.error('Failed to copy password:', err);
+        // console.error('Failed to copy password:', err);
         toast.error('Failed to copy password');
       }
     }
@@ -120,7 +120,7 @@ export default function CredentialViewPage() {
           <p className="text-red-800">{error}</p>
         </div>
         <Button 
-          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+          onClick={() => router.back(/*`/project/${projectId}/service/${serviceId}/credential`*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -137,7 +137,7 @@ export default function CredentialViewPage() {
           <p className="text-yellow-800">Credential not found</p>
         </div>
         <Button 
-          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+          onClick={() => router.back(/*`/project/${projectId}/service/${serviceId}/credential`*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function CredentialViewPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential`)}
+            onClick={() => router.back(/*`/project/${projectId}/service/${serviceId}/credential`*/)}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -165,7 +165,7 @@ export default function CredentialViewPage() {
         </div>
         <Button 
           variant="outline"
-          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credId}/edit`)}
+          onClick={() => router.replace(`/project/${projectId}/service/${serviceId}/credential/${credId}/edit`)}
           className="flex items-center space-x-2"
         >
           <EditIcon className="w-4 h-4" />

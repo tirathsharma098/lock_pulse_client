@@ -75,7 +75,7 @@ export default function CreateProjectDialog({
       
       onProjectCreated();
     } catch (err:any) {
-      console.error('Failed to create project:', err);
+      // console.error('Failed to create project:', err);
       setError(err?.message || 'Failed to create project. Please try again.');
     } finally {
       setLoading(false);
@@ -154,7 +154,7 @@ export default function CreateProjectDialog({
         </DialogContent>
         
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={loading}>
+          <Button variant="outline" onClick={handleClose} disabled={loading} type='button'>
             Cancel
           </Button>
           <Button 

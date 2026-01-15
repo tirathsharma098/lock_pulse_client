@@ -63,7 +63,7 @@ export default function ServiceEditPage() {
           setPassword(decryptedPassword);
         }
       } catch (err) {
-        console.error('Error fetching service:', err);
+        // console.error('Error fetching service:', err);
         setError('Failed to load service details');
       } finally {
         setLoading(false);
@@ -75,7 +75,7 @@ export default function ServiceEditPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    // console.log(">>> Submitting service update...");
     if (!name.trim()) {
       setError('Service name is required');
       return;
@@ -95,16 +95,12 @@ export default function ServiceEditPage() {
       setSaving(true);
       setError(null);
       
-      // Check if password has changed
-      const passwordChanged = password !== originalPassword;
-      
       let updateData: any = {
         name: name.trim(),
-        notes: notes.trim() || undefined
+        notes: notes.trim() || undefined,
       };
       
-      // If password changed, we need to re-encrypt everything
-      if (passwordChanged) {
+      // We need to re-encrypt everything even if password is not changed, to ensure consistency
         // Unwrap the current service vault key using the original password
         const originalKdfSalt = new Uint8Array(Buffer.from(service.vaultKdfSalt, 'base64'));
         const originalKek = await deriveKEK(originalPassword, originalKdfSalt, service.vaultKdfParams);
@@ -129,17 +125,11 @@ export default function ServiceEditPage() {
           passwordCiphertext: newPasswordEncrypted.ciphertext,
           isLong,
         };
-      } else {
-        updateData.isLong = isLong;
-      }
-      
       await updateService(projectId, serviceId, updateData);
-      
       toast.success('Service updated successfully');
-      router.push(`/project/${projectId}/service/${serviceId}/view`);
-      
+      router.replace(`/project/${projectId}/service/${serviceId}/view`);
     } catch (err) {
-      console.error('Failed to update service:', err);
+      // console.error('Failed to update service:', err);
       setError('Failed to update service. Please try again.');
     } finally {
       setSaving(false);
@@ -164,7 +154,7 @@ export default function ServiceEditPage() {
           <p className="text-red-800">{error}</p>
         </div>
         <Button 
-          onClick={() => router.push(`/project/${projectId}/service`)}
+          onClick={() => router.back(/*`/project/${projectId}/service`*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -180,7 +170,7 @@ export default function ServiceEditPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project/${projectId}/service`)}
+            onClick={() => router.back(/*`/project/${projectId}/service`*/)}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -265,7 +255,7 @@ export default function ServiceEditPage() {
               <div className="flex justify-end space-x-2 pt-4">
                 <Button 
                   variant="outline" 
-                  onClick={() => router.push(`/project/${projectId}/service/${serviceId}/view`)}
+                  onClick={() => router.replace(`/project/${projectId}/service/${serviceId}/view`)}
                   disabled={saving}
                   type='button'
                 >

@@ -35,14 +35,14 @@ export default function ServiceViewPage() {
       try {
         const data = await getService(projectId, serviceId);
         setService(data);
-        console.log(">>> Fetched service data: ",projectVaultKey);
+        // console.log(">>> Fetched service data: ",projectVaultKey);
         // Decrypt the service password
         if (data && projectVaultKey) {
-          console.log(">>> Decrypting service password...");
+          // console.log(">>> Decrypting service password...");
           await decryptServicePassword(data);
         }
       } catch (err) {
-        console.error('Error fetching service:', err);
+        // console.error('Error fetching service:', err);
         setError('Failed to load service details');
       } finally {
         setLoading(false);
@@ -67,10 +67,10 @@ export default function ServiceViewPage() {
         serviceData.passwordCiphertext,
         projectVaultKey
       );
-      console.log(">> Decrypted password: ", password);
+      // console.log(">> Decrypted password: ", password);
       setDecryptedPassword(password);
     } catch (err) {
-      console.error('Failed to decrypt service password:', err);
+      // console.error('Failed to decrypt service password:', err);
       setPasswordError('Failed to decrypt service password');
     } finally {
       setPasswordLoading(false);
@@ -83,7 +83,7 @@ export default function ServiceViewPage() {
         await navigator.clipboard.writeText(decryptedPassword);
         toast.success('Password copied to clipboard');
       } catch (err) {
-        console.error('Failed to copy password:', err);
+        // console.error('Failed to copy password:', err);
         toast.error('Failed to copy password');
       }
     }
@@ -107,7 +107,7 @@ export default function ServiceViewPage() {
           <p className="text-red-800">{error}</p>
         </div>
         <Button 
-          onClick={() => router.push(`/project/${projectId}/service`)}
+          onClick={() => router.back(/*`/project/${projectId}/service`*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -124,7 +124,7 @@ export default function ServiceViewPage() {
           <p className="text-yellow-800">Service not found</p>
         </div>
         <Button 
-          onClick={() => router.push(`/project/${projectId}/service`)}
+          onClick={() => router.back(/*`/project/${projectId}/service`*/)}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -140,7 +140,7 @@ export default function ServiceViewPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project/${projectId}/service`)}
+            onClick={() => router.back(/*`/project/${projectId}/service`*/)}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -150,7 +150,7 @@ export default function ServiceViewPage() {
         </div>
         <Button 
           variant="outline"
-          onClick={() => router.push(`/project/${projectId}/service/${serviceId}/edit`)}
+          onClick={() => router.replace(`/project/${projectId}/service/${serviceId}/edit`)}
           className="flex items-center space-x-2"
         >
           <EditIcon className="w-4 h-4" />
@@ -235,7 +235,7 @@ export default function ServiceViewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Credentials</CardTitle>
           </CardHeader>
@@ -250,7 +250,7 @@ export default function ServiceViewPage() {
               </Button>
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
     </div>
   );

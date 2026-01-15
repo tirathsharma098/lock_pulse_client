@@ -102,7 +102,7 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
         setPassword(decryptedItem.password);
         setLongMode(!!decryptedItem.isLong);
       } catch (err: any) {
-        console.error('Failed to load item:', err);
+        // console.error('Failed to load item:', err);
         if (err?.status === 401) {
           toast.error('Session expired. Please log in again.');
           wipeVaultKey();

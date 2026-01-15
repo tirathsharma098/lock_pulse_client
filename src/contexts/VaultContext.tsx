@@ -39,7 +39,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [collaboratorId, setCollaboratorId] = useState<string | null>(null);
 
   const setVaultData = (key: Uint8Array | null, username: string, email: string) => {
-    console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
+    // console.debug('[vault-ctx] setVaultKey called. len=', key?.length ?? null);
     setVaultKeyState(key);
     setUsername(username);
     setEmail(email);
@@ -63,18 +63,18 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
 
     // Wipe vault key on visibility change (e.g., tab switch, minimize)
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        wipeVaultKey();
-      }
-    };
+    // const handleVisibilityChange = () => {
+    //   if (document.hidden) {
+    //     wipeVaultKey();
+    //   }
+    // };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // document.removeEventListener('visibilitychange', handleVisibilityChange);
       // Do NOT wipe here — this cleanup runs on re-renders (e.g., when vaultKey changes)
       // wiping here would instantly clear the key after setVaultKey.
     };

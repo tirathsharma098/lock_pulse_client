@@ -62,7 +62,7 @@ export default function ProjectEditPage() {
           setPassword(decryptedPassword);
         }
       } catch (err) {
-        console.error('Error fetching project:', err);
+        // console.error('Error fetching project',);
         setError('Failed to load project details');
       } finally {
         setLoading(false);
@@ -123,10 +123,10 @@ export default function ProjectEditPage() {
       await updateProject(projectId, updateData);
       
       toast.success('Project updated successfully');
-      router.push(`/project/${projectId}/view`);
+      router.replace(`/project/${projectId}/view`);
       
     } catch (err:any) {
-      console.error('Failed to update project:', err);
+      // console.error('Failed to update project');
       setError(err?.message || 'Failed to update project. Please try again.');
     } finally {
       setSaving(false);
@@ -151,7 +151,7 @@ export default function ProjectEditPage() {
           <p className="text-red-800">{error}</p>
         </div>
         <Button 
-          onClick={() => router.push('/project')}
+          onClick={() => router.back()}
           className="flex items-center space-x-2"
         >
           <ArrowBackIcon className="w-4 h-4" />
@@ -167,7 +167,7 @@ export default function ProjectEditPage() {
         <div className="flex items-center space-x-4">
           <Button 
             variant="outline"
-            onClick={() => router.push(`/project`)}
+            onClick={() => router.back()}
             className="flex items-center space-x-2"
           >
             <ArrowBackIcon className="w-4 h-4" />
@@ -252,7 +252,7 @@ export default function ProjectEditPage() {
               <div className="flex justify-end space-x-2 pt-4">
                 <Button 
                   variant="outline" 
-                  onClick={() => router.push(`/project/${projectId}/view`)}
+                  onClick={() => router.replace(`/project/${projectId}/view`)}
                   disabled={saving}
                 >
                   Cancel

@@ -18,25 +18,25 @@ export const apiRequest = async (endpoint: string, options: RequestInit = {}) =>
     ...options,
   };
 
-  console.log(`Making API request to: ${url}`);
-  console.log('Request config:', { 
-    method: config.method || 'GET',
-    credentials: config.credentials,
-    headers: config.headers 
-  });
+  // console.log(`Making API request to: ${url}`);
+  // console.log('Request config:', { 
+  //   method: config.method || 'GET',
+  //   credentials: config.credentials,
+  //   headers: config.headers 
+  // });
 
   const response = await fetch(url, config);
   
-  console.log(`Response status: ${response.status}`);
+  // console.log(`Response status: ${response.status}`);
   
   if (!response.ok) {
     const error = await response.json().catch(() => ({ code: 'UNKNOWN_ERROR', message: 'Unknown error' }));
-    console.error('API Error:', error);
+    // console.error('API Error:', error);
     throw new ApiError(error.code || 'UNKNOWN_ERROR', error.message || 'Unknown error', response.status);
   }
 
   const data = await response.json();
-  console.log(`Response data for ${endpoint}:`, data);
+  // console.log(`Response data for ${endpoint}:`, data);
   return data;
 };
 

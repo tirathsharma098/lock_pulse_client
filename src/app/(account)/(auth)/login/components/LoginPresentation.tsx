@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Lock, Key, Eye, EyeOff, Sparkles, ArrowRight } from 'lucide-react';
 import styles from './LoginPresentation.module.css';
+import Link from 'next/link';
 
 export default function LoginPresentation() {
   const [currentFeature, setCurrentFeature] = useState(0);
@@ -60,9 +61,11 @@ export default function LoginPresentation() {
               <Shield className="h-16 w-16 text-white" />
             </div>
           </div>
+          <Link href='/' >
           <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
             LockPulse
           </h1>
+          </Link>
           <p className="text-xl text-blue-100 font-light">
             Zero-Knowledge Password Manager
           </p>
