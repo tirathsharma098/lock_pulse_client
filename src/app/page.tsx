@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Shield, Lock, Key, Eye, EyeOff, Server, UserCheck, AlertTriangle } from 'lucide-react'
+import { Shield, Lock, Key, Eye, EyeOff, Server, UserCheck, AlertTriangle, Users, FolderGit2, ChevronDown } from 'lucide-react'
+import DevFeaturesSection from './components/dashboard/DevFeaturesSection'
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState(0)
+  const [showDevFeatures, setShowDevFeatures] = useState(false)
 
   const securitySteps = [
     { title: "Your Password", description: "Enter your password locally" },
@@ -30,7 +32,16 @@ export default function HomePage() {
             <Shield className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-white">LockPulse</span>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => setShowDevFeatures(!showDevFeatures)}
+              className="text-sm text-gray-300 hover:text-primary transition-colors duration-300 flex items-center space-x-1"
+            >
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">For Developers & Teams</span>
+              <span className="sm:hidden">For Teams</span>
+              <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${showDevFeatures ? 'rotate-180' : ''}`} />
+            </button>
             <Link href="/login" className="bg-transparent border border-primary text-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all duration-300">
               Sign In
             </Link>
@@ -40,6 +51,9 @@ export default function HomePage() {
           </div>
         </div>
       </nav>
+
+      {/* Developer Features Section - Collapsible */}
+      <DevFeaturesSection isOpen={showDevFeatures} />
 
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-20 text-center relative">
