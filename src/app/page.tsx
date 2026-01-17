@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Shield, Lock, Key, Eye, EyeOff, Server, UserCheck, AlertTriangle } from 'lucide-react'
+import { Shield, Lock, Key, Eye, EyeOff, Server, UserCheck, AlertTriangle, Users, FolderGit2, ChevronDown } from 'lucide-react'
+import DevFeaturesSection from './components/dashboard/DevFeaturesSection'
 
 export default function HomePage() {
   const [currentStep, setCurrentStep] = useState(0)
+  const [showDevFeatures, setShowDevFeatures] = useState(false)
 
   const securitySteps = [
     { title: "Your Password", description: "Enter your password locally" },
@@ -30,7 +32,16 @@ export default function HomePage() {
             <Shield className="h-8 w-8 text-primary" />
             <span className="text-2xl font-bold text-white">LockPulse</span>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => setShowDevFeatures(!showDevFeatures)}
+              className="text-sm text-gray-300 hover:text-primary transition-colors duration-300 flex items-center space-x-1"
+            >
+              <Users className="h-4 w-4" />
+              <span className="hidden sm:inline">For Developers & Teams</span>
+              <span className="sm:hidden">For Teams</span>
+              <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${showDevFeatures ? 'rotate-180' : ''}`} />
+            </button>
             <Link href="/login" className="bg-transparent border border-primary text-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all duration-300">
               Sign In
             </Link>
@@ -40,6 +51,9 @@ export default function HomePage() {
           </div>
         </div>
       </nav>
+
+      {/* Developer Features Section - Collapsible */}
+      <DevFeaturesSection isOpen={showDevFeatures} />
 
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-20 text-center relative">
@@ -345,14 +359,53 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="border-t border-slate-700 py-12">
         <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Shield className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold text-white">LockPulse</span>
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <Shield className="h-8 w-8 text-primary" />
+                <span className="text-2xl font-bold text-white">LockPulse</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                Zero-knowledge password storage for everyone.
+              </p>
             </div>
-            <div className="text-gray-400 text-center md:text-right">
+            
+            <div>
+              <h3 className="text-white font-semibold mb-4">Product</h3>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/register" className="hover:text-primary">Get Started</Link></li>
+                <li><Link href="/login" className="hover:text-primary">Sign In</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Security</h3>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/blog/what-is-zero-knowledge-password-manager" className="hover:text-primary">Zero-Knowledge Security</Link></li>
+                <li><Link href="/blog/client-side-encryption-explained" className="hover:text-primary">Client-Side Encryption</Link></li>
+                <li><Link href="/blog/aes-256-encryption-standard" className="hover:text-primary">AES-256 Encryption</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-white font-semibold mb-4">Resources</h3>
+              <ul className="space-y-2 text-gray-400 text-sm">
+                <li><Link href="/blog/project-based-credential-management" className="hover:text-primary">Project Management</Link></li>
+                <li><Link href="/blog/team-credential-management" className="hover:text-primary">Team Collaboration</Link></li>
+                <li><Link href="/blog/getting-started-lockpulse" className="hover:text-primary">Getting Started</Link></li>
+                <li><Link href="/blog/security-best-practices" className="hover:text-primary">Best Practices</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-700 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center text-gray-400 text-sm">
               <p>&copy; 2025 LockPulse. Your security is our priority.</p>
-              <p className="text-sm mt-1">Zero-knowledge password storage for everyone.</p>
+              <div className="flex space-x-6 mt-4 md:mt-0">
+                <Link href="/blog/password-manager-comparison" className="hover:text-primary">Why LockPulse</Link>
+                <Link href="/blog/managing-aws-credentials-securely" className="hover:text-primary">AWS Security</Link>
+                <Link href="/blog/github-token-security" className="hover:text-primary">GitHub Security</Link>
+              </div>
             </div>
           </div>
         </div>

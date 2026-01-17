@@ -6,6 +6,8 @@ import { Toaster } from 'sonner'
 
 const inter = Inter({ subsets: ['latin'] })
 
+const baseUrl = process.env.NEXT_PUBLIC_CLIENT_URL || 'https://lockpulse.codedigit.in'
+
 export const metadata: Metadata = {
   title: 'LockPulse - Zero-Knowledge Password Manager | 100% Secure Password Storage',
   description: 'LockPulse is a revolutionary zero-knowledge password manager that keeps your passwords truly secure. Client-side encryption ensures even we cannot access your data. Start securing your passwords today.',
@@ -18,14 +20,14 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://lockpulse.com'),
+  metadataBase: new URL(baseUrl),
   alternates: {
     canonical: '/',
   },
   openGraph: {
     title: 'LockPulse - Zero-Knowledge Password Manager',
     description: 'Secure your passwords with military-grade encryption. Zero-knowledge architecture means your data stays private, even from us.',
-    url: 'https://lockpulse.com',
+    url: baseUrl,
     siteName: 'LockPulse',
     images: [
       {
@@ -80,7 +82,7 @@ export default function RootLayout({
               "@type": "SoftwareApplication",
               "name": "LockPulse",
               "description": "Zero-knowledge password manager with client-side encryption",
-              "url": "https://lockpulse.com",
+              "url": baseUrl,
               "applicationCategory": "SecurityApplication",
               "operatingSystem": "Web Browser",
               "offers": {
