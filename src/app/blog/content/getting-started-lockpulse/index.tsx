@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+const baseUrl = process.env.NEXT_PUBLIC_CLIENT_URL || 'https://lockpulse.codedigit.in';
 
 export const blog: BlogPost = {
   slug: 'getting-started-lockpulse',
@@ -34,7 +35,7 @@ export const blog: BlogPost = {
 
       <h3>Visit LockPulse</h3>
       <p>
-        Navigate to <strong>lockpulse.com</strong> and click "Create Account" or "Get Started Free".
+        Navigate to <strong>{baseUrl}</strong> and click "Create Account" or "Get Started Free".
       </p>
 
       <h3>Choose Your Master Password</h3>

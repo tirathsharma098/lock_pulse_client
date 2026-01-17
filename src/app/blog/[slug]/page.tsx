@@ -12,6 +12,7 @@ export async function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const baseUrl = process.env.NEXT_PUBLIC_CLIENT_URL || 'https://lockpulse.codedigit.in'
   const post = getBlogBySlug(params.slug)
   
   if (!post) {
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     }
   }
 
-  const canonicalUrl = `https://lockpulse.com/blog/${post.slug}`
+  const canonicalUrl = `${baseUrl}/blog/${post.slug}`
   const publishedTime = new Date(post.date).toISOString()
 
   return {
@@ -80,6 +81,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 }
 
 export default function BlogPost({ params }: { params: { slug: string } }) {
+  const baseUrl = process.env.NEXT_PUBLIC_CLIENT_URL || 'https://lockpulse.codedigit.in'
   const post = getBlogBySlug(params.slug)
 
   if (!post) {
@@ -91,26 +93,26 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
     '@type': 'BlogPosting',
     headline: post.title,
     description: post.description,
-    image: 'https://lockpulse.com/og-image.png',
+    image: `${baseUrl}/og-image.png`,
     datePublished: new Date(post.date).toISOString(),
     dateModified: new Date(post.date).toISOString(),
     author: {
       '@type': 'Organization',
       name: 'LockPulse Security Team',
-      url: 'https://lockpulse.com',
+      url: baseUrl,
     },
     publisher: {
       '@type': 'Organization',
       name: 'LockPulse',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://lockpulse.com/logo.png',
+        url: `${baseUrl}/logo.png`,
       },
-      url: 'https://lockpulse.com',
+      url: baseUrl,
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://lockpulse.com/blog/${post.slug}`,
+      '@id': `${baseUrl}/blog/${post.slug}`,
     },
     keywords: post.tags.join(', '),
     articleSection: post.tags[0],
@@ -127,19 +129,19 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://lockpulse.com',
+        item: baseUrl,
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: 'Blog',
-        item: 'https://lockpulse.com/blog',
+        item: `${baseUrl}/blog`,
       },
       {
         '@type': 'ListItem',
         position: 3,
         name: post.title,
-        item: `https://lockpulse.com/blog/${post.slug}`,
+        item: `${baseUrl}/blog/${post.slug}`,
       },
     ],
   }
