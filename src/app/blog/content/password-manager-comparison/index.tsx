@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'password-manager-comparison',
@@ -46,7 +47,7 @@ export const blog: BlogPost = {
       <h3>LockPulse's Zero-Knowledge Difference</h3>
       <p>
         With <strong>LockPulse</strong>, trust is not required—it's mathematically impossible for us to access
-        your data. Your <a href="/blog/client-side-encryption-explained">client-side encryption</a> ensures
+        your data. Your <Link href="/blog/client-side-encryption-explained">client-side encryption</Link> ensures
         that only you hold the decryption keys.
       </p>
 
@@ -70,13 +71,13 @@ export const blog: BlogPost = {
       <h3>Project-Based Organization</h3>
       <ul>
         <li><strong>Traditional:</strong> Flat folder structure</li>
-        <li><strong>LockPulse:</strong> <a href="/blog/project-based-credential-management">Advanced project-based organization</a></li>
+        <li><strong>LockPulse:</strong> <Link href="/blog/project-based-credential-management">Advanced project-based organization</Link></li>
       </ul>
 
       <h3>Team Collaboration</h3>
       <ul>
         <li><strong>Traditional:</strong> Basic sharing with admin access</li>
-        <li><strong>LockPulse:</strong> <a href="/blog/secure-credential-sharing-teams">Zero-knowledge team sharing</a></li>
+        <li><strong>LockPulse:</strong> <Link href="/blog/secure-credential-sharing-teams">Zero-knowledge team sharing</Link></li>
       </ul>
 
       <h2>The Open Source Advantage</h2>
@@ -93,7 +94,7 @@ export const blog: BlogPost = {
 
       <h2>Performance Comparison</h2>
       <p>
-        Some users worry that <a href="/blog/client-side-encryption-explained">client-side encryption</a> might
+        Some users worry that <Link href="/blog/client-side-encryption-explained">client-side encryption</Link> might
         be slower. In practice, LockPulse is often faster because:
       </p>
       <ul>
@@ -125,16 +126,16 @@ export const blog: BlogPost = {
 
       <h2>Making the Switch</h2>
       <p>
-        Migrating from a traditional password manager to LockPulse is straightforward. Our <a href="/blog/importing-passwords-guide">import tool</a>
-        supports major password managers. Once imported, reorganize credentials into <a href="/blog/project-based-credential-management">projects</a>
+        Migrating from a traditional password manager to LockPulse is straightforward. Our <Link href="/blog/importing-passwords-guide">import tool</Link>
+        supports major password managers. Once imported, reorganize credentials into <Link href="/blog/project-based-credential-management">projects</Link>
         for better organization.
       </p>
 
       <h3>The Bottom Line</h3>
       <p>
         Traditional password managers ask you to trust them. LockPulse makes trust unnecessary through
-        cryptographic guarantees. When managing <a href="/blog/managing-aws-credentials-securely">AWS credentials</a>,
-        <a href="/blog/database-password-management">database passwords</a>, or any sensitive data,
+        cryptographic guarantees. When managing <Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link>,
+        <Link href="/blog/database-password-management">database passwords</Link>, or any sensitive data,
         mathematical certainty beats marketing promises.
       </p>
     </>

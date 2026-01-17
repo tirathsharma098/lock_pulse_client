@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'github-token-security',
@@ -55,20 +56,20 @@ export const blog: BlogPost = {
       <p>
         Use GitHub's fine-grained PATs to limit token scope. Store the permission details in LockPulse alongside
         the token. This helps team members understand what each token can access. Learn more about
-        <a href="/blog/developer-credential-workflow">developer credential workflows</a>.
+        <Link href="/blog/developer-credential-workflow">developer credential workflows</Link>.
       </p>
 
       <h2>Sharing Tokens with Team</h2>
       <p>
         When multiple developers need the same GitHub token, share it via a <strong>LockPulse Project</strong>.
         Each team member gets encrypted access, and you can revoke access when needed. See our guide on
-        <a href="/blog/secure-credential-sharing-teams">secure credential sharing</a>.
+        <Link href="/blog/secure-credential-sharing-teams">secure credential sharing</Link>.
       </p>
 
       <h3>Integration with CI/CD</h3>
       <p>
         Store GitHub tokens in LockPulse and reference them in your CI/CD pipelines. This is safer than
-        hardcoding tokens or using environment variables. Check out <a href="/blog/ci-cd-credential-security">CI/CD credential security</a>
+        hardcoding tokens or using environment variables. Check out <Link href="/blog/ci-cd-credential-security">CI/CD credential security</Link>
         for detailed strategies.
       </p>
     </>

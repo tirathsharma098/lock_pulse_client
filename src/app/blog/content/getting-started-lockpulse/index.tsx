@@ -1,4 +1,6 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
+
 const baseUrl = process.env.NEXT_PUBLIC_CLIENT_URL || 'https://lockpulse.codedigit.in';
 
 export const blog: BlogPost = {
@@ -41,7 +43,7 @@ export const blog: BlogPost = {
       <h3>Choose Your Master Password</h3>
       <p>
         This is the most important step. Your master password is the only key to your vault. Take time to
-        create a strong, memorable password using our <a href="/blog/creating-strong-master-password">master password guide</a>.
+        create a strong, memorable password using our <Link href="/blog/creating-strong-master-password">master password guide</Link>.
       </p>
       <p>
         <strong>Quick tips:</strong>
@@ -55,7 +57,7 @@ export const blog: BlogPost = {
 
       <h3>Important: No Password Recovery</h3>
       <p>
-        LockPulse uses <a href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge encryption</a>.
+        LockPulse uses <Link href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge encryption</Link>.
         We cannot reset your master password. If you forget it, your data is unrecoverable. This is a feature,
         not a bug—it's what keeps your data truly secure.
       </p>
@@ -85,7 +87,7 @@ export const blog: BlogPost = {
       <h3>Understanding Projects</h3>
       <p>
         <strong>LockPulse Projects</strong> let you organize credentials by context. Instead of one big list,
-        group credentials logically. Learn more about <a href="/blog/project-based-credential-management">project-based management</a>.
+        group credentials logically. Learn more about <Link href="/blog/project-based-credential-management">project-based management</Link>.
       </p>
 
       <h3>Create Your First Project</h3>
@@ -129,7 +131,7 @@ export const blog: BlogPost = {
         When you save a credential:
       </p>
       <ol>
-        <li>Your browser encrypts it using <a href="/blog/aes-256-encryption-standard">AES-256 encryption</a></li>
+        <li>Your browser encrypts it using <Link href="/blog/aes-256-encryption-standard">AES-256 encryption</Link></li>
         <li>The encryption key is derived from your master password</li>
         <li>Only encrypted data is sent to our servers</li>
         <li>We never see your passwords in plaintext</li>
@@ -172,7 +174,7 @@ export const blog: BlogPost = {
         <li>Immediately delete the export file</li>
       </ol>
       <p>
-        Full details in our <a href="/blog/importing-passwords-guide">importing passwords guide</a>.
+        Full details in our <Link href="/blog/importing-passwords-guide">importing passwords guide</Link>.
       </p>
 
       <h2>Next Steps</h2>
@@ -188,16 +190,16 @@ export const blog: BlogPost = {
       <h3>Week 2: Full Migration</h3>
       <ul>
         <li>Import all passwords from old password manager</li>
-        <li><a href="/blog/organizing-imported-passwords">Organize imported passwords</a> into projects</li>
+        <li><Link href="/blog/organizing-imported-passwords">Organize imported passwords</Link> into projects</li>
         <li>Update weak or reused passwords</li>
         <li>Set up sharing for team credentials (if applicable)</li>
       </ul>
 
       <h3>Month 1: Establish Workflows</h3>
       <ul>
-        <li>Configure <a href="/blog/credential-rotation-automation">credential rotation</a> reminders</li>
+        <li>Configure <Link href="/blog/credential-rotation-automation">credential rotation</Link> reminders</li>
         <li>Share projects with team members (if needed)</li>
-        <li>Review <a href="/blog/security-best-practices">security best practices</a></li>
+        <li>Review <Link href="/blog/security-best-practices">security best practices</Link></li>
         <li>Cancel your old password manager subscription</li>
       </ul>
 
@@ -217,14 +219,14 @@ export const blog: BlogPost = {
 
       <h3>What if I'm not sure about a strong master password?</h3>
       <p>
-        Take your time! Use our <a href="/blog/creating-strong-master-password">comprehensive guide</a>.
+        Take your time! Use our <Link href="/blog/creating-strong-master-password">comprehensive guide</Link>.
         It's better to spend 10 minutes choosing a great password than to rush and forget it later.
       </p>
 
       <h3>How do I share passwords with my team?</h3>
       <p>
         Create a shared project, add credentials, then invite team members via email. Each receives
-        encrypted access. See <a href="/blog/secure-credential-sharing-teams">secure credential sharing</a>.
+        encrypted access. See <Link href="/blog/secure-credential-sharing-teams">secure credential sharing</Link>.
       </p>
 
       <h2>Pro Tips for New Users</h2>
@@ -286,7 +288,7 @@ export const blog: BlogPost = {
       <h2>Welcome to True Security</h2>
       <p>
         Congratulations! You've set up <strong>LockPulse</strong> and taken control of your password security.
-        Your credentials are now protected by <a href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge encryption</a>,
+        Your credentials are now protected by <Link href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge encryption</Link>,
         giving you mathematical certainty that only you can access them.
       </p>
       <p>

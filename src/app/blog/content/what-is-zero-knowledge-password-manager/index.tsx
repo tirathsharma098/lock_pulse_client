@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'what-is-zero-knowledge-password-manager',
@@ -51,7 +52,7 @@ export const blog: BlogPost = {
 
       <h3>Benefits for Teams</h3>
       <p>
-        When using <a href="/blog/secure-credential-sharing-teams">LockPulse for team collaboration</a>, each team
+        When using <Link href="/blog/secure-credential-sharing-teams">LockPulse for team collaboration</Link>, each team
         member has their own encryption keys. Shared project credentials are re-encrypted for each recipient,
         ensuring zero-knowledge principles apply to collaboration too.
       </p>

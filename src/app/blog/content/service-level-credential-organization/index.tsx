@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'service-level-credential-organization',
@@ -40,7 +41,7 @@ export const blog: BlogPost = {
         Organize all cloud provider credentials:
       </p>
       <ul>
-        <li><a href="/blog/managing-aws-credentials-securely">AWS</a> access keys and secrets</li>
+        <li><Link href="/blog/managing-aws-credentials-securely">AWS</Link> access keys and secrets</li>
         <li>Azure subscription credentials</li>
         <li>Google Cloud service account keys</li>
         <li>DigitalOcean API tokens</li>
@@ -52,7 +53,7 @@ export const blog: BlogPost = {
 
       <h3>Database Services Project</h3>
       <p>
-        All <a href="/blog/database-password-management">database credentials</a> in one place:
+        All <Link href="/blog/database-password-management">database credentials</Link> in one place:
       </p>
       <ul>
         <li>Production database passwords</li>
@@ -68,7 +69,7 @@ export const blog: BlogPost = {
 
       <h3>API Services Project</h3>
       <p>
-        Third-party <a href="/blog/api-key-management">API keys</a> organized by category:
+        Third-party <Link href="/blog/api-key-management">API keys</Link> organized by category:
       </p>
       <ul>
         <li><strong>Payment APIs:</strong> Stripe, PayPal, Square</li>
@@ -118,7 +119,7 @@ export const blog: BlogPost = {
 
       <h3>GitHub/Version Control Services</h3>
       <p>
-        Organize <a href="/blog/github-token-security">GitHub tokens</a> by purpose:
+        Organize <Link href="/blog/github-token-security">GitHub tokens</Link> by purpose:
       </p>
       <ul>
         <li><strong>Personal tokens:</strong> Individual developer access</li>

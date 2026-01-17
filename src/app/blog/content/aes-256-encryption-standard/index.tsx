@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'aes-256-encryption-standard',
@@ -48,8 +49,8 @@ export const blog: BlogPost = {
 
       <h3>Industry Standard for Sensitive Data</h3>
       <p>
-        AES-256 is approved by the NSA for protecting classified information. When managing <a href="/blog/managing-aws-credentials-securely">AWS credentials</a>
-        or <a href="/blog/database-password-management">database passwords</a>, you need this level of protection.
+        AES-256 is approved by the NSA for protecting classified information. When managing <Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link>
+        or <Link href="/blog/database-password-management">database passwords</Link>, you need this level of protection.
       </p>
 
       <h2>Performance Considerations</h2>

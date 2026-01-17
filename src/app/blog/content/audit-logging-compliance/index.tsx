@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'audit-logging-compliance',
@@ -201,9 +202,9 @@ export const blog: BlogPost = {
       </p>
       <ol>
         <li>Export full month of audit logs</li>
-        <li>Verify all <a href="/blog/access-control-best-practices">access control policies</a> enforced</li>
+        <li>Verify all <Link href="/blog/access-control-best-practices">access control policies</Link> enforced</li>
         <li>Review project membership changes</li>
-        <li>Confirm <a href="/blog/credential-rotation-automation">credential rotation</a> on schedule</li>
+        <li>Confirm <Link href="/blog/credential-rotation-automation">credential rotation</Link> on schedule</li>
         <li>Prepare compliance documentation</li>
         <li>Archive logs for long-term retention</li>
       </ol>
@@ -412,8 +413,8 @@ export const blog: BlogPost = {
       </ul>
 
       <p>
-        Audit logging is essential for <a href="/blog/team-credential-management">team credential management</a>
-        and meeting <a href="/blog/security-compliance-features">security compliance requirements</a>.
+        Audit logging is essential for <Link href="/blog/team-credential-management">team credential management</Link>
+        and meeting <Link href="/blog/security-compliance-features">security compliance requirements</Link>.
       </p>
     </>
   ),

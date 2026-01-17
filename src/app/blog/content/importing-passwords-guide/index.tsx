@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'importing-passwords-guide',
@@ -26,10 +27,10 @@ export const blog: BlogPost = {
         Preparation steps:
       </p>
       <ul>
-        <li>Create your <strong>LockPulse account</strong> with a strong <a href="/blog/creating-strong-master-password">master password</a></li>
+        <li>Create your <strong>LockPulse account</strong> with a strong <Link href="/blog/creating-strong-master-password">master password</Link></li>
         <li>Export passwords from your current password manager</li>
         <li>Ensure exports are from a secure, private device</li>
-        <li>Plan your <a href="/blog/project-based-credential-management">project organization</a></li>
+        <li>Plan your <Link href="/blog/project-based-credential-management">project organization</Link></li>
       </ul>
 
       <h2>Supported Import Sources</h2>
@@ -141,7 +142,7 @@ export const blog: BlogPost = {
         <li>Delete any outdated or duplicate entries</li>
       </ol>
       <p>
-        See <a href="/blog/organizing-imported-passwords">organizing imported passwords</a> for detailed strategies.
+        See <Link href="/blog/organizing-imported-passwords">organizing imported passwords</Link> for detailed strategies.
       </p>
 
       <h3>Add Missing Information</h3>
@@ -193,7 +194,7 @@ export const blog: BlogPost = {
         <li>Import shared credentials to a dedicated project</li>
         <li>Share the project with team members</li>
         <li>Each member imports their personal credentials separately</li>
-        <li>Establish new <a href="/blog/team-credential-management">team workflows</a></li>
+        <li>Establish new <Link href="/blog/team-credential-management">team workflows</Link></li>
       </ol>
 
       <h3>Security During Migration</h3>
@@ -210,7 +211,7 @@ export const blog: BlogPost = {
       </p>
       <ul>
         <li>Update weak or reused passwords</li>
-        <li>Set up <a href="/blog/credential-rotation-automation">credential rotation</a> schedules</li>
+        <li>Set up <Link href="/blog/credential-rotation-automation">credential rotation</Link> schedules</li>
         <li>Configure browser extension for auto-fill</li>
         <li>Share necessary projects with team members</li>
         <li>Cancel your old password manager subscription</li>
@@ -219,7 +220,7 @@ export const blog: BlogPost = {
       <h3>Welcome to Zero-Knowledge Security</h3>
       <p>
         You've successfully migrated to <strong>LockPulse</strong>. Your credentials are now protected by
-        <a href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge encryption</a>, giving you
+        <Link href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge encryption</Link>, giving you
         complete control and ultimate security.
       </p>
     </>

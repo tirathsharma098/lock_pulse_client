@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'password-recovery-options',
@@ -16,7 +17,7 @@ export const blog: BlogPost = {
     <>
       <h2>The Hard Truth About Zero-Knowledge Recovery</h2>
       <p>
-        In a <a href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge password manager</a> like
+        In a <Link href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge password manager</Link> like
         <strong> LockPulse</strong>, if you forget your master password, your data is unrecoverable. This isn't
         a bug—it's the fundamental feature that keeps your credentials secure.
       </p>
@@ -57,15 +58,15 @@ export const blog: BlogPost = {
         <li>No employee has access to your credentials</li>
       </ul>
       <p>
-        This is mathematically enforced through <a href="/blog/encryption-key-derivation">key derivation</a>
-        and <a href="/blog/client-side-encryption-explained">client-side encryption</a>.
+        This is mathematically enforced through <Link href="/blog/encryption-key-derivation">key derivation</Link>
+        and <Link href="/blog/client-side-encryption-explained">client-side encryption</Link>.
       </p>
 
       <h2>Prevention Strategies</h2>
 
       <h3>Strategy 1: Choose a Memorable Master Password</h3>
       <p>
-        Use the passphrase method from our <a href="/blog/creating-strong-master-password">master password guide</a>:
+        Use the passphrase method from our <Link href="/blog/creating-strong-master-password">master password guide</Link>:
       </p>
       <ul>
         <li>Create a story or mental image</li>
@@ -110,7 +111,7 @@ export const blog: BlogPost = {
         <li>Regular review and rotation of emergency access</li>
       </ul>
       <p>
-        Learn more in our <a href="/blog/emergency-access-planning">emergency access planning guide</a>.
+        Learn more in our <Link href="/blog/emergency-access-planning">emergency access planning guide</Link>.
       </p>
 
       <h3>Trusted Delegate Feature (Future)</h3>
@@ -191,7 +192,7 @@ export const blog: BlogPost = {
 
       <h3>Critical Credential Redundancy</h3>
       <p>
-        For <a href="/blog/team-credential-management">team credential management</a>:
+        For <Link href="/blog/team-credential-management">team credential management</Link>:
       </p>
       <ul>
         <li>Ensure multiple team members have access to critical credentials</li>
@@ -235,10 +236,10 @@ export const blog: BlogPost = {
 
       <h2>Best Practices Summary</h2>
       <ul>
-        <li>✅ Choose a truly memorable <a href="/blog/creating-strong-master-password">master password</a></li>
+        <li>✅ Choose a truly memorable <Link href="/blog/creating-strong-master-password">master password</Link></li>
         <li>✅ Practice typing it daily for the first month</li>
         <li>✅ Consider temporary physical backup during transition</li>
-        <li>✅ Set up <a href="/blog/emergency-access-planning">emergency access</a> for critical accounts</li>
+        <li>✅ Set up <Link href="/blog/emergency-access-planning">emergency access</Link> for critical accounts</li>
         <li>✅ Keep old password manager active during transition</li>
         <li>✅ Understand and accept the recovery limitations</li>
         <li>✅ Create encrypted backups periodically</li>

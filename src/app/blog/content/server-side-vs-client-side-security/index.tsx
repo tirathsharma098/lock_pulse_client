@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'server-side-vs-client-side-security',
@@ -38,11 +39,11 @@ export const blog: BlogPost = {
 
       <h3>Client-Side Encryption (LockPulse's Approach)</h3>
       <p>
-        With <a href="/blog/client-side-encryption-explained">client-side encryption</a>:
+        With <Link href="/blog/client-side-encryption-explained">client-side encryption</Link>:
       </p>
       <ol>
         <li>You enter your password on your device</li>
-        <li>Your browser encrypts it using <a href="/blog/aes-256-encryption-standard">AES-256</a></li>
+        <li>Your browser encrypts it using <Link href="/blog/aes-256-encryption-standard">AES-256</Link></li>
         <li>Only the encrypted blob is transmitted</li>
         <li>Servers store encrypted data without decryption capability</li>
       </ol>
@@ -67,7 +68,7 @@ export const blog: BlogPost = {
 
       <h3>Client-Side: Trustless Security</h3>
       <p>
-        With LockPulse's <a href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge architecture</a>:
+        With LockPulse's <Link href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge architecture</Link>:
       </p>
       <ul>
         <li>Trust is mathematically unnecessary</li>
@@ -174,12 +175,12 @@ export const blog: BlogPost = {
       <h2>Making the Choice</h2>
       <p>
         For maximum security, client-side encryption is non-negotiable. When managing sensitive credentials
-        like <a href="/blog/managing-aws-credentials-securely">AWS keys</a> or <a href="/blog/database-password-management">database passwords</a>,
+        like <Link href="/blog/managing-aws-credentials-securely">AWS keys</Link> or <Link href="/blog/database-password-management">database passwords</Link>,
         you need mathematical guarantees, not trust-based promises.
       </p>
       <p>
         <strong>LockPulse's commitment:</strong> 100% client-side encryption, zero server-side decryption,
-        complete user control. Learn more about our <a href="/blog/security-technical-overview">security architecture</a>.
+        complete user control. Learn more about our <Link href="/blog/security-technical-overview">security architecture</Link>.
       </p>
     </>
   ),

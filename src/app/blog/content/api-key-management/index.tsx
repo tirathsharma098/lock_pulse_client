@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'api-key-management',
@@ -40,7 +41,7 @@ export const blog: BlogPost = {
         <li><strong>Analytics Project:</strong> Tracking and analytics API keys</li>
       </ul>
       <p>
-        This approach follows <a href="/blog/service-level-credential-organization">service-level credential organization</a> principles.
+        This approach follows <Link href="/blog/service-level-credential-organization">service-level credential organization</Link> principles.
       </p>
 
       <h2>Test vs Production Keys</h2>
@@ -80,8 +81,8 @@ export const blog: BlogPost = {
       <h3>Team Collaboration</h3>
       <p>
         When multiple developers need access to API keys, share projects instead of copying keys around.
-        This maintains security and enables <a href="/blog/audit-logging-compliance">audit logging</a>.
-        Learn more about <a href="/blog/secure-credential-sharing-teams">secure credential sharing</a>.
+        This maintains security and enables <Link href="/blog/audit-logging-compliance">audit logging</Link>.
+        Learn more about <Link href="/blog/secure-credential-sharing-teams">secure credential sharing</Link>.
       </p>
 
       <h2>Webhook Secrets</h2>

@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'developer-credential-workflow',
@@ -23,7 +24,7 @@ export const blog: BlogPost = {
 
       <h3>Common Developer Credential Types</h3>
       <ul>
-        <li><strong><a href="/blog/github-token-security">GitHub tokens</a>:</strong> Repository access and automation</li>
+        <li><strong><Link href="/blog/github-token-security">GitHub tokens</Link>:</strong> Repository access and automation</li>
         <li><strong>Database credentials:</strong> Local, dev, staging, prod databases</li>
         <li><strong>API keys:</strong> Third-party services (Stripe, SendGrid, etc.)</li>
         <li><strong>Cloud credentials:</strong> AWS, Azure, GCP access</li>
@@ -37,7 +38,7 @@ export const blog: BlogPost = {
         Every developer should have their own LockPulse account:
       </p>
       <ol>
-        <li>Create account with strong <a href="/blog/creating-strong-master-password">master password</a></li>
+        <li>Create account with strong <Link href="/blog/creating-strong-master-password">master password</Link></li>
         <li>Enable 2FA for additional security</li>
         <li>Install browser extension for easy access</li>
       </ol>
@@ -122,7 +123,12 @@ export const blog: BlogPost = {
         <li>Use separate credentials for each pipeline</li>
       </ul>
       <p>
-        Learn more about <a href="/blog/ci-cd-credential-security">CI/CD credential security</a>.
+        Learn more about <Link href="/blog/ci-cd-credential-security">CI/CD credential security</Link>.
+      </p>
+      <p>
+        Use GitHub's fine-grained PATs to limit token scope. Store the permission details in LockPulse alongside
+        the token. This helps team members understand what each token can access. Learn more about
+        <Link href="/blog/developer-credential-workflow">developer credential workflows</Link>.
       </p>
 
       <h3>Deployment Credentials</h3>

@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'why-master-password-matters',
@@ -24,7 +25,7 @@ export const blog: BlogPost = {
       <p>
         Unlike traditional services, we cannot reset your master password. This isn't a limitation—it's the
         core security feature. If we could reset it, we could access your data. That would defeat the purpose
-        of <a href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge architecture</a>.
+        of <Link href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge architecture</Link>.
       </p>
 
       <h3>Creating a Memorable Master Password</h3>
@@ -47,7 +48,7 @@ export const blog: BlogPost = {
       <h2>Using LockPulse Projects with Your Master Password</h2>
       <p>
         Once you've secured your vault with a strong master password, <strong>LockPulse Projects</strong> help
-        you organize credentials by context. Whether managing <a href="/blog/team-credential-management">team credentials</a>
+        you organize credentials by context. Whether managing <Link href="/blog/team-credential-management">team credentials</Link>
         or personal passwords, your master password unlocks everything.
       </p>
 

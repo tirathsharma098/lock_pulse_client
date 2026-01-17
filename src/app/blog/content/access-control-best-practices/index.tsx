@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'access-control-best-practices',
@@ -46,7 +47,7 @@ export const blog: BlogPost = {
       <ul>
         <li><strong>Access to:</strong> All environments (dev, staging, production)</li>
         <li><strong>Restrictions:</strong> Audit all production access</li>
-        <li><strong>Example credentials:</strong> <a href="/blog/managing-aws-credentials-securely">AWS credentials</a>, deployment keys, server SSH</li>
+        <li><strong>Example credentials:</strong> <Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link>, deployment keys, server SSH</li>
       </ul>
 
       <h3>QA Team Access</h3>
@@ -221,7 +222,7 @@ export const blog: BlogPost = {
       </ul>
 
       <p>
-        Learn more about <a href="/blog/audit-logging-compliance">audit logging and compliance</a>.
+        Learn more about <Link href="/blog/audit-logging-compliance">audit logging and compliance</Link>.
       </p>
 
       <h2>Monitoring and Alerts</h2>

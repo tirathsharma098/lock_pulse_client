@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'encryption-key-derivation',
@@ -64,7 +65,7 @@ export const blog: BlogPost = {
         The final result is a 256-bit encryption key:
       </p>
       <ul>
-        <li>Perfect length for <a href="/blog/aes-256-encryption-standard">AES-256 encryption</a></li>
+        <li>Perfect length for <Link href="/blog/aes-256-encryption-standard">AES-256 encryption</Link></li>
         <li>High entropy regardless of password strength</li>
         <li>Used to encrypt/decrypt your credentials</li>
         <li>Never transmitted or stored</li>
@@ -139,7 +140,7 @@ export const blog: BlogPost = {
 
       <h2>Key Derivation in Team Sharing</h2>
       <p>
-        When sharing <a href="/blog/secure-credential-sharing-teams">credentials with teams</a>:
+        When sharing <Link href="/blog/secure-credential-sharing-teams">credentials with teams</Link>:
       </p>
 
       <h3>Individual Key Derivation</h3>
@@ -188,7 +189,7 @@ export const blog: BlogPost = {
       <ul>
         <li>If password is common (e.g., "password123")</li>
         <li>Attacker could eventually crack it</li>
-        <li>This is why <a href="/blog/creating-strong-master-password">creating a strong master password</a> is critical</li>
+        <li>This is why <Link href="/blog/creating-strong-master-password">creating a strong master password</Link> is critical</li>
       </ul>
 
       <h2>Technical Details for Security Professionals</h2>
@@ -246,7 +247,7 @@ export const blog: BlogPost = {
 
       <h2>Best Practices</h2>
       <ul>
-        <li>✅ Choose a strong, unique <a href="/blog/creating-strong-master-password">master password</a></li>
+        <li>✅ Choose a strong, unique <Link href="/blog/creating-strong-master-password">master password</Link></li>
         <li>✅ Never reuse your master password elsewhere</li>
         <li>✅ Understand that key derivation protects weak passwords to some extent</li>
         <li>✅ Accept the 1-second login delay as a security feature</li>
@@ -257,8 +258,8 @@ export const blog: BlogPost = {
       <p>
         Key derivation is the mathematical bridge between your memorable password and cryptographic security.
         <strong>LockPulse</strong> uses industry-standard PBKDF2 to ensure that even if our servers are compromised,
-        your master password remains safe. Combined with <a href="/blog/client-side-encryption-explained">client-side encryption</a>
-        and <a href="/blog/aes-256-encryption-standard">AES-256</a>, this creates a security model where trust
+        your master password remains safe. Combined with <Link href="/blog/client-side-encryption-explained">client-side encryption</Link>
+        and <Link href="/blog/aes-256-encryption-standard">AES-256</Link>, this creates a security model where trust
         is unnecessary—mathematics provides the guarantees.
       </p>
     </>

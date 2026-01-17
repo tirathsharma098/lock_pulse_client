@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'client-side-encryption-explained',
@@ -47,8 +48,8 @@ export const blog: BlogPost = {
       <p>
         <strong>LockPulse's project feature</strong> lets you organize credentials by context—development, production,
         personal, etc. Each project maintains the same client-side encryption model. Whether you're storing
-        <a href="/blog/managing-aws-credentials-securely">AWS credentials</a> or
-        <a href="/blog/database-password-management">database passwords</a>, everything is encrypted before leaving your browser.
+        <Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link> or
+        <Link href="/blog/database-password-management">database passwords</Link>, everything is encrypted before leaving your browser.
       </p>
 
       <h3>Performance Considerations</h3>

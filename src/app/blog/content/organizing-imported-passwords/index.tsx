@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'organizing-imported-passwords',
@@ -16,7 +17,7 @@ export const blog: BlogPost = {
     <>
       <h2>The Post-Import Challenge</h2>
       <p>
-        You've successfully <a href="/blog/importing-passwords-guide">imported your passwords</a> to
+        You've successfully <Link href="/blog/importing-passwords-guide">imported your passwords</Link> to
         <strong>LockPulse</strong>. Now you have dozens (or hundreds) of credentials in one big list.
         This guide shows you how to transform that chaos into an organized, project-based system.
       </p>
@@ -85,7 +86,7 @@ export const blog: BlogPost = {
         <li>Production environment</li>
       </ul>
       <p>
-        Learn more about <a href="/blog/managing-multiple-environments">managing multiple environments</a>.
+        Learn more about <Link href="/blog/managing-multiple-environments">managing multiple environments</Link>.
       </p>
 
       <h2>Step 3: Create Your Project Structure</h2>
@@ -163,7 +164,7 @@ export const blog: BlogPost = {
       </ul>
 
       <p>
-        See our guide on <a href="/blog/credential-tagging-strategies">credential tagging strategies</a> for more details.
+        See our guide on <Link href="/blog/credential-tagging-strategies">credential tagging strategies</Link> for more details.
       </p>
 
       <h3>Bulk Tagging</h3>
@@ -230,7 +231,7 @@ export const blog: BlogPost = {
       <ul>
         <li>Create dedicated "Team" or "Shared" project</li>
         <li>Move these credentials there</li>
-        <li>Set up <a href="/blog/secure-credential-sharing-teams">project sharing</a></li>
+        <li>Set up <Link href="/blog/secure-credential-sharing-teams">project sharing</Link></li>
         <li>Define clear ownership and rotation schedule</li>
       </ul>
 
@@ -255,7 +256,7 @@ export const blog: BlogPost = {
         <li><strong>Personal Dev:</strong> Personal GitHub, cloud accounts</li>
         <li><strong>Project A - Dev:</strong> Development credentials</li>
         <li><strong>Project A - Prod:</strong> Production credentials</li>
-        <li><strong>Shared Services:</strong> <a href="/blog/api-key-management">API keys</a>, databases</li>
+        <li><strong>Shared Services:</strong> <Link href="/blog/api-key-management">API keys</Link>, databases</li>
       </ul>
 
       <h3>Team Lead</h3>
@@ -266,7 +267,7 @@ export const blog: BlogPost = {
         <li><strong>Personal:</strong> Your individual accounts</li>
         <li><strong>Team Shared:</strong> Credentials for whole team</li>
         <li><strong>Client A:</strong> Per-client organization</li>
-        <li><strong>Infrastructure:</strong> <a href="/blog/managing-aws-credentials-securely">AWS</a>, servers, deployment</li>
+        <li><strong>Infrastructure:</strong> <Link href="/blog/managing-aws-credentials-securely">AWS</Link>, servers, deployment</li>
       </ul>
 
       <h2>Advanced Organization Techniques</h2>
@@ -291,7 +292,7 @@ export const blog: BlogPost = {
         <li>Example: "Databases" (all database credentials)</li>
       </ul>
       <p>
-        See <a href="/blog/service-level-credential-organization">service-level credential organization</a>.
+        See <Link href="/blog/service-level-credential-organization">service-level credential organization</Link>.
       </p>
 
       <h2>Maintenance and Review</h2>
@@ -357,9 +358,9 @@ export const blog: BlogPost = {
         With organized credentials, you can:
       </p>
       <ul>
-        <li>Set up <a href="/blog/credential-rotation-automation">rotation schedules</a> by project</li>
-        <li>Share appropriate projects with <a href="/blog/team-credential-management">team members</a></li>
-        <li>Implement <a href="/blog/access-control-best-practices">access controls</a> per project</li>
+        <li>Set up <Link href="/blog/credential-rotation-automation">rotation schedules</Link> by project</li>
+        <li>Share appropriate projects with <Link href="/blog/team-credential-management">team members</Link></li>
+        <li>Implement <Link href="/blog/access-control-best-practices">access controls</Link> per project</li>
         <li>Run security audits more effectively</li>
         <li>Scale your credential management confidently</li>
       </ul>
@@ -368,7 +369,7 @@ export const blog: BlogPost = {
       <p>
         Organizing imported passwords takes time but pays dividends. A well-organized <strong>LockPulse</strong>
         vault makes daily credential access effortless, reduces security risks, and scales with your needs.
-        The <a href="/blog/project-based-credential-management">project-based approach</a> grows with you,
+        The <Link href="/blog/project-based-credential-management">project-based approach</Link> grows with you,
         whether you're managing dozens or thousands of credentials.
       </p>
     </>

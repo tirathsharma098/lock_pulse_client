@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'ci-cd-credential-security',
@@ -23,8 +24,8 @@ export const blog: BlogPost = {
 
       <h3>Common CI/CD Credentials</h3>
       <ul>
-        <li><strong>Cloud Provider Credentials:</strong> <a href="/blog/managing-aws-credentials-securely">AWS</a>, Azure, GCP service accounts</li>
-        <li><strong>Version Control Tokens:</strong> <a href="/blog/github-token-security">GitHub</a>, GitLab, Bitbucket access tokens</li>
+        <li><strong>Cloud Provider Credentials:</strong> <Link href="/blog/managing-aws-credentials-securely">AWS</Link>, Azure, GCP service accounts</li>
+        <li><strong>Version Control Tokens:</strong> <Link href="/blog/github-token-security">GitHub</Link>, GitLab, Bitbucket access tokens</li>
         <li><strong>Container Registries:</strong> Docker Hub, ECR, GCR credentials</li>
         <li><strong>Deployment Keys:</strong> SSH keys for server access</li>
         <li><strong>Database Credentials:</strong> Connection strings for migrations and testing</li>
@@ -299,7 +300,7 @@ export const blog: BlogPost = {
 
       <h3>LockPulse Audit Trail</h3>
       <p>
-        Maintain compliance with <a href="/blog/audit-logging-compliance">LockPulse audit logging</a>:
+        Maintain compliance with <Link href="/blog/audit-logging-compliance">LockPulse audit logging</Link>:
       </p>
       <ul>
         <li>Log when CI/CD credentials are retrieved</li>
@@ -373,7 +374,7 @@ export const blog: BlogPost = {
       </ul>
 
       <p>
-        For comprehensive DevOps credential management, see our guide on <a href="/blog/developer-credential-workflow">developer credential workflows</a>.
+        For comprehensive DevOps credential management, see our guide on <Link href="/blog/developer-credential-workflow">developer credential workflows</Link>.
       </p>
     </>
   ),

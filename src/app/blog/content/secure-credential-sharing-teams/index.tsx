@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'secure-credential-sharing-teams',
@@ -44,27 +45,27 @@ export const blog: BlogPost = {
       <h2>Granular Access Control</h2>
       <p>
         Control who sees what within your projects. Some team members might need read-only access, while others
-        can edit credentials. LockPulse's <a href="/blog/access-control-best-practices">access control system</a>
+        can edit credentials. LockPulse's <Link href="/blog/access-control-best-practices">access control system</Link>
         lets you define permissions at the project level.
       </p>
 
       <h3>Revocation is Instant</h3>
       <p>
         When a team member leaves or changes roles, revoke their access immediately. They lose access to shared
-        projects, but their personal vault remains intact. This is crucial for <a href="/blog/team-credential-management">team credential management</a>.
+        projects, but their personal vault remains intact. This is crucial for <Link href="/blog/team-credential-management">team credential management</Link>.
       </p>
 
       <h2>Audit Trail</h2>
       <p>
         Every access and modification is logged (without exposing credential content). Know who accessed which
-        credentials and when. This satisfies <a href="/blog/audit-logging-compliance">compliance requirements</a>
+        credentials and when. This satisfies <Link href="/blog/audit-logging-compliance">compliance requirements</Link>
         while maintaining zero-knowledge security.
       </p>
 
       <h3>Real-World Example</h3>
       <p>
         Your development team needs access to staging environment credentials. Create a "Staging Project" in
-        LockPulse, add <a href="/blog/managing-aws-credentials-securely">AWS credentials</a>, database passwords,
+        LockPulse, add <Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link>, database passwords,
         and API keys. Share the project with your team. Everyone gets encrypted access without compromising security.
       </p>
     </>

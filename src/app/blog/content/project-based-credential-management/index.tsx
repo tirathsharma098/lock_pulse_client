@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'project-based-credential-management',
@@ -39,22 +40,22 @@ export const blog: BlogPost = {
         Inside each project, organize credentials by service type:
       </p>
       <ul>
-        <li><a href="/blog/managing-aws-credentials-securely">AWS Credentials</a></li>
-        <li><a href="/blog/github-token-security">GitHub Tokens</a></li>
-        <li><a href="/blog/database-password-management">Database Passwords</a></li>
-        <li><a href="/blog/api-key-management">API Keys</a></li>
+        <li><Link href="/blog/managing-aws-credentials-securely">AWS Credentials</Link></li>
+        <li><Link href="/blog/github-token-security">GitHub Tokens</Link></li>
+        <li><Link href="/blog/database-password-management">Database Passwords</Link></li>
+        <li><Link href="/blog/api-key-management">API Keys</Link></li>
       </ul>
 
       <h3>Sharing Credentials Securely</h3>
       <p>
-        When collaborating, <strong>LockPulse</strong> uses <a href="/blog/secure-credential-sharing-teams">secure sharing protocols</a>.
+        When collaborating, <strong>LockPulse</strong> uses <Link href="/blog/secure-credential-sharing-teams">secure sharing protocols</Link>.
         Each team member receives credentials encrypted with their own key, maintaining zero-knowledge principles.
       </p>
 
       <h2>Migration from Other Password Managers</h2>
       <p>
         Switching to project-based organization is simple. Import your existing passwords and reorganize them
-        into logical projects. LockPulse's <a href="/blog/importing-passwords-guide">import tool</a> supports
+        into logical projects. LockPulse's <Link href="/blog/importing-passwords-guide">import tool</Link> supports
         major password managers.
       </p>
 

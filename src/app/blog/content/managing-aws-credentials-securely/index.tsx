@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'managing-aws-credentials-securely',
@@ -39,15 +40,15 @@ export const blog: BlogPost = {
         <li><strong>Production Project:</strong> Critical production access</li>
       </ul>
       <p>
-        This separation follows the principle of least privilege and makes <a href="/blog/managing-multiple-environments">
-        managing multiple environments</a> easier.
+        This separation follows the principle of least privilege and makes <Link href="/blog/managing-multiple-environments">
+        managing multiple environments</Link> easier.
       </p>
 
       <h2>Team Access to AWS Credentials</h2>
       <p>
         When sharing AWS credentials with your team, <strong>LockPulse</strong> ensures each member receives
         encrypted credentials they can decrypt with their own master password. This is covered in detail in our
-        <a href="/blog/secure-credential-sharing-teams">secure credential sharing guide</a>.
+        <Link href="/blog/secure-credential-sharing-teams">secure credential sharing guide</Link>.
       </p>
 
       <h3>Rotation Best Practices</h3>

@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'first-project-setup',
@@ -35,7 +36,7 @@ export const blog: BlogPost = {
       <h3>What Are Projects?</h3>
       <p>
         <strong>Projects</strong> are containers for related credentials. Instead of one long list of passwords,
-        you organize them by context. Learn more about <a href="/blog/project-based-credential-management">project-based credential management</a>.
+        you organize them by context. Learn more about <Link href="/blog/project-based-credential-management">project-based credential management</Link>.
       </p>
 
       <h3>Common Project Types</h3>
@@ -151,7 +152,7 @@ export const blog: BlogPost = {
 
       <h3>Save the Credential</h3>
       <p>
-        Click <strong>"Save"</strong>. Your credential is encrypted using <a href="/blog/aes-256-encryption-standard">AES-256</a>
+        Click <strong>"Save"</strong>. Your credential is encrypted using <Link href="/blog/aes-256-encryption-standard">AES-256</Link>
         and stored securely.
       </p>
 
@@ -267,8 +268,8 @@ export const blog: BlogPost = {
         Create "Development Tools" project:
       </p>
       <ul>
-        <li><a href="/blog/github-token-security">GitHub personal access token</a></li>
-        <li><a href="/blog/managing-aws-credentials-securely">AWS credentials</a></li>
+        <li><Link href="/blog/github-token-security">GitHub personal access token</Link></li>
+        <li><Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link></li>
         <li>Database passwords (local dev)</li>
         <li>API keys for development</li>
       </ul>
@@ -301,9 +302,9 @@ export const blog: BlogPost = {
         If migrating from another password manager:
       </p>
       <ul>
-        <li>Follow our <a href="/blog/importing-passwords-guide">import guide</a></li>
+        <li>Follow our <Link href="/blog/importing-passwords-guide">import guide</Link></li>
         <li>Then organize into projects</li>
-        <li>See <a href="/blog/organizing-imported-passwords">organizing imported passwords</a></li>
+        <li>See <Link href="/blog/organizing-imported-passwords">organizing imported passwords</Link></li>
       </ul>
 
       <h3>Share with Team</h3>
@@ -314,7 +315,7 @@ export const blog: BlogPost = {
         <li>Click "Share" button in project</li>
         <li>Enter team member email addresses</li>
         <li>Set permission level (Viewer, Editor, Admin)</li>
-        <li>They receive encrypted access via <a href="/blog/secure-credential-sharing-teams">zero-knowledge sharing</a></li>
+        <li>They receive encrypted access via <Link href="/blog/secure-credential-sharing-teams">zero-knowledge sharing</Link></li>
       </ul>
 
       <h2>Troubleshooting</h2>
@@ -346,11 +347,11 @@ export const blog: BlogPost = {
       <h2>Congratulations!</h2>
       <p>
         You've created your first <strong>LockPulse Project</strong> and added credentials securely. This
-        foundation will scale as you add more projects and credentials. The <a href="/blog/project-based-credential-management">project-based organization</a>
+        foundation will scale as you add more projects and credentials. The <Link href="/blog/project-based-credential-management">project-based organization</Link>
         keeps everything manageable as your credential collection grows.
       </p>
       <p>
-        Continue with our <a href="/blog/getting-started-lockpulse">getting started guide</a> to learn
+        Continue with our <Link href="/blog/getting-started-lockpulse">getting started guide</Link> to learn
         more about advanced features and best practices.
       </p>
     </>

@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'managing-multiple-environments',
@@ -71,13 +72,13 @@ export const blog: BlogPost = {
         The most restricted project with live system credentials:
       </p>
       <ul>
-        <li>Production <a href="/blog/database-password-management">database passwords</a></li>
-        <li>Live <a href="/blog/managing-aws-credentials-securely">AWS credentials</a></li>
+        <li>Production <Link href="/blog/database-password-management">database passwords</Link></li>
+        <li>Live <Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link></li>
         <li>Real payment API keys</li>
         <li>Critical service accounts</li>
       </ul>
       <p>
-        <strong>Access:</strong> Limited to senior engineers and DevOps team. Implement <a href="/blog/access-control-best-practices">strict access controls</a>.
+        <strong>Access:</strong> Limited to senior engineers and DevOps team. Implement <Link href="/blog/access-control-best-practices">strict access controls</Link>.
       </p>
 
       <h2>Environment-Specific Best Practices</h2>
@@ -112,7 +113,7 @@ export const blog: BlogPost = {
         <li><strong>Production:</strong> Rotate every 90 days (or more frequently)</li>
       </ul>
       <p>
-        Learn more about <a href="/blog/credential-rotation-automation">credential rotation automation</a>.
+        Learn more about <Link href="/blog/credential-rotation-automation">credential rotation automation</Link>.
       </p>
 
       <h3>Deployment Workflows</h3>
@@ -136,7 +137,7 @@ export const blog: BlogPost = {
         <li>Feature branches can use Staging Project for testing</li>
       </ul>
       <p>
-        See <a href="/blog/ci-cd-credential-security">CI/CD credential security</a> for detailed integration strategies.
+        See <Link href="/blog/ci-cd-credential-security">CI/CD credential security</Link> for detailed integration strategies.
       </p>
 
       <h3>Emergency Access</h3>
@@ -159,7 +160,7 @@ export const blog: BlogPost = {
         <li><strong>HIPAA:</strong> Restricts production PHI access</li>
       </ul>
       <p>
-        LockPulse's project-based organization and <a href="/blog/audit-logging-compliance">audit logging</a>
+        LockPulse's project-based organization and <Link href="/blog/audit-logging-compliance">audit logging</Link>
         help satisfy these requirements.
       </p>
     </>

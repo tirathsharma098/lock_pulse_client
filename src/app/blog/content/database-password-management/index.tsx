@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'database-password-management',
@@ -40,7 +41,7 @@ export const blog: BlogPost = {
         <li><strong>Production DB Project:</strong> Live system credentials (most restricted access)</li>
       </ul>
       <p>
-        This aligns with <a href="/blog/managing-multiple-environments">managing multiple environments</a> best practices.
+        This aligns with <Link href="/blog/managing-multiple-environments">managing multiple environments</Link> best practices.
       </p>
 
       <h2>Password Rotation Strategy</h2>
@@ -65,21 +66,21 @@ export const blog: BlogPost = {
 
       <h2>Team Access Control</h2>
       <p>
-        Production database credentials should have minimal team access. Use <a href="/blog/access-control-best-practices">access control best practices</a>
+        Production database credentials should have minimal team access. Use <Link href="/blog/access-control-best-practices">access control best practices</Link>
         to limit who can view production passwords. Development databases can have broader access.
       </p>
 
       <h3>Compliance and Auditing</h3>
       <p>
         Many compliance frameworks (PCI-DSS, HIPAA, SOC 2) require tracking database credential access.
-        LockPulse's <a href="/blog/audit-logging-compliance">audit logging</a> automatically tracks who
+        LockPulse's <Link href="/blog/audit-logging-compliance">audit logging</Link> automatically tracks who
         accessed database credentials and when, without exposing the passwords themselves.
       </p>
 
       <h2>Emergency Access Procedures</h2>
       <p>
         Define clear procedures for emergency database access. Store emergency contact information and
-        escalation procedures alongside credentials in LockPulse. See <a href="/blog/emergency-access-planning">emergency access planning</a>
+        escalation procedures alongside credentials in LockPulse. See <Link href="/blog/emergency-access-planning">emergency access planning</Link>
         for comprehensive strategies.
       </p>
     </>

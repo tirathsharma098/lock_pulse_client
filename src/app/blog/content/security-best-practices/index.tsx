@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'security-best-practices',
@@ -32,7 +33,7 @@ export const blog: BlogPost = {
 
       <h3>Master Password Excellence</h3>
       <p>
-        Your <a href="/blog/creating-strong-master-password">master password</a> is the foundation:
+        Your <Link href="/blog/creating-strong-master-password">master password</Link> is the foundation:
       </p>
       <ul>
         <li><strong>Length over complexity:</strong> 20+ characters beats 8 complex characters</li>
@@ -63,7 +64,7 @@ export const blog: BlogPost = {
         <li><strong>Master password:</strong> Only if suspected compromise</li>
       </ul>
       <p>
-        Learn more about <a href="/blog/credential-rotation-automation">credential rotation automation</a>.
+        Learn more about <Link href="/blog/credential-rotation-automation">credential rotation automation</Link>.
       </p>
 
       <h2>Multi-Factor Authentication (2FA/MFA)</h2>
@@ -292,7 +293,7 @@ export const blog: BlogPost = {
       </p>
       <ul>
         <li>Grant minimum necessary access</li>
-        <li>Regular <a href="/blog/access-control-best-practices">access reviews</a></li>
+        <li>Regular <Link href="/blog/access-control-best-practices">access reviews</Link></li>
         <li>Immediate revocation on offboarding</li>
         <li>Separate admin accounts from daily use accounts</li>
       </ul>
@@ -345,7 +346,7 @@ export const blog: BlogPost = {
 
       <h3>Monthly</h3>
       <ul>
-        <li>✅ Review LockPulse <a href="/blog/audit-logging-compliance">audit logs</a></li>
+        <li>✅ Review LockPulse <Link href="/blog/audit-logging-compliance">audit logs</Link></li>
         <li>✅ Update passwords for high-value accounts</li>
         <li>✅ Review app permissions</li>
         <li>✅ Check credit report for identity theft</li>
@@ -426,10 +427,10 @@ export const blog: BlogPost = {
 
       <h3>Further Learning</h3>
       <ul>
-        <li><a href="/blog/what-is-zero-knowledge-password-manager">Zero-Knowledge Security</a></li>
-        <li><a href="/blog/team-credential-management">Team Security</a></li>
-        <li><a href="/blog/ci-cd-credential-security">DevOps Security</a></li>
-        <li><a href="/blog/emergency-access-planning">Emergency Planning</a></li>
+        <li><Link href="/blog/what-is-zero-knowledge-password-manager">Zero-Knowledge Security</Link></li>
+        <li><Link href="/blog/team-credential-management">Team Security</Link></li>
+        <li><Link href="/blog/ci-cd-credential-security">DevOps Security</Link></li>
+        <li><Link href="/blog/emergency-access-planning">Emergency Planning</Link></li>
       </ul>
 
       <h2>The Security Mindset</h2>

@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'credential-rotation-automation',
@@ -40,7 +41,7 @@ export const blog: BlogPost = {
       <h3>Critical Production Credentials</h3>
       <ul>
         <li><strong>Production database passwords:</strong> Every 60 days</li>
-        <li><strong>Production <a href="/blog/managing-aws-credentials-securely">AWS keys</a>:</strong> Every 90 days</li>
+        <li><strong>Production <Link href="/blog/managing-aws-credentials-securely">AWS keys</Link>:</strong> Every 90 days</li>
         <li><strong>Root/Admin accounts:</strong> Every 90 days</li>
         <li><strong>API keys for payment processing:</strong> Every 90 days</li>
       </ul>
@@ -101,7 +102,7 @@ export const blog: BlogPost = {
 
       <h3>AWS Credentials Automation</h3>
       <p>
-        For <a href="/blog/managing-aws-credentials-securely">AWS credentials</a>, use IAM policies and scripts:
+        For <Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link>, use IAM policies and scripts:
       </p>
       <ul>
         <li>Use AWS Secrets Manager for automatic rotation</li>
@@ -112,7 +113,7 @@ export const blog: BlogPost = {
 
       <h3>Database Password Automation</h3>
       <p>
-        For <a href="/blog/database-password-management">database passwords</a>:
+        For <Link href="/blog/database-password-management">database passwords</Link>:
       </p>
       <ul>
         <li>Use database-native rotation features (RDS, Azure SQL)</li>
@@ -194,7 +195,7 @@ export const blog: BlogPost = {
 
       <h3>Audit Trail</h3>
       <p>
-        LockPulse's <a href="/blog/audit-logging-compliance">audit logging</a> automatically tracks:
+        LockPulse's <Link href="/blog/audit-logging-compliance">audit logging</Link> automatically tracks:
       </p>
       <ul>
         <li>When credentials were added/modified</li>

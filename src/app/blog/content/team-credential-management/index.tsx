@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'team-credential-management',
@@ -85,7 +86,7 @@ export const blog: BlogPost = {
       <h2>Compliance and Auditing</h2>
       <p>
         LockPulse's audit logs show who accessed what and when. This satisfies compliance requirements
-        while maintaining zero-knowledge security. Learn more about <a href="/blog/audit-logging-compliance">audit logging</a>.
+        while maintaining zero-knowledge security. Learn more about <Link href="/blog/audit-logging-compliance">audit logging</Link>.
       </p>
     </>
   ),

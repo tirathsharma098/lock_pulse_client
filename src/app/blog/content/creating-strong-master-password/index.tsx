@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'creating-strong-master-password',
@@ -16,7 +17,7 @@ export const blog: BlogPost = {
     <>
       <h2>Your Master Password: The Foundation of Security</h2>
       <p>
-        In a <a href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge system</a> like <strong>LockPulse</strong>,
+        In a <Link href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge system</Link> like <strong>LockPulse</strong>,
         your master password is everything. It's the only key to your vault, and unlike traditional services,
         we can never reset it. This guide will help you create one that's both secure and memorable.
       </p>
@@ -144,7 +145,7 @@ export const blog: BlogPost = {
 
       <h2>What If You Forget?</h2>
       <p>
-        Remember: with <a href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge encryption</a>,
+        Remember: with <Link href="/blog/what-is-zero-knowledge-password-manager">zero-knowledge encryption</Link>,
         forgotten master passwords mean unrecoverable data. That's by design—it's what keeps your credentials
         secure even if LockPulse is compromised.
       </p>
@@ -154,7 +155,7 @@ export const blog: BlogPost = {
       <ul>
         <li>Test it for a week before migrating all passwords</li>
         <li>Ensure you can type it reliably</li>
-        <li>Consider an emergency backup method (see <a href="/blog/emergency-access-planning">emergency access planning</a>)</li>
+        <li>Consider an emergency backup method (see <Link href="/blog/emergency-access-planning">emergency access planning</Link>)</li>
       </ul>
 
       <h2>Changing Your Master Password</h2>

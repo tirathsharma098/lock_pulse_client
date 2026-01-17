@@ -11,9 +11,10 @@ export async function generateStaticParams() {
   }))
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const baseUrl = process.env.NEXT_PUBLIC_CLIENT_URL || 'https://lockpulse.codedigit.in'
-  const post = getBlogBySlug(params.slug)
+  const { slug } = await params
+  const post = getBlogBySlug(slug)
   
   if (!post) {
     return {
@@ -80,9 +81,10 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   }
 }
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const baseUrl = process.env.NEXT_PUBLIC_CLIENT_URL || 'https://lockpulse.codedigit.in'
-  const post = getBlogBySlug(params.slug)
+  const { slug } = await params
+  const post = getBlogBySlug(slug)
 
   if (!post) {
     notFound()

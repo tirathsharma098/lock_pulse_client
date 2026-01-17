@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'why-choose-lockpulse',
@@ -38,7 +39,7 @@ export const blog: BlogPost = {
       </p>
       <ul>
         <li>Your master password never leaves your device</li>
-        <li>All encryption happens in your browser using <a href="/blog/client-side-encryption-explained">client-side encryption</a></li>
+        <li>All encryption happens in your browser using <Link href="/blog/client-side-encryption-explained">client-side encryption</Link></li>
         <li>We store only encrypted blobs—useless without your password</li>
         <li>Our servers can't decrypt your data even if compromised</li>
       </ul>
@@ -55,7 +56,7 @@ export const blog: BlogPost = {
       </ul>
       <p>
         With <strong>LockPulse</strong>, trust is unnecessary. Cryptography provides the guarantees,
-        not corporate promises. Read more about <a href="/blog/server-side-vs-client-side-security">server-side vs client-side security</a>.
+        not corporate promises. Read more about <Link href="/blog/server-side-vs-client-side-security">server-side vs client-side security</Link>.
       </p>
 
       <h2>Project-Based Organization</h2>
@@ -73,7 +74,7 @@ export const blog: BlogPost = {
       <ul>
         <li>Separate projects for each application you build</li>
         <li>Organize by environment (dev, staging, production)</li>
-        <li>Store <a href="/blog/github-token-security">GitHub tokens</a>, <a href="/blog/managing-aws-credentials-securely">AWS credentials</a>, database passwords by project</li>
+        <li>Store <Link href="/blog/github-token-security">GitHub tokens</Link>, <Link href="/blog/managing-aws-credentials-securely">AWS credentials</Link>, database passwords by project</li>
         <li>Share project access with team members</li>
       </ul>
 
@@ -98,7 +99,7 @@ export const blog: BlogPost = {
       </ul>
 
       <p>
-        Learn more about <a href="/blog/project-based-credential-management">project-based credential management</a>.
+        Learn more about <Link href="/blog/project-based-credential-management">project-based credential management</Link>.
       </p>
 
       <h2>Team Collaboration Without Compromise</h2>
@@ -123,7 +124,7 @@ export const blog: BlogPost = {
       </ul>
 
       <p>
-        Details in our <a href="/blog/secure-credential-sharing-teams">secure credential sharing guide</a>.
+        Details in our <Link href="/blog/secure-credential-sharing-teams">secure credential sharing guide</Link>.
       </p>
 
       <h2>Open Source Transparency</h2>
@@ -165,7 +166,7 @@ export const blog: BlogPost = {
       </ul>
 
       <p>
-        See <a href="/blog/developer-credential-workflow">developer credential workflow</a> for details.
+        See <Link href="/blog/developer-credential-workflow">developer credential workflow</Link> for details.
       </p>
 
       <h2>Performance and Reliability</h2>
@@ -196,8 +197,8 @@ export const blog: BlogPost = {
         <strong>Advanced Security:</strong>
       </p>
       <ul>
-        <li><a href="/blog/aes-256-encryption-standard">AES-256-GCM encryption</a></li>
-        <li><a href="/blog/encryption-key-derivation">PBKDF2 key derivation</a> (100,000 iterations)</li>
+        <li><Link href="/blog/aes-256-encryption-standard">AES-256-GCM encryption</Link></li>
+        <li><Link href="/blog/encryption-key-derivation">PBKDF2 key derivation</Link> (100,000 iterations)</li>
         <li>Password strength analyzer</li>
         <li>Breach detection (check if passwords were leaked)</li>
         <li>Reused password detector</li>
@@ -218,7 +219,7 @@ export const blog: BlogPost = {
         <strong>Compliance Ready:</strong>
       </p>
       <ul>
-        <li><a href="/blog/audit-logging-compliance">Audit logging</a> for compliance</li>
+        <li><Link href="/blog/audit-logging-compliance">Audit logging</Link> for compliance</li>
         <li>SOC 2, ISO 27001 alignment</li>
         <li>GDPR compliant</li>
         <li>Data residency options</li>
@@ -258,7 +259,7 @@ export const blog: BlogPost = {
       </ul>
 
       <p>
-        Follow our <a href="/blog/importing-passwords-guide">complete migration guide</a>.
+        Follow our <Link href="/blog/importing-passwords-guide">complete migration guide</Link>.
       </p>
 
       <h2>Customer Support That Cares</h2>
@@ -299,7 +300,7 @@ export const blog: BlogPost = {
       <h2>Ready to Make the Switch?</h2>
       <p>
         Join thousands of security-conscious users, developers, and teams who've chosen mathematical
-        certainty over trust-based promises. Start with our <a href="/blog/getting-started-lockpulse">getting started guide</a>
+        certainty over trust-based promises. Start with our <Link href="/blog/getting-started-lockpulse">getting started guide</Link>
         and experience the difference true zero-knowledge security makes.
       </p>
       <p>

@@ -1,4 +1,5 @@
 import { BlogPost } from '../../types'
+import Link from 'next/link'
 
 export const blog: BlogPost = {
   slug: 'credential-tagging-strategies',
@@ -93,7 +94,7 @@ export const blog: BlogPost = {
         <li><code>local</code> - Local development</li>
       </ul>
       <p>
-        Related: <a href="/blog/managing-multiple-environments">Managing multiple environments</a>.
+        Related: <Link href="/blog/managing-multiple-environments">Managing multiple environments</Link>.
       </p>
 
       <h3>Category 6: Access Tags</h3>
@@ -441,7 +442,7 @@ export const blog: BlogPost = {
       <h2>Conclusion</h2>
       <p>
         Effective tagging transforms <strong>LockPulse</strong> from a secure credential store into a powerful
-        credential management system. Combined with <a href="/blog/project-based-credential-management">project-based organization</a>,
+        credential management system. Combined with <Link href="/blog/project-based-credential-management">project-based organization</Link>,
         tags provide the flexibility to find, manage, and secure credentials at scale.
       </p>
       <p>
