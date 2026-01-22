@@ -24,6 +24,8 @@ import { z } from 'zod'; // add zod
 import { Shield } from 'lucide-react';
 import styles from './LoginPresentation.module.css';
 import FullPageSpinner from '@/components/ui/full-page-loader';
+import { saveUser } from '@/lib/usersFn';
+import RecentUsers from './RecentUsers';
 
 // local schema
 const loginSchema = z.object({
@@ -148,7 +150,7 @@ export default function LoginClient() {
       setVaultData(vaultKey, username, securityData.email);
       kek.fill(0);
       setPassword('');
-
+      saveUser(username);
       toast.success('Signed in');
       router.replace('/account');
     } catch (err: any) {
@@ -248,6 +250,15 @@ export default function LoginClient() {
               </Typography>
             </Box>
           </Paper>
+
+          <Box className="!mt-4">
+            <RecentUsers 
+              onSelectUser={(selectedUsername) => {
+                setUsername(selectedUsername);
+                if (fieldErrors.username) setFieldErrors((p) => ({ ...p, username: undefined }));
+              }}
+            />
+          </Box>
         </Container>
       </div>
     </div> : <FullPageSpinner/>
