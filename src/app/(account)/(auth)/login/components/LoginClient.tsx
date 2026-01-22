@@ -165,8 +165,8 @@ export default function LoginClient() {
       <LoginPresentation />
       
       {/* Form Side */}
-      <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Container maxWidth="sm">
+      <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-4 md:p-4">
+        <Container maxWidth="sm" className='!p-0 sm:!p-4'>
           <Paper elevation={3} className="!p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
             <div className='lg:hidden'>
               <div className="flex items-center justify-center mb-4">
