@@ -23,6 +23,7 @@ import LoginPresentation from '../components/LoginPresentation';
 import { z } from 'zod'; // add zod
 import { Shield } from 'lucide-react';
 import styles from './LoginPresentation.module.css';
+import FullPageSpinner from '@/components/ui/full-page-loader';
 
 // local schema
 const loginSchema = z.object({
@@ -45,7 +46,33 @@ export default function LoginClient() {
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setVaultData } = useVault();
+  const { setVaultData, vaultKey, wipeVaultKey } = useVault();
+  const [isInitialLoad, setIsInitialLoad] = useState(false);
+
+  useEffect(()=> {
+    const handleBeforeLoad = async () => {
+      try{
+        const res = await fetch('api/auth/check-cookie',{
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success && vaultKey)
+          router.replace('/account');
+        else if(data.success && !vaultKey){
+          await fetch('/api/auth/check-cookie', {
+            credentials: 'include',
+            method: 'POST',
+          })
+        }
+      } catch(err){
+        toast.error("Something went wrong");
+      } finally {
+        wipeVaultKey();
+        setIsInitialLoad(true);
+      }
+    }
+    handleBeforeLoad();
+  }, []);
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
@@ -133,8 +160,7 @@ export default function LoginClient() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex">
+  return ( isInitialLoad ? <div className="min-h-screen flex">
       {/* Presentation Side */}
       <LoginPresentation />
       
@@ -224,6 +250,6 @@ export default function LoginClient() {
           </Paper>
         </Container>
       </div>
-    </div>
+    </div> : <FullPageSpinner/>
   );
 }

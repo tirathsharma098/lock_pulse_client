@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Container, 
@@ -21,6 +21,8 @@ import RegisterPresentation from './components/RegisterPresentation';
 import { z } from 'zod'; // add zod
 import { Shield } from 'lucide-react';
 import styles from '@/app/(account)/(auth)/login/components/LoginPresentation.module.css';
+import { toast } from 'sonner';
+import FullPageSpinner from '@/components/ui/full-page-loader';
 
 // local schema
 const registerSchema = z.object({
@@ -59,6 +61,25 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; email?: string; password?: string; confirmPassword?: string }>({});
   const router = useRouter();
+  const [isInitialLoad, setIsInitialLoad] = useState(false);
+
+  useEffect(()=> {
+    const handleBeforeLoad = async () => {
+      try{
+        const res = await fetch('api/auth/check-cookie',{
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success)
+          router.replace('/account');
+      } catch(err){
+        toast.error("Something went wrong");
+      } finally {
+        setIsInitialLoad(true);
+      }
+    }
+    handleBeforeLoad();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,8 +153,7 @@ export default function RegisterPage() {
 
     const passwordSize = password ? getEncryptedSize(password) : 0;
 
-  return (
-    <div className="min-h-screen flex">
+  return (isInitialLoad ? <div className="min-h-screen flex">
       {/* Presentation Side */}
       <RegisterPresentation />
       
@@ -254,6 +274,6 @@ export default function RegisterPage() {
           </Paper>
         </Container>
       </div>
-    </div>
+    </div> : <FullPageSpinner/>
   );
 }
