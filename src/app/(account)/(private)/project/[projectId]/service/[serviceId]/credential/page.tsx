@@ -12,6 +12,8 @@ import { decryptCompat } from '@/lib/crypto';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardContent, CardTitle, Button, IconButton, Select, Pagination } from '@/components/ui';
 import { Box } from '@mui/material';
+import { Menu, MenuItem } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 export default function CredentialsPage() {
   const params = useParams();
@@ -29,6 +31,20 @@ export default function CredentialsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
   const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const [activeCredentialId, setActiveCredentialId] = useState<string | null>(null);
+
+  const handleOpenMenu = (e: React.MouseEvent<HTMLElement>, projectId: string) => {
+    e.stopPropagation(); // avoid triggering the row click
+    setAnchorEl(e.currentTarget);
+    setActiveCredentialId(projectId);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setActiveCredentialId(null);
+  };
 
   const fetchData = async (
     page: number = 1,
@@ -97,7 +113,7 @@ export default function CredentialsPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto !p-0 md:p-6 max-w-4xl">
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
           <div className="flex justify-between items-center">
@@ -113,7 +129,7 @@ export default function CredentialsPage() {
       )}
 
       <Card>
-        <CardHeader>
+        <CardHeader className='px-1 sm:px-6'>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button 
@@ -137,7 +153,7 @@ export default function CredentialsPage() {
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className='px-1 sm:px-6'>
           <div className="flex flex-col sm:flex-row gap-3 mb-6">
             <Select
               label="Filter"
@@ -211,7 +227,7 @@ export default function CredentialsPage() {
                         </p>
                       </div>
                     </Box>
-                    <div className="flex items-center space-x-1">
+                    <div className="hidden sm:flex items-center space-x-1">
                       <IconButton 
                         onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${credential.id}/view`)}
                         variant="ghost"
@@ -234,10 +250,48 @@ export default function CredentialsPage() {
                         <DeleteIcon />
                       </IconButton>
                     </div>
+                    <IconButton
+                      size="sm"
+                      onClick={(e) => handleOpenMenu(e, credential.id)}
+                      className="sm:hidden"
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+
                   </div>
                 ))}
               </div>
+              <Menu
+                  anchorEl={anchorEl}
+                  open={open}
+                  onClose={handleCloseMenu}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                slotProps={{
+                  paper: {sx:{
+                    borderRadius: 4,        // 16px
+                    boxShadow:
+                      "0px 4px 20px rgba(0,0,0,0.12)", // soft shadow
+                    minWidth: 100,
+                    mt: 1,
+                  },}
+                }}
+              >
+                      <MenuItem onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${activeCredentialId}/view`)}>
+                        View
+                      </MenuItem>
 
+                      <MenuItem onClick={() => router.push(`/project/${projectId}/service/${serviceId}/credential/${activeCredentialId}/edit`)}>
+                        Edit
+                      </MenuItem>
+
+                      <MenuItem
+                        onClick={() => handleDeleteCredential(activeCredentialId!)}
+                        sx={{ color: "error.main" }}
+                      >
+                        Delete
+                      </MenuItem>
+                    </Menu>
               {totalPages > 1 && (
                 <div className="mt-6">
                   <Pagination

@@ -204,14 +204,14 @@ export default function ProjectViewPage() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'sr', headerName: 'Sr', width: 70 },
-    { field: 'username', headerName: 'Username', width: 200 },
-    { field: 'email', headerName: 'Email', width: 250 },
+    { field: 'sr', headerName: 'Sr', minWidth: 10 },
+    { field: 'username', headerName: 'Username', minWidth: 100 },
+    { field: 'email', headerName: 'Email', minWidth: 200 },
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      width: 100,
+      minWidth: 50,
       getActions: (params:any) => [
         <GridActionsCellItem
           key="unshare"
@@ -271,7 +271,7 @@ export default function ProjectViewPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto !p-0 md:p-6 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
           <Button
@@ -391,9 +391,9 @@ export default function ProjectViewPage() {
           <CardHeader>
             <CardTitle>Project Sharing</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Box sx={{ p: 3 }}>
-              <Paper sx={{ p: 3, mb: 3 }}>
+          <CardContent className='!px-0 md:px-6'>
+            <Box sx={{ p: {xs: 0, md: 3},  }}>
+              <Paper sx={{ p: {xs:1, md: 3}, mb: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6">Shared Users</Typography>
                   <Button

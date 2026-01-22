@@ -23,6 +23,9 @@ import LoginPresentation from '../components/LoginPresentation';
 import { z } from 'zod'; // add zod
 import { Shield } from 'lucide-react';
 import styles from './LoginPresentation.module.css';
+import FullPageSpinner from '@/components/ui/full-page-loader';
+import { saveUser } from '@/lib/usersFn';
+import RecentUsers from './RecentUsers';
 
 // local schema
 const loginSchema = z.object({
@@ -45,7 +48,33 @@ export default function LoginClient() {
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setVaultData } = useVault();
+  const { setVaultData, vaultKey, wipeVaultKey } = useVault();
+  const [isInitialLoad, setIsInitialLoad] = useState(false);
+
+  useEffect(()=> {
+    const handleBeforeLoad = async () => {
+      try{
+        const res = await fetch('api/auth/check-cookie',{
+          credentials: 'include'
+        });
+        const data = await res.json();
+        if (data.success && vaultKey)
+          router.replace('/account');
+        else if(data.success && !vaultKey){
+          await fetch('/api/auth/check-cookie', {
+            credentials: 'include',
+            method: 'POST',
+          })
+        }
+      } catch(err){
+        toast.error("Something went wrong");
+      } finally {
+        wipeVaultKey();
+        setIsInitialLoad(true);
+      }
+    }
+    handleBeforeLoad();
+  }, []);
 
   useEffect(() => {
     if (searchParams.get('registered') === 'true') {
@@ -121,7 +150,7 @@ export default function LoginClient() {
       setVaultData(vaultKey, username, securityData.email);
       kek.fill(0);
       setPassword('');
-
+      saveUser(username);
       toast.success('Signed in');
       router.replace('/account');
     } catch (err: any) {
@@ -133,14 +162,13 @@ export default function LoginClient() {
     }
   };
 
-  return (
-    <div className="min-h-screen flex">
+  return ( isInitialLoad ? <div className="min-h-screen flex">
       {/* Presentation Side */}
       <LoginPresentation />
       
       {/* Form Side */}
-      <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <Container maxWidth="sm">
+      <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-4 md:p-4">
+        <Container maxWidth="sm" className='!p-0 sm:!p-4'>
           <Paper elevation={3} className="!p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
             <div className='lg:hidden'>
               <div className="flex items-center justify-center mb-4">
@@ -222,8 +250,17 @@ export default function LoginClient() {
               </Typography>
             </Box>
           </Paper>
+
+          <Box className="!mt-4">
+            <RecentUsers 
+              onSelectUser={(selectedUsername) => {
+                setUsername(selectedUsername);
+                if (fieldErrors.username) setFieldErrors((p) => ({ ...p, username: undefined }));
+              }}
+            />
+          </Box>
         </Container>
       </div>
-    </div>
+    </div> : <FullPageSpinner/>
   );
 }
