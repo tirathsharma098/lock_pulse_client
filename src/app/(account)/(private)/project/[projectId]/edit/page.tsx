@@ -162,7 +162,7 @@ export default function ProjectEditPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto !p-0 md:p-6 max-w-4xl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
           <Button 

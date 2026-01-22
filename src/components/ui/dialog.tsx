@@ -34,7 +34,7 @@ const Dialog: React.FC<DialogProps> = ({ open, onClose, children, className }) =
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-[1400] flex items-center justify-center">
       <div 
         className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
         onClick={onClose}

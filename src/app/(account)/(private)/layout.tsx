@@ -48,7 +48,7 @@ export default function MainLayout({
   return (isInitialLoad ?
     <div className="min-h-screen bg-gray-50">
       <VaultHeader />
-      <Container maxWidth="md" className="pt-8">
+      <Container maxWidth="md" className="pt-8 !px-1 sm:!px-4">
         <AppBreadCrumb />
         <main className="pt-6">{children}</main>
       </Container>

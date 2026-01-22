@@ -18,6 +18,8 @@ import ViewPasswordDialog from '@/components/vault/ViewPasswordDialog';
 import { Edit2Icon, EditIcon } from 'lucide-react';
 import EditPasswordDialog from '@/components/vault/EditPasswordDialog';
 import { Card, CardHeader, CardContent, CardTitle, Button, Select, Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, IconButton, Pagination } from '@/components/ui';
+import { Menu, MenuItem } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 interface DecryptedVaultItem extends VaultItem {
   title: string;
@@ -42,7 +44,20 @@ export default function VaultPage() {
 
   const [filterType, setFilterType] = useState<'all' | 'normal' | 'long'>('all');
   const [sortDir, setSortDir] = useState<'ASC' | 'DESC'>('DESC');
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const [activeVaultId, setActiveVaultId] = useState<string | null>(null);
 
+  const handleOpenMenu = (e: React.MouseEvent<HTMLElement>, projectId: string) => {
+    e.stopPropagation(); // avoid triggering the row click
+    setAnchorEl(e.currentTarget);
+    setActiveVaultId(projectId);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+    setActiveVaultId(null);
+  };
   const clearVaultStateData = () => {
     // console.debug('[vault] Missing/invalid vaultKey. length=', vaultKey?.length);
     setItems([]);
@@ -156,7 +171,7 @@ export default function VaultPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className="container mx-auto !p-0 md:p-6 max-w-4xl">
       {error && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
           <div className="flex justify-between items-center">
@@ -249,7 +264,7 @@ export default function VaultPage() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1">
+                    <div className="hidden sm:flex items-center space-x-1">
                       <IconButton 
                         onClick={() => handleViewItem(item.id)} 
                         variant="ghost"
@@ -275,9 +290,52 @@ export default function VaultPage() {
                         <DeleteIcon />
                       </IconButton>
                     </div>
+                    <IconButton
+                      size="sm"
+                      onClick={(e) => handleOpenMenu(e, item.id)}
+                      className="sm:hidden"
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                    
                   </div>
                 ))}
               </div>
+
+            <Menu
+              anchorEl={anchorEl}
+              open={open}
+              onClose={handleCloseMenu}
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              transformOrigin={{ vertical: "top", horizontal: "right" }}
+              slotProps={{
+                paper: {sx:{
+                  borderRadius: 4,        // 16px
+                  boxShadow:
+                    "0px 4px 20px rgba(0,0,0,0.12)", // soft shadow
+                  minWidth: 100,
+                  mt: 1,
+                },}
+              }}
+            >
+              <MenuItem onClick={()=>handleViewItem(activeVaultId!)}>
+                View
+              </MenuItem>
+
+              <MenuItem onClick={()=>handleEditItem(activeVaultId!)}>
+                Edit
+              </MenuItem>
+
+              <MenuItem
+                onClick={() => {
+                  setItemToDelete(activeVaultId);
+                  setDeleteDialogOpen(true);
+                }}
+                sx={{ color: "error.main" }}
+              >
+                Delete
+              </MenuItem>
+            </Menu>
 
               {totalPages > 1 && (
                 <div className="mt-6">
