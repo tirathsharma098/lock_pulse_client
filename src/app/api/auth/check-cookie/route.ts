@@ -15,7 +15,11 @@ export async function GET () {
 
 export async function POST () {
     const cookie = await cookies();
-    cookie.delete('auth');
+    cookie.delete({
+        name: 'auth',
+        path: '/',
+        domain: process.env.COOKIE_DOMAIN || ""
+    });
     return NextResponse.json({
         success: true
     }, {status: 200});
