@@ -18,6 +18,7 @@ import { useVault } from '@/contexts/VaultContext';
 import { authService } from '@/services';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { permanentRedirect } from 'next/navigation';
 
 export default function VaultHeader() {
     const { wipeVaultKey } = useVault();
@@ -28,11 +29,11 @@ export default function VaultHeader() {
         await authService.logout();
         wipeVaultKey();
         toast.success('Logged out');
-        router.push('/');
+        permanentRedirect("/login");
       } catch {
         wipeVaultKey();
         toast.success('Logged out');
-        router.push('/');
+        permanentRedirect("/login");
       }
     };
   

@@ -18,7 +18,9 @@ export async function POST () {
     cookie.delete({
         name: 'auth',
         path: '/',
-        domain: process.env.COOKIE_DOMAIN || ""
+        domain: process.env.COOKIE_DOMAIN,
+        sameSite: 'strict',
+        secure: true,
     });
     return NextResponse.json({
         success: true
