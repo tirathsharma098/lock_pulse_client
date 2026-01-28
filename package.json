@@ -16,6 +16,7 @@
     "@mui/x-data-grid": "^8.11.0",
     "@serenity-kit/opaque": "^0.9.0",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "libsodium-wrappers-sumo": "^0.7.15",
     "lodash": "^4.17.21",
     "lucide-react": "^0.541.0",

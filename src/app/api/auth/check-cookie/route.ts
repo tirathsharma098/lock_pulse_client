@@ -26,7 +26,7 @@ export async function POST () {
             name: 'auth',
             path: '/',
             domain: process.env.COOKIE_DOMAIN,
-            sameSite: 'strict',
+            sameSite: process.env.NEXT_PUBLIC_NODE_ENV == 'development'? 'lax':'strict',
             secure: true,
         });
         return NextResponse.json({
