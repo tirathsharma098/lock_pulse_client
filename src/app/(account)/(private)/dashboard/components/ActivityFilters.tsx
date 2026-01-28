@@ -11,6 +11,8 @@ import {
 } from '@mui/material';
 import { Filter, RefreshCw } from 'lucide-react';
 import ActivityTable from './ActivityTable';
+import { getAllProjects } from '@/services/projectService';
+import { getAllServices } from '@/services/serviceService';
 
 interface ActivityFiltersProps {
   isVaultResource?: boolean;
@@ -29,6 +31,7 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
   const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
   const [services, setServices] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isVaultResource === false) {
@@ -47,19 +50,13 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
 
   const fetchProjects = async () => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/project`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setProjects(data);
-      }
-    } catch (error) {
-      console.error('Error fetching projects:', error);
+      const data = await getAllProjects("page=1");
+      setProjects(data.items.map(p => ({ id: p.id, name: p.name })));
+    } catch (err) {
+      console.error('Error fetching projects:', err);
+      setError('Failed to load projects');
     } finally {
       setLoading(false);
     }
@@ -67,22 +64,13 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
 
   const fetchServices = async (projectId: string) => {
     setLoading(true);
+    setError(null);
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/service/project/${projectId}`,
-        { 
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setServices(data);
-      }
-    } catch (error) {
-      console.error('Error fetching services:', error);
+      const data = await getAllServices(projectId, "page=1");
+      setServices(data.items.map(s => ({ id: s.id, name: s.name })));
+    } catch (err) {
+      console.error('Error fetching services:', err);
+      setError('Failed to load services');
     } finally {
       setLoading(false);
     }
@@ -102,6 +90,7 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
       serviceId: '',
     });
     setServices([]);
+    setError(null);
   };
 
   return (
@@ -112,6 +101,12 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
             <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h3>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-600 dark:text-red-400 text-sm">
+              {error}
+            </div>
+          )}
 
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={3}>
@@ -125,10 +120,12 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
               >
                 <MenuItem value="">All</MenuItem>
                 <MenuItem value="view">View</MenuItem>
+                <MenuItem value="find">Find</MenuItem>
                 <MenuItem value="create">Create</MenuItem>
                 <MenuItem value="update">Update</MenuItem>
                 <MenuItem value="delete">Delete</MenuItem>
                 <MenuItem value="share">Share</MenuItem>
+                <MenuItem value="unshare">Unshare</MenuItem>
               </TextField>
             </Grid>
 
@@ -143,19 +140,16 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
               >
                 <MenuItem value="">All</MenuItem>
                 {isVaultResource !== false && <MenuItem value="vault">Vault</MenuItem>}
-                {isVaultResource !== true && (
-                  <>
-                    <MenuItem value="project">Project</MenuItem>
-                    <MenuItem value="service">Service</MenuItem>
-                    <MenuItem value="credential">Credential</MenuItem>
-                  </>
-                )}
+                {isVaultResource !== true && [
+                    <MenuItem key="project" value="project">Project</MenuItem>,
+                    <MenuItem key="service" value="service">Service</MenuItem>,
+                    <MenuItem key="credential" value="credential">Credential</MenuItem>
+                  ]}
               </TextField>
             </Grid>
 
-            {isVaultResource === false && (
-              <>
-                <Grid item xs={12} sm={6} md={3}>
+            {isVaultResource === false && [
+                <Grid key="project" item xs={12} sm={6} md={3}>
                   <TextField
                     select
                     fullWidth
@@ -172,9 +166,8 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
                       </MenuItem>
                     ))}
                   </TextField>
-                </Grid>
-
-                <Grid item xs={12} sm={6} md={3}>
+                </Grid>,
+                <Grid key="service" item xs={12} sm={6} md={3}>
                   <TextField
                     select
                     fullWidth
@@ -192,8 +185,7 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
                     ))}
                   </TextField>
                 </Grid>
-              </>
-            )}
+              ]}
 
             <Grid item xs={12} sm={6} md={3}>
               <TextField

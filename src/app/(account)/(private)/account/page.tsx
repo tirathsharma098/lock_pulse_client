@@ -5,6 +5,13 @@ import Link from "next/link";
 
 const cards = [
   {
+    title: "Dashboard",
+    desc: "View activity logs, analytics, and insights.",
+    href: "/dashboard",
+    icon: BarChart3,
+    bg: "bg-gradient-to-br from-purple-500 to-violet-600",
+  },
+  {
     title: "My Vault",
     desc: "Manage and view your vault.",
     href: "/vault",
@@ -53,22 +60,7 @@ export default function HomePage() {
           </div>
         </Link>
       ))}
-
-      <Link href="/dashboard" className="block">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border-2 border-transparent hover:border-blue-500">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <BarChart3 className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Dashboard</h3>
-            </div>
-          </div>
-          <p className="text-gray-600 dark:text-gray-400 text-sm">
-            View activity logs, analytics, and insights for your vaults and projects
-          </p>
-        </div>
-      </Link>
+      
     </div>
   );
 }
