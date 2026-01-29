@@ -74,3 +74,10 @@ export const deleteProject = async (id: string): Promise<void> => {
     method: 'DELETE',
   });
 };
+
+export async function searchProjectsAutocomplete(query: string): Promise<Array<{ id: string; name: string }>> {
+  if (!query || query.trim().length < 1) {
+    return [];
+  }
+  return apiRequest(`/projects/search/autocomplete?q=${encodeURIComponent(query)}`);
+}

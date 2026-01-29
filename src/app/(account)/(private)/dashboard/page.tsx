@@ -87,16 +87,13 @@ export default function DashboardPage() {
             <Tab label="Overview" icon={<TrendingUp className="w-5 h-5" />} iconPosition="start" />
             <Tab label="Vault Activities" icon={<Vault className="w-5 h-5" />} iconPosition="start" />
             <Tab label="Project Activities" icon={<FolderKanban className="w-5 h-5" />} iconPosition="start" />
-            <Tab label="All Activities" icon={<Activity className="w-5 h-5" />} iconPosition="start" />
+            {/* <Tab label="All Activities" icon={<Activity className="w-5 h-5" />} iconPosition="start" /> */}
           </Tabs>
         </Box>
 
         {/* Tab Panels */}
         <TabPanel value={tabValue} index={0}>
           <DashboardStats filter="all" />
-          <Box sx={{ mt: 4 }}>
-            <ActivityTable filter="recent" limit={10} />
-          </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
@@ -111,10 +108,6 @@ export default function DashboardPage() {
           <Box sx={{ mt: 4 }}>
             <ActivityFilters isVaultResource={false} />
           </Box>
-        </TabPanel>
-
-        <TabPanel value={tabValue} index={3}>
-          <ActivityFilters />
         </TabPanel>
       </div>
     </div>

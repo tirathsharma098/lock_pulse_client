@@ -73,3 +73,13 @@ export const deleteService = async (projectId: string, id: string): Promise<void
     method: 'DELETE',
   });
 };
+
+export async function searchServicesAutocomplete(
+  projectId: string,
+  query: string
+): Promise<Array<{ id: string; name: string }>> {
+  if (!query || query.trim().length < 1 || !projectId) {
+    return [];
+  }
+  return apiRequest(`/projects/${projectId}/services/search/autocomplete?q=${encodeURIComponent(query)}`);
+}

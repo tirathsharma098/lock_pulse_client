@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -8,14 +8,22 @@ import {
   TextField,
   MenuItem,
   Button,
+  Autocomplete,
+  CircularProgress,
 } from '@mui/material';
 import { Filter, RefreshCw } from 'lucide-react';
 import ActivityTable from './ActivityTable';
-import { getAllProjects } from '@/services/projectService';
-import { getAllServices } from '@/services/serviceService';
+import { searchProjectsAutocomplete } from '@/services/projectService';
+import { searchServicesAutocomplete } from '@/services/serviceService';
+import debounce from 'lodash/debounce';
 
 interface ActivityFiltersProps {
   isVaultResource?: boolean;
+}
+
+interface Option {
+  id: string;
+  name: string;
 }
 
 export default function ActivityFilters({ isVaultResource }: ActivityFiltersProps) {
@@ -28,56 +36,92 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
     serviceId: '',
   });
 
-  const [projects, setProjects] = useState<Array<{ id: string; name: string }>>([]);
-  const [services, setServices] = useState<Array<{ id: string; name: string }>>([]);
-  const [loading, setLoading] = useState(false);
+  const [projectOptions, setProjectOptions] = useState<Option[]>([]);
+  const [serviceOptions, setServiceOptions] = useState<Option[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Option | null>(null);
+  const [selectedService, setSelectedService] = useState<Option | null>(null);
+  const [projectInput, setProjectInput] = useState('');
+  const [serviceInput, setServiceInput] = useState('');
+  const [projectLoading, setProjectLoading] = useState(false);
+  const [serviceLoading, setServiceLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (isVaultResource === false) {
-      fetchProjects();
-    }
-  }, [isVaultResource]);
+  // Debounced search for projects
+  const debouncedSearchProjects = useCallback(
+    debounce(async (searchQuery: string) => {
+      if (!searchQuery || searchQuery.trim().length < 1) {
+        setProjectOptions([]);
+        return;
+      }
+      setProjectLoading(true);
+      try {
+        const results = await searchProjectsAutocomplete(searchQuery);
+        setProjectOptions(results);
+      } catch (err) {
+        console.error('Error searching projects:', err);
+        setError('Failed to search projects');
+      } finally {
+        setProjectLoading(false);
+      }
+    }, 300),
+    []
+  );
+
+  // Debounced search for services
+  const debouncedSearchServices = useCallback(
+    debounce(async (projectId: string, searchQuery: string) => {
+      if (!searchQuery || searchQuery.trim().length < 1 || !projectId) {
+        setServiceOptions([]);
+        return;
+      }
+      setServiceLoading(true);
+      try {
+        const results = await searchServicesAutocomplete(projectId, searchQuery);
+        setServiceOptions(results);
+      } catch (err) {
+        console.error('Error searching services:', err);
+        setError('Failed to search services');
+      } finally {
+        setServiceLoading(false);
+      }
+    }, 300),
+    []
+  );
 
   useEffect(() => {
-    if (filters.projectId) {
-      fetchServices(filters.projectId);
+    if (projectInput) {
+      debouncedSearchProjects(projectInput);
     } else {
-      setServices([]);
-      setFilters((prev) => ({ ...prev, serviceId: '' }));
+      setProjectOptions([]);
     }
-  }, [filters.projectId]);
+  }, [projectInput, debouncedSearchProjects]);
 
-  const fetchProjects = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getAllProjects("page=1");
-      setProjects(data.items.map(p => ({ id: p.id, name: p.name })));
-    } catch (err) {
-      console.error('Error fetching projects:', err);
-      setError('Failed to load projects');
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (serviceInput && filters.projectId) {
+      debouncedSearchServices(filters.projectId, serviceInput);
+    } else {
+      setServiceOptions([]);
     }
-  };
-
-  const fetchServices = async (projectId: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getAllServices(projectId, "page=1");
-      setServices(data.items.map(s => ({ id: s.id, name: s.name })));
-    } catch (err) {
-      console.error('Error fetching services:', err);
-      setError('Failed to load services');
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [serviceInput, filters.projectId, debouncedSearchServices]);
 
   const handleFilterChange = (field: string, value: string) => {
     setFilters((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleProjectChange = (event: any, value: Option | null) => {
+    setSelectedProject(value);
+    setFilters((prev) => ({ 
+      ...prev, 
+      projectId: value?.id || '',
+      serviceId: '' 
+    }));
+    setSelectedService(null);
+    setServiceOptions([]);
+  };
+
+  const handleServiceChange = (event: any, value: Option | null) => {
+    setSelectedService(value);
+    setFilters((prev) => ({ ...prev, serviceId: value?.id || '' }));
   };
 
   const handleReset = () => {
@@ -89,7 +133,12 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
       projectId: '',
       serviceId: '',
     });
-    setServices([]);
+    setSelectedProject(null);
+    setSelectedService(null);
+    setProjectInput('');
+    setServiceInput('');
+    setProjectOptions([]);
+    setServiceOptions([]);
     setError(null);
   };
 
@@ -129,61 +178,83 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
               </TextField>
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
-              <TextField
-                select
-                fullWidth
-                label="Resource Type"
-                value={filters.resourceType}
-                onChange={(e) => handleFilterChange('resourceType', e.target.value)}
-                size="small"
-              >
-                <MenuItem value="">All</MenuItem>
-                {isVaultResource !== false && <MenuItem value="vault">Vault</MenuItem>}
-                {isVaultResource !== true && [
-                    <MenuItem key="project" value="project">Project</MenuItem>,
-                    <MenuItem key="service" value="service">Service</MenuItem>,
-                    <MenuItem key="credential" value="credential">Credential</MenuItem>
-                  ]}
-              </TextField>
-            </Grid>
-
             {isVaultResource === false && [
+              <Grid key="resource_type" item xs={12} sm={6} md={3}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Resource Type"
+                  value={filters.resourceType}
+                  onChange={(e) => handleFilterChange('resourceType', e.target.value)}
+                  size="small"
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {/* {isVaultResource !== false && <MenuItem value="vault">Vault</MenuItem>} */}
+                  <MenuItem key="project" value="project">Project</MenuItem>,
+                  <MenuItem key="service" value="service">Service</MenuItem>,
+                  <MenuItem key="credential" value="credential">Credential</MenuItem>
+                </TextField>
+              </Grid>,
                 <Grid key="project" item xs={12} sm={6} md={3}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Project"
-                    value={filters.projectId}
-                    onChange={(e) => handleFilterChange('projectId', e.target.value)}
+                  <Autocomplete
                     size="small"
-                    disabled={loading}
-                  >
-                    <MenuItem value="">All Projects</MenuItem>
-                    {projects.map((project) => (
-                      <MenuItem key={project.id} value={project.id}>
-                        {project.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                    options={projectOptions}
+                    getOptionLabel={(option) => option.name}
+                    value={selectedProject}
+                    onChange={handleProjectChange}
+                    inputValue={projectInput}
+                    onInputChange={(event, newInputValue) => {
+                      setProjectInput(newInputValue);
+                    }}
+                    loading={projectLoading}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Project"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {projectLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          ),
+                        }}
+                      />
+                    )}
+                    noOptionsText="Type to search projects"
+                  />
                 </Grid>,
                 <Grid key="service" item xs={12} sm={6} md={3}>
-                  <TextField
-                    select
-                    fullWidth
-                    label="Service"
-                    value={filters.serviceId}
-                    onChange={(e) => handleFilterChange('serviceId', e.target.value)}
+                  <Autocomplete
                     size="small"
-                    disabled={!filters.projectId || loading}
-                  >
-                    <MenuItem value="">All Services</MenuItem>
-                    {services.map((service) => (
-                      <MenuItem key={service.id} value={service.id}>
-                        {service.name}
-                      </MenuItem>
-                    ))}
-                  </TextField>
+                    options={serviceOptions}
+                    getOptionLabel={(option) => option.name}
+                    value={selectedService}
+                    onChange={handleServiceChange}
+                    inputValue={serviceInput}
+                    onInputChange={(event, newInputValue) => {
+                      setServiceInput(newInputValue);
+                    }}
+                    loading={serviceLoading}
+                    disabled={!filters.projectId}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Service"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {serviceLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          ),
+                        }}
+                      />
+                    )}
+                    noOptionsText={filters.projectId ? "Type to search services" : "Select a project first"}
+                  />
                 </Grid>
               ]}
 
