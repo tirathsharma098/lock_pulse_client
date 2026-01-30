@@ -97,14 +97,12 @@ export default function DashboardPage() {
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
-          <DashboardStats filter="vault" />
           <Box sx={{ mt: 4 }}>
             <ActivityFilters isVaultResource={true} />
           </Box>
         </TabPanel>
 
         <TabPanel value={tabValue} index={2}>
-          <DashboardStats filter="project" />
           <Box sx={{ mt: 4 }}>
             <ActivityFilters isVaultResource={false} />
           </Box>

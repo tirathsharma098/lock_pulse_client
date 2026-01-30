@@ -1,17 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Card,
-  CardContent,
-  Grid,
-  TextField,
-  MenuItem,
-  Button,
-  Autocomplete,
-  CircularProgress,
-} from '@mui/material';
-import { Filter, RefreshCw } from 'lucide-react';
+import { Autocomplete, TextField, CircularProgress } from '@mui/material';
+import { Filter, RefreshCw, Calendar, Activity as ActivityIcon, Layers, Folder, Server } from 'lucide-react';
 import ActivityTable from './ActivityTable';
 import { searchProjectsAutocomplete } from '@/services/projectService';
 import { searchServicesAutocomplete } from '@/services/serviceService';
@@ -25,6 +16,24 @@ interface Option {
   id: string;
   name: string;
 }
+
+const ACTIVITY_TYPES = [
+  { value: '', label: 'All Activities' },
+  { value: 'view', label: 'View' },
+  { value: 'find', label: 'Find' },
+  { value: 'create', label: 'Create' },
+  { value: 'update', label: 'Update' },
+  { value: 'delete', label: 'Delete' },
+  { value: 'share', label: 'Share' },
+  { value: 'unshare', label: 'Unshare' },
+];
+
+const RESOURCE_TYPES = [
+  { value: '', label: 'All Resources' },
+  { value: 'project', label: 'Project' },
+  { value: 'service', label: 'Service' },
+  { value: 'credential', label: 'Credential' },
+];
 
 export default function ActivityFilters({ isVaultResource }: ActivityFiltersProps) {
   const [filters, setFilters] = useState({
@@ -46,7 +55,6 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
   const [serviceLoading, setServiceLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Debounced search for projects
   const debouncedSearchProjects = useCallback(
     debounce(async (searchQuery: string) => {
       if (!searchQuery || searchQuery.trim().length < 1) {
@@ -67,7 +75,6 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
     []
   );
 
-  // Debounced search for services
   const debouncedSearchServices = useCallback(
     debounce(async (projectId: string, searchQuery: string) => {
       if (!searchQuery || searchQuery.trim().length < 1 || !projectId) {
@@ -143,160 +150,217 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
   };
 
   return (
-    <div className="space-y-4">
-      <Card className="dark:bg-gray-800">
-        <CardContent>
-          <div className="flex items-center space-x-2 mb-4">
-            <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h3>
-          </div>
-
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded text-red-600 dark:text-red-400 text-sm">
-              {error}
+    <div className="space-y-6">
+      {/* Filters Card */}
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-750 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-600 rounded-lg">
+              <Filter className="w-5 h-5 text-white" />
             </div>
-          )}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Filter Activities
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Narrow down your activity logs
+              </p>
+            </div>
+          </div>
+        </div>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={3}>
-              <TextField
-                select
-                fullWidth
-                label="Activity Type"
+        {/* Error Message */}
+        {error && (
+          <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-lg">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-red-500 rounded-full" />
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">{error}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Filter Grid */}
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Activity Type */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <ActivityIcon className="w-4 h-4" />
+                Activity Type
+              </label>
+              <select
                 value={filters.activityType}
                 onChange={(e) => handleFilterChange('activityType', e.target.value)}
-                size="small"
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               >
-                <MenuItem value="">All</MenuItem>
-                <MenuItem value="view">View</MenuItem>
-                <MenuItem value="find">Find</MenuItem>
-                <MenuItem value="create">Create</MenuItem>
-                <MenuItem value="update">Update</MenuItem>
-                <MenuItem value="delete">Delete</MenuItem>
-                <MenuItem value="share">Share</MenuItem>
-                <MenuItem value="unshare">Unshare</MenuItem>
-              </TextField>
-            </Grid>
+                {ACTIVITY_TYPES.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-            {isVaultResource === false && [
-              <Grid key="resource_type" item xs={12} sm={6} md={3}>
-                <TextField
-                  select
-                  fullWidth
-                  label="Resource Type"
+            {/* Resource Type - Only for projects */}
+            {isVaultResource === false && (
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <Layers className="w-4 h-4" />
+                  Resource Type
+                </label>
+                <select
                   value={filters.resourceType}
                   onChange={(e) => handleFilterChange('resourceType', e.target.value)}
-                  size="small"
+                  className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  <MenuItem value="">All</MenuItem>
-                  {/* {isVaultResource !== false && <MenuItem value="vault">Vault</MenuItem>} */}
-                  <MenuItem key="project" value="project">Project</MenuItem>,
-                  <MenuItem key="service" value="service">Service</MenuItem>,
-                  <MenuItem key="credential" value="credential">Credential</MenuItem>
-                </TextField>
-              </Grid>,
-                <Grid key="project" item xs={12} sm={6} md={3}>
-                  <Autocomplete
-                    size="small"
-                    options={projectOptions}
-                    getOptionLabel={(option) => option.name}
-                    value={selectedProject}
-                    onChange={handleProjectChange}
-                    inputValue={projectInput}
-                    onInputChange={(event, newInputValue) => {
-                      setProjectInput(newInputValue);
-                    }}
-                    loading={projectLoading}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Project"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {projectLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          ),
-                        }}
-                      />
-                    )}
-                    noOptionsText="Type to search projects"
-                  />
-                </Grid>,
-                <Grid key="service" item xs={12} sm={6} md={3}>
-                  <Autocomplete
-                    size="small"
-                    options={serviceOptions}
-                    getOptionLabel={(option) => option.name}
-                    value={selectedService}
-                    onChange={handleServiceChange}
-                    inputValue={serviceInput}
-                    onInputChange={(event, newInputValue) => {
-                      setServiceInput(newInputValue);
-                    }}
-                    loading={serviceLoading}
-                    disabled={!filters.projectId}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Service"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {serviceLoading ? <CircularProgress color="inherit" size={20} /> : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          ),
-                        }}
-                      />
-                    )}
-                    noOptionsText={filters.projectId ? "Type to search services" : "Select a project first"}
-                  />
-                </Grid>
-              ]}
+                  {RESOURCE_TYPES.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
-            <Grid item xs={12} sm={6} md={3}>
-              <TextField
-                fullWidth
-                label="Start Date"
+            {/* Project Autocomplete - Only for projects */}
+            {isVaultResource === false && (
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <Folder className="w-4 h-4" />
+                  Project
+                </label>
+                <Autocomplete
+                  size="small"
+                  options={projectOptions}
+                  getOptionLabel={(option) => option.name}
+                  value={selectedProject}
+                  onChange={handleProjectChange}
+                  inputValue={projectInput}
+                  onInputChange={(event, newInputValue) => setProjectInput(newInputValue)}
+                  loading={projectLoading}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder="Search projects..."
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {projectLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'rgb(249 250 251)',
+                          '&.Mui-focused': {
+                            backgroundColor: 'white',
+                          },
+                        },
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgb(209 213 219)',
+                        },
+                      }}
+                    />
+                  )}
+                  noOptionsText="Type to search projects"
+                />
+              </div>
+            )}
+
+            {/* Service Autocomplete - Only for projects */}
+            {isVaultResource === false && (
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <Server className="w-4 h-4" />
+                  Service
+                </label>
+                <Autocomplete
+                  size="small"
+                  options={serviceOptions}
+                  getOptionLabel={(option) => option.name}
+                  value={selectedService}
+                  onChange={handleServiceChange}
+                  inputValue={serviceInput}
+                  onInputChange={(event, newInputValue) => setServiceInput(newInputValue)}
+                  loading={serviceLoading}
+                  disabled={!filters.projectId}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      placeholder={filters.projectId ? "Search services..." : "Select project first"}
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {serviceLoading ? <CircularProgress color="inherit" size={20} /> : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          backgroundColor: 'rgb(249 250 251)',
+                          '&.Mui-focused': {
+                            backgroundColor: 'white',
+                          },
+                        },
+                        '& .MuiOutlinedInput-notchedOutline': {
+                          borderColor: 'rgb(209 213 219)',
+                        },
+                      }}
+                    />
+                  )}
+                  noOptionsText={filters.projectId ? "Type to search services" : "Select a project first"}
+                />
+              </div>
+            )}
+
+            {/* Start Date */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Calendar className="w-4 h-4" />
+                Start Date
+              </label>
+              <input
                 type="date"
                 value={filters.startDate}
                 onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                size="small"
-                InputLabelProps={{ shrink: true }}
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-            </Grid>
+            </div>
 
-            <Grid item xs={12} sm={6} md={3}>
-              <TextField
-                fullWidth
-                label="End Date"
+            {/* End Date */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                <Calendar className="w-4 h-4" />
+                End Date
+              </label>
+              <input
                 type="date"
                 value={filters.endDate}
                 onChange={(e) => handleFilterChange('endDate', e.target.value)}
-                size="small"
-                InputLabelProps={{ shrink: true }}
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-            </Grid>
+            </div>
+          </div>
 
-            <Grid item xs={12} sm={6} md={3}>
-              <Button
-                fullWidth
-                variant="outlined"
-                startIcon={<RefreshCw className="w-4 h-4" />}
-                onClick={handleReset}
-                className="h-10"
-              >
-                Reset Filters
-              </Button>
-            </Grid>
-          </Grid>
-        </CardContent>
-      </Card>
+          {/* Reset Button */}
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={handleReset}
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors duration-200"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Reset Filters
+            </button>
+          </div>
+        </div>
+      </div>
 
+      {/* Activity Table */}
       <ActivityTable
         isVaultResource={isVaultResource}
         activityType={filters.activityType}

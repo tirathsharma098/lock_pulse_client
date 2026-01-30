@@ -10,6 +10,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import FullPageSpinner from '@/components/ui/full-page-loader';
 import { useVault } from '@/contexts/VaultContext';
+import { usePathname } from 'next/navigation';
 
 export default function MainLayout({
   children,
@@ -18,6 +19,8 @@ export default function MainLayout({
 }) {
   const [isInitialLoad, setIsInitialLoad] = useState(false);
   const { vaultKey, wipeVaultKey } = useVault();
+  const pathname = usePathname();
+  const maxWidth = pathname === '/dashboard' ? 'lg' : 'md';
   // const router = useRouter();
     useEffect(()=> {
       const handleBeforeLoad = async () => {
@@ -48,7 +51,7 @@ export default function MainLayout({
   return (isInitialLoad ?
     <div className="min-h-screen bg-gray-50">
       <VaultHeader />
-      <Container maxWidth="md" className="pt-8 !px-1 sm:!px-4">
+      <Container maxWidth={maxWidth} className="pt-8 !px-1 sm:!px-4">
         <AppBreadCrumb />
         <main className="pt-6">{children}</main>
       </Container>
