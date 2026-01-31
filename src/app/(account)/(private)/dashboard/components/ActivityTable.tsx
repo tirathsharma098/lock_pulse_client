@@ -126,7 +126,6 @@ export default function ActivityTable({
       field: 'resourceName',
       headerName: 'Resource Name',
       width: 200,
-      flex: 1,
       renderCell: (params) => (
         <span className="font-medium text-gray-900 dark:text-white truncate">
           {params.value || '-'}
