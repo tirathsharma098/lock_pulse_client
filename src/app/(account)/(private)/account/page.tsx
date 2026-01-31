@@ -19,13 +19,6 @@ const cards = [
     bg: "bg-gradient-to-br from-pink-500 to-rose-600",
   },
   {
-    title: "Profile",
-    desc: "View and edit your profile settings.",
-    href: "/profile",
-    icon: User,
-    bg: "bg-gradient-to-br from-green-500 to-emerald-600",
-  },
-  {
     title: "Projects",
     desc: "Manage and view your projects.",
     href: "/project",
@@ -38,6 +31,13 @@ const cards = [
     href: "/collaborate",
     icon: Share2,
     bg: "bg-gradient-to-br from-pink-500 to-rose-600",
+  },
+  {
+    title: "Profile",
+    desc: "View and edit your profile settings.",
+    href: "/profile",
+    icon: User,
+    bg: "bg-gradient-to-br from-green-500 to-emerald-600",
   },
 ];
 

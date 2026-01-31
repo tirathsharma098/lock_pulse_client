@@ -35,17 +35,22 @@ const registerSchema = z.object({
         message: 'Username must contain only letters and numbers',
       })
   ),
-   email: z
-   .string()
-   .min(5, { message: "Email is required" })
-   .max(320, { message: "Email must be at most 320 characters" })
-   .toLowerCase()
-   .trim(),
+  email: z
+    .string()
+    .min(5, { message: "Email is required" })
+    .max(320, { message: "Email must be at most 320 characters" })
+    .toLowerCase()
+    .trim(),
+  fullname: z
+    .string()
+    .max(100, { message: "Full name must be at most 100 characters" })
+    .trim()
+    .optional(),
   password: z.string()
-  .min(8, { message: 'Password must be at least 8 characters long' })
-  .refine((val) => getEncryptedSize(val) <= 1024, {
-    message: 'Encrypted password must be less than 1 KB',
-  }),
+    .min(8, { message: 'Password must be at least 8 characters long' })
+    .refine((val) => getEncryptedSize(val) <= 1024, {
+      message: 'Encrypted password must be less than 1 KB',
+    }),
   confirmPassword: z.string().min(1, 'Confirm Password is required'),
 }).refine((v) => v.password === v.confirmPassword, {
   path: ['confirmPassword'],
@@ -55,11 +60,12 @@ const registerSchema = z.object({
 export default function RegisterPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [fullname, setFullname] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [fieldErrors, setFieldErrors] = useState<{ username?: string; email?: string; password?: string; confirmPassword?: string }>({});
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; email?: string; fullname?: string; password?: string; confirmPassword?: string }>({});
   const router = useRouter();
   const [isInitialLoad, setIsInitialLoad] = useState(false);
 
@@ -87,7 +93,7 @@ export default function RegisterPage() {
     setFieldErrors({});
 
     // zod validation (replace inline checks)
-    const result = registerSchema.safeParse({ username, email, password, confirmPassword });
+    const result = registerSchema.safeParse({ username, email, fullname, password, confirmPassword });
     if (!result.success) {
       const errs: Record<string, string> = {};
       for (const issue of result.error.issues) {
@@ -132,6 +138,7 @@ export default function RegisterPage() {
       await authService.registerFinish({
         username,
         email,
+        fullname: fullname,
         registrationRecord,
         registrationRequest,
         wrappedVaultKey,
@@ -197,7 +204,6 @@ export default function RegisterPage() {
               />
                <TextField
             fullWidth
-            // type="email"
             label="Email Address"
             value={email}
             onChange={(e) => {
@@ -210,7 +216,25 @@ export default function RegisterPage() {
             helperText={fieldErrors.email}
             disabled={loading}
             autoComplete="email"
+            className="bg-white/70"
           />
+              <TextField
+                fullWidth
+                label="Full Name (Optional)"
+                value={fullname}
+                onChange={(e) => {
+                  setFullname(e.target.value);
+                  if (fieldErrors.fullname) {
+                    setFieldErrors((prev) => ({ ...prev, fullname: undefined }));
+                  }
+                }}
+                error={!!fieldErrors.fullname}
+                helperText={fieldErrors.fullname}
+                disabled={loading}
+                required={true}
+                autoComplete="name"
+                className="bg-white/70"
+              />
               <Box>
               <TextField
                 fullWidth

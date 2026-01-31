@@ -8,6 +8,7 @@ export interface RegisterStartData {
 export interface RegisterFinishData {
   username: string;
   email: string;
+  fullname: string;
   registrationRecord: string;
   registrationRequest: string;
   wrappedVaultKey: string;
