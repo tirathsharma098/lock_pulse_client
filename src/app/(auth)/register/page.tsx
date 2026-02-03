@@ -44,6 +44,9 @@ const registerSchema = z.object({
   fullname: z
     .string()
     .max(100, { message: "Full name must be at most 100 characters" })
+    .regex(/^[A-Za-z\s]+$/, {
+      message: 'Full name must contain only letters and spaces',
+    })
     .trim()
     .optional(),
   password: z.string()
@@ -188,6 +191,22 @@ export default function RegisterPage() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
+            <TextField
+                fullWidth
+                label="Full Name"
+                value={fullname}
+                onChange={(e) => {
+                  setFullname(e.target.value);
+                  if (fieldErrors.fullname) {
+                    setFieldErrors((prev) => ({ ...prev, fullname: undefined }));
+                  }
+                }}
+                error={!!fieldErrors.fullname}
+                helperText={fieldErrors.fullname}
+                disabled={loading}
+                autoComplete="name"
+                className="bg-white/70"
+              />
               <TextField
                 fullWidth
                 label="Username"
@@ -197,6 +216,7 @@ export default function RegisterPage() {
                   if (fieldErrors.username) setFieldErrors((p) => ({ ...p, username: undefined }));
                 }}
                 disabled={loading}
+
                 autoComplete="username"
                 className="bg-white/70"
                 error={!!fieldErrors.username}
@@ -218,23 +238,6 @@ export default function RegisterPage() {
             autoComplete="email"
             className="bg-white/70"
           />
-              <TextField
-                fullWidth
-                label="Full Name (Optional)"
-                value={fullname}
-                onChange={(e) => {
-                  setFullname(e.target.value);
-                  if (fieldErrors.fullname) {
-                    setFieldErrors((prev) => ({ ...prev, fullname: undefined }));
-                  }
-                }}
-                error={!!fieldErrors.fullname}
-                helperText={fieldErrors.fullname}
-                disabled={loading}
-                required={true}
-                autoComplete="name"
-                className="bg-white/70"
-              />
               <Box>
               <TextField
                 fullWidth

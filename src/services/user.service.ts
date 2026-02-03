@@ -41,5 +41,8 @@ export const userService = {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  },
+  getUserProfile: async ()=>{
+    return apiRequest('/me/profile');
   }
 };

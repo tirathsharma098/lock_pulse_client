@@ -9,6 +9,8 @@ interface VaultContextType {
   username: string | null;
   email: string | null;
   setVaultData: (key: Uint8Array | null, username: string, email: string) => void;
+  setUsername: (username: string | null) => void;
+  setEmail: (email: string | null) => void;
   setProjectVaultKey: (key: Uint8Array | null) => void;
   setServiceVaultKey: (key: Uint8Array | null) => void;
   isUnlocked: boolean;
@@ -86,6 +88,8 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     serviceVaultKey,
     username,
     email,
+    setUsername,
+    setEmail,
     setVaultData,
     setProjectVaultKey,
     setServiceVaultKey,

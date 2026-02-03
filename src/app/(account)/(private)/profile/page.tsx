@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { User, Mail, Lock, History, ArrowRight, Save, X } from 'lucide-react';
 import { useVault } from '@/contexts/VaultContext';
 import { toast } from 'sonner';
@@ -10,12 +10,27 @@ import { userService } from '@/services';
 import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
-  const { username, email, vaultKey, setVaultData } = useVault();
+  const { setUsername, setEmail, username, email } = useVault();
   const [isUpdatePasswordOpen, setIsUpdatePasswordOpen] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
   const router = useRouter();
+  const [fullname, setFullname] = useState('');
 
+  const getProfile = async () => {
+    try {
+      const profile = await userService.getUserProfile();
+      setUsername(profile.username);
+      setEmail(profile.email);
+      setFullname(profile.fullname);
+    } catch (err) {
+      toast.error('Failed to load profile');
+    }
+  };
+
+  useEffect(() => {
+    getProfile();
+  }, []);
   const handleUpdatePassword = () => {
     setIsUpdatePasswordOpen(true);
   };
@@ -28,8 +43,8 @@ export default function ProfilePage() {
   const handleSaveEmail = async () => {
     try {
       await userService.updateEmail({ email: tempEmail });
-      setVaultData(vaultKey, username || '', tempEmail);
       setIsEditingEmail(false);
+      getProfile();
       toast.success('Email updated successfully');
     } catch (err) {
       setTempEmail('');
@@ -48,7 +63,7 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="p-8 space-y-8">
-          <ProfileHeader username={username || 'Unknown User'} />
+          <ProfileHeader fullname={fullname || 'Unknown User'} username={username || 'Unknown User'} />
             {/* Account Settings Section */}
             <div>
               <div className="flex items-center gap-3 mb-6">
