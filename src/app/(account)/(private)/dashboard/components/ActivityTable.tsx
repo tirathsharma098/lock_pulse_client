@@ -104,7 +104,7 @@ export default function ActivityTable({
     {
       field: 'activityType',
       headerName: 'Activity',
-      width: 130,
+      width: 130+28,
       renderCell: (params) => (
         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${getActivityColor(params.value)}`}>
           {params.value}
@@ -114,7 +114,7 @@ export default function ActivityTable({
     {
       field: 'resourceType',
       headerName: 'Resource Type',
-      width: 150,
+      width: 150+28,
       renderCell: (params) => (
         <div className="flex items-center gap-2">
           <FileText className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -125,7 +125,7 @@ export default function ActivityTable({
     {
       field: 'resourceName',
       headerName: 'Resource Name',
-      width: 200,
+      width: 200+28,
       renderCell: (params) => (
         <span className="font-medium text-gray-900 dark:text-white truncate">
           {params.value || '-'}
@@ -136,7 +136,7 @@ export default function ActivityTable({
       field: 'username',
       headerName: 'User',
       valueGetter: (_value, row) => row.user?.username ?? '-',
-      width: 150,
+      width: 150+28,
       renderCell: (params) => (
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
@@ -149,7 +149,7 @@ export default function ActivityTable({
     {
       field: 'createdAt',
       headerName: 'Date & Time',
-      width: 180,
+      width: 180+28,
       renderCell: (params) => (
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-gray-400" />
@@ -159,19 +159,19 @@ export default function ActivityTable({
         </div>
       ),
     },
-    {
-      field: 'ipAddress',
-      headerName: 'IP Address',
-      width: 140,
-      renderCell: (params) => (
-        <div className="flex items-center gap-2">
-          <MapPin className="w-4 h-4 text-gray-400" />
-          <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
-            {params.value || '-'}
-          </span>
-        </div>
-      ),
-    },
+    // {
+    //   field: 'ipAddress',
+    //   headerName: 'IP Address',
+    //   width: 140,
+    //   renderCell: (params) => (
+    //     <div className="flex items-center gap-2">
+    //       <MapPin className="w-4 h-4 text-gray-400" />
+    //       <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
+    //         {params.value || '-'}
+    //       </span>
+    //     </div>
+    //   ),
+    // },
   ];
 
   return (

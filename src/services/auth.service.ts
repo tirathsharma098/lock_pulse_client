@@ -55,4 +55,15 @@ export const authService = {
     apiRequest('/auth/logout', {
       method: 'POST',
     }),
+
+  // Session management
+  getSessions: () =>
+    apiRequest('/auth/sessions', {
+      method: 'GET',
+    }),
+
+  revokeSession: (sessionId: string) =>
+    apiRequest(`/auth/session/${sessionId}`, {
+      method: 'DELETE',
+    }),
 };

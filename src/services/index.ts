@@ -3,6 +3,7 @@ export { authService } from './auth.service';
 export { userService } from './user.service';
 export { vaultService } from './vault.service';
 export { ApiError, apiRequest } from './config/api';
+export * from './session.service';
 
 // Export types
 export type {

@@ -12,6 +12,7 @@ import {
   Security,
 } from '@mui/icons-material';
 import { AuthLogType } from '@/services/auth-log.service';
+import { LucideLogOut } from 'lucide-react';
 
 interface LogTypeChipProps {
   logType: AuthLogType;
@@ -67,6 +68,11 @@ const LOG_TYPE_CONFIG = {
     label: '2FA Disabled',
     color: 'error' as const,
     icon: <Security fontSize="small" />,
+  },
+  [AuthLogType.REVOKED_SESSION]: {
+    label: 'Revoked Session',
+    color: 'success' as const,
+    icon: <LucideLogOut fontSize="small" />,
   },
 };
 

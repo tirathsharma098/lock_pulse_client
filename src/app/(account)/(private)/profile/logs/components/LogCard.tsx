@@ -2,9 +2,6 @@
 
 import { AuthLog, AuthLogType } from '@/services/auth-log.service';
 import {
-  Monitor,
-  Smartphone,
-  Tablet,
   LogIn,
   LogOut,
   UserPlus,
@@ -32,24 +29,12 @@ const LOG_TYPE_CONFIG = {
   [AuthLogType.PASSWORD_RESET_COMPLETE]: { label: 'Password Reset', icon: Key, color: 'orange' },
   [AuthLogType.TWO_FACTOR_ENABLED]: { label: '2FA Enabled', icon: Shield, color: 'green' },
   [AuthLogType.TWO_FACTOR_DISABLED]: { label: '2FA Disabled', icon: Shield, color: 'red' },
+  [AuthLogType.REVOKED_SESSION]: { label: 'Revoked Session', icon: LogOut, color: 'gray' },
 };
 
 export function LogCard({ log }: LogCardProps) {
   const config = LOG_TYPE_CONFIG[log.logType] || { label: log.logType, icon: Edit, color: 'gray' };
   const Icon = config.icon;
-
-  const getDeviceIcon = () => {
-    switch (log.deviceType?.toLowerCase()) {
-      case 'mobile':
-        return Smartphone;
-      case 'tablet':
-        return Tablet;
-      default:
-        return Monitor;
-    }
-  };
-
-  const DeviceIcon = getDeviceIcon();
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -85,31 +70,30 @@ export function LogCard({ log }: LogCardProps) {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-400">
-                <div className="flex items-center gap-2">
-                  <DeviceIcon className="w-4 h-4" />
-                  <span>{log.browser || 'Unknown Browser'}</span>
+              {log.metadata && Object.keys(log.metadata).length > 0 && (
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  {log.metadata.email && (
+                    <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                      {log.metadata.email}
+                    </span>
+                  )}
+                  {log.metadata.oldEmail && log.metadata.newEmail && (
+                    <span className="text-xs">
+                      {log.metadata.oldEmail} → {log.metadata.newEmail}
+                    </span>
+                  )}
+                  {log.metadata.fields && Array.isArray(log.metadata.fields) && (
+                    <span className="text-xs bg-purple-100 dark:bg-purple-900/20 px-2 py-1 rounded">
+                      Updated: {log.metadata.fields.join(', ')}
+                    </span>
+                  )}
                 </div>
-
-                {log.os && (
-                  <span className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                    {log.os}
-                  </span>
-                )}
-
-                {log.ipAddress && (
-                  <span className="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                    {log.ipAddress}
-                  </span>
-                )}
-
-                {(log.city || log.country) && (
-                  <span className="text-xs">
-                    📍 {log.city}{log.city && log.country ? ', ' : ''}{log.country}
-                  </span>
-                )}
-              </div>
-
+              )}
+                {log?.session && log?.session?.deviceName && (
+                <div className="mt-2 text-sm text-red-blue dark:text-white-400 bg-white-50 dark:bg-black-900/20 px-3 py-1 rounded">
+                  Device: {log?.session?.deviceName}
+                </div>
+              )}
               {!log.success && log.failureReason && (
                 <div className="mt-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-1 rounded">
                   {log.failureReason}
