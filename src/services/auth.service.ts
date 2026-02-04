@@ -26,6 +26,14 @@ export interface LoginFinishData {
   finishLoginRequest: string;
 }
 
+export interface SendVerificationEmailData {
+  email: string;
+}
+
+export interface VerifyEmailTokenData {
+  token: string;
+}
+
 export const authService = {
   registerStart: (data: RegisterStartData) =>
     apiRequest('/auth/register/start', {
@@ -47,6 +55,18 @@ export const authService = {
 
   loginFinish: (data: LoginFinishData) =>
     apiRequest('/auth/login/finish', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  sendVerificationEmail: (data: SendVerificationEmailData) =>
+    apiRequest('/auth/verify-email/send', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  verifyEmailToken: (data: VerifyEmailTokenData) =>
+    apiRequest('/auth/verify-email/confirm', {
       method: 'POST',
       body: JSON.stringify(data),
     }),

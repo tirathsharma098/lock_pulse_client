@@ -153,7 +153,7 @@ export default function RegisterPage() {
       vaultKey.fill(0);
       kek.fill(0);
 
-      router.push('/login?registered=true');
+      router.push(`/${email}/verify-email`);
     } catch (err: any) {
       setError(err.message || 'Registration failed');
     } finally {

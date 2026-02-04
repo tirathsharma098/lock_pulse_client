@@ -11,6 +11,8 @@ export type {
   RegisterFinishData,
   LoginStartData,
   LoginFinishData,
+  SendVerificationEmailData,
+  VerifyEmailTokenData,
 } from './auth.service';
 
 export type {

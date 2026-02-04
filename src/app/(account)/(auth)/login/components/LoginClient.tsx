@@ -110,10 +110,16 @@ export default function LoginClient() {
       const { startLoginRequest, clientLoginState } = opaque.client.startLogin({ password });
 
       // Send login start request - Updated to use authService
-      const { loginResponse, loginId } = await authService.loginStart({
+      const { loginResponse, loginId, case: loginCase, email } = await authService.loginStart({
         username,
         startLoginRequest,
       });
+      if(loginCase === 'EMAIL_NOT_VERIFIED') {
+        setError('Email not verified. Please verify your email before logging in.');
+        setLoading(false);
+        router.replace(`/${email}/verify-email`)
+        return;
+      }
       if(!loginResponse || !loginId || loginResponse === 'decoy_response') {
         throw new Error('Username or password is incorrect');
       }
