@@ -80,10 +80,21 @@ export default function LoginClient() {
     if (searchParams.get('registered') === 'true') {
       setSuccess('Account created successfully! Please sign in.');
     }
+    if (searchParams.get('restored') === 'true') {
+      const restoredUsername = searchParams.get('username');
+      setSuccess(
+        restoredUsername
+          ? `Account restored. Use username "${restoredUsername}" to sign in.`
+          : 'Account restored. Please sign in with your previous username.',
+      );
+      if (!username && restoredUsername) {
+        setUsername(restoredUsername);
+      }
+    }
     if (searchParams.get('reason') === 'expired') {
       toast.info("Session expired. Please log in again.");
     }
-  }, [searchParams]);
+  }, [searchParams, username]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -117,7 +128,9 @@ export default function LoginClient() {
       if(loginCase === 'EMAIL_NOT_VERIFIED') {
         setError('Email not verified. Please verify your email before logging in.');
         setLoading(false);
-        router.replace(`/${email}/verify-email`)
+        if (email) {
+          router.replace(`/${email}/verify-email`);
+        }
         return;
       }
       if(!loginResponse || !loginId || loginResponse === 'decoy_response') {

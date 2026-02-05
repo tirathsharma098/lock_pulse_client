@@ -8,7 +8,7 @@ export interface RegisterStartData {
 export interface RegisterFinishData {
   username: string;
   email: string;
-  fullname: string;
+  fullname?: string;
   registrationRecord: string;
   registrationRequest: string;
   wrappedVaultKey: string;
@@ -16,9 +16,22 @@ export interface RegisterFinishData {
   vaultKdfParams: any;
 }
 
+export interface RegisterFinishResponse {
+  ok: boolean;
+  restoredUsername?: string | null;
+  message?: string;
+}
+
 export interface LoginStartData {
   username: string;
   startLoginRequest: string;
+}
+
+export interface LoginStartResponse {
+  loginResponse: string;
+  loginId: string;
+  case?: string;
+  email?: string;
 }
 
 export interface LoginFinishData {
@@ -41,13 +54,13 @@ export const authService = {
       body: JSON.stringify(data),
     }),
 
-  registerFinish: (data: RegisterFinishData) =>
+  registerFinish: (data: RegisterFinishData): Promise<RegisterFinishResponse> =>
     apiRequest('/auth/register/finish', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
-  loginStart: (data: LoginStartData) =>
+  loginStart: (data: LoginStartData): Promise<LoginStartResponse> =>
     apiRequest('/auth/login/start', {
       method: 'POST',
       body: JSON.stringify(data),

@@ -138,7 +138,7 @@ export default function RegisterPage() {
       });
 
       // Send final registration data - Updated to use authService
-      await authService.registerFinish({
+      const registerResult = await authService.registerFinish({
         username,
         email,
         fullname: fullname,
@@ -148,6 +148,15 @@ export default function RegisterPage() {
         vaultKdfSalt: Buffer.from(vaultKdfSalt).toString('base64'),
         vaultKdfParams: defaultKdfParams,
       });
+
+      if (registerResult?.restoredUsername) {
+        toast.success(
+          registerResult.message ||
+            `Account restored. Use username ${registerResult.restoredUsername} to sign in.`,
+        );
+        router.push(`/login?restored=true&username=${encodeURIComponent(registerResult.restoredUsername)}`);
+        return;
+      }
 
       // Clear sensitive data
       vaultKey.fill(0);

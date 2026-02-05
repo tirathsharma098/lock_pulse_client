@@ -6,12 +6,14 @@ import { useVault } from '@/contexts/VaultContext';
 import { toast } from 'sonner';
 import ProfileHeader from './components/ProfileHeader';
 import UpdatePasswordDialog from './components/UpdatePasswordDialog';
+import DeleteAccountDialog from './components/DeleteAccountDialog';
 import { userService } from '@/services';
 import { useRouter } from 'next/navigation';
 
 export default function ProfilePage() {
   const { setUsername, setEmail, username, email } = useVault();
   const [isUpdatePasswordOpen, setIsUpdatePasswordOpen] = useState(false);
+  const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [tempEmail, setTempEmail] = useState('');
   const router = useRouter();
@@ -33,6 +35,10 @@ export default function ProfilePage() {
   }, []);
   const handleUpdatePassword = () => {
     setIsUpdatePasswordOpen(true);
+  };
+
+  const handleDeleteAccount = () => {
+    setIsDeleteAccountOpen(true);
   };
 
   const handleEditEmail = () => {
@@ -86,7 +92,7 @@ export default function ProfilePage() {
                       Your email address for account notifications
                     </p>
 
-                    {isEditingEmail ? (
+                    {/* {isEditingEmail ? (
                       <div className="flex gap-2">
                         <input
                           type="email"
@@ -123,7 +129,7 @@ export default function ProfilePage() {
                           <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
-                    )}
+                    )} */}
                   </div>
                 </div>
               </div>
@@ -196,6 +202,38 @@ export default function ProfilePage() {
                     </button>
                   </div>
                 </div>
+
+                {/* Delete Account */}
+                <div className="bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-900/10 dark:to-rose-900/10 rounded-xl p-6 border border-red-200 dark:border-red-800 hover:shadow-lg transition-shadow">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-start gap-3 flex-1">
+                      <div className="p-2 bg-red-600 rounded-lg">
+                        <X className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                          Delete Account
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          Permanently delete your account and all associated data. This action cannot be undone.
+                        </p>
+                        <button
+                          onClick={handleDeleteAccount}
+                          className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors shadow-sm hover:shadow-md flex items-center gap-2"
+                        >
+                          <X className="w-4 h-4" />
+                          Delete Account
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleDeleteAccount}
+                      className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    >
+                      <ArrowRight className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -206,6 +244,10 @@ export default function ProfilePage() {
         open={isUpdatePasswordOpen}
         onClose={() => setIsUpdatePasswordOpen(false)}
         username={username || ''}
+      />
+      <DeleteAccountDialog
+        open={isDeleteAccountOpen}
+        onClose={() => setIsDeleteAccountOpen(false)}
       />
     </div>
   );

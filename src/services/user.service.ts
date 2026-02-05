@@ -42,6 +42,11 @@ export const userService = {
       body: JSON.stringify(data),
     });
   },
+  deleteAccount: async () => {
+    return apiRequest('/me/delete-account', {
+      method: 'DELETE',
+    });
+  },
   getUserProfile: async ()=>{
     return apiRequest('/me/profile');
   }
