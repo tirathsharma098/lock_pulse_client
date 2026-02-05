@@ -14,8 +14,8 @@ export default function ProfilePage() {
   const { setUsername, setEmail, username, email } = useVault();
   const [isUpdatePasswordOpen, setIsUpdatePasswordOpen] = useState(false);
   const [isDeleteAccountOpen, setIsDeleteAccountOpen] = useState(false);
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
-  const [tempEmail, setTempEmail] = useState('');
+  // const [isEditingEmail, setIsEditingEmail] = useState(false);
+  // const [tempEmail, setTempEmail] = useState('');
   const router = useRouter();
   const [fullname, setFullname] = useState('');
 
@@ -41,28 +41,28 @@ export default function ProfilePage() {
     setIsDeleteAccountOpen(true);
   };
 
-  const handleEditEmail = () => {
-    setTempEmail(email!);
-    setIsEditingEmail(true);
-  };
+  // const handleEditEmail = () => {
+  //   setTempEmail(email!);
+  //   setIsEditingEmail(true);
+  // };
 
-  const handleSaveEmail = async () => {
-    try {
-      await userService.updateEmail({ email: tempEmail });
-      setIsEditingEmail(false);
-      getProfile();
-      toast.success('Email updated successfully');
-    } catch (err) {
-      setTempEmail('');
-      setIsEditingEmail(false);
-      toast.error('Email update failed');
-    }
-  };
+  // const handleSaveEmail = async () => {
+  //   try {
+  //     await userService.updateEmail({ email: tempEmail });
+  //     setIsEditingEmail(false);
+  //     getProfile();
+  //     toast.success('Email updated successfully');
+  //   } catch (err) {
+  //     setTempEmail('');
+  //     setIsEditingEmail(false);
+  //     toast.error('Email update failed');
+  //   }
+  // };
 
-  const handleCancelEditEmail = () => {
-    setTempEmail('');
-    setIsEditingEmail(false);
-  };
+  // const handleCancelEditEmail = () => {
+  //   setTempEmail('');
+  //   setIsEditingEmail(false);
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 p-4 md:p-8">
@@ -91,7 +91,18 @@ export default function ProfilePage() {
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                       Your email address for account notifications
                     </p>
-
+                    <div className="flex items-center justify-between bg-white dark:bg-gray-900 px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <span className="text-gray-900 dark:text-white font-medium">
+                          {email || 'No email set'}
+                        </span>
+                        {/* <button
+                          onClick={handleEditEmail}
+                          className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-sm flex items-center gap-1"
+                        >
+                          Edit
+                          <ArrowRight className="w-4 h-4" />
+                        </button> */}
+                      </div>
                     {/* {isEditingEmail ? (
                       <div className="flex gap-2">
                         <input

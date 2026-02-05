@@ -62,9 +62,9 @@ export default function ServiceEditPage() {
           setOriginalPassword(decryptedPassword);
           setPassword(decryptedPassword);
         }
-      } catch (err) {
+      } catch (err: any) {
         // console.error('Error fetching service:', err);
-        setError('Failed to load service details');
+        setError(err?.message ||'Failed to load service details');
       } finally {
         setLoading(false);
       }
@@ -128,9 +128,9 @@ export default function ServiceEditPage() {
       await updateService(projectId, serviceId, updateData);
       toast.success('Service updated successfully');
       router.replace(`/project/${projectId}/service/${serviceId}/view`);
-    } catch (err) {
+    } catch (err: any) {
       // console.error('Failed to update service:', err);
-      setError('Failed to update service. Please try again.');
+      setError(err?.message || 'Failed to update service. Please try again.');
     } finally {
       setSaving(false);
     }

@@ -78,9 +78,8 @@ export default function ServicesPage() {
       await deleteService(projectId, serviceId);
       toast.success('Service deleted successfully');
       fetchData();
-    } catch (err) {
-      setError('Failed to delete service');
-      // console.error(err);
+    } catch (err:any) {
+      setError(err.message || 'Failed to delete service');
     }
   };
 

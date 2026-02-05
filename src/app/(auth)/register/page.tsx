@@ -164,6 +164,10 @@ export default function RegisterPage() {
 
       router.push(`/${email}/verify-email`);
     } catch (err: any) {
+      if(err?.code === "USERNAME_EXISTS")
+        setFieldErrors({ username: 'Username already taken' });
+      else if(err?.code === "EMAIL_EXISTS")
+        setFieldErrors({ email: 'Email already registered' });
       setError(err.message || 'Registration failed');
     } finally {
       setLoading(false);
