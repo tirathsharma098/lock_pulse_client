@@ -119,6 +119,7 @@ export default function RegisterPage() {
       // Send registration request to server - Updated to use authService
       const { registrationResponse } = await authService.registerStart({
         username,
+        email,
         registrationRequest,
       });
 

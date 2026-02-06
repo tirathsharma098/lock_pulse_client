@@ -16,6 +16,7 @@ import {
 import { Warning } from '@mui/icons-material';
 import { toast } from 'sonner';
 import { userService } from '@/services';
+import { redirectUserToLogin } from '../profile-action';
 
 interface DeleteAccountDialogProps {
   open: boolean;
@@ -77,6 +78,7 @@ export default function DeleteAccountDialog({ open, onClose }: DeleteAccountDial
       await userService.deleteAccount();
       toast.success('Account deleted successfully');
       handleClose();
+      redirectUserToLogin();
     } catch (err: any) {
       const message = err?.message || 'Account deletion failed';
       setError(message);

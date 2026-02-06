@@ -2,6 +2,7 @@ import { apiRequest } from './config/api';
 
 export interface RegisterStartData {
   username: string;
+  email: string;
   registrationRequest: string;
 }
 
