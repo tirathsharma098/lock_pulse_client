@@ -204,14 +204,15 @@ export default function ProjectViewPage() {
   };
 
   const columns: GridColDef[] = [
-    { field: 'sr', headerName: 'Sr', minWidth: 10 },
-    { field: 'username', headerName: 'Username', minWidth: 100 },
-    { field: 'email', headerName: 'Email', minWidth: 200 },
+    { field: 'sr', headerName: 'Sr', flex:0.2},
+    { field: 'username', headerName: 'Username',minWidth: 150,flex:1 },
+    { field: 'email', headerName: 'Email', minWidth: 230, flex:1 },
     {
       field: 'actions',
       type: 'actions',
       headerName: 'Actions',
-      minWidth: 50,
+      minWidth: 100,
+      flex:1,
       getActions: (params:any) => [
         <GridActionsCellItem
           key="unshare"

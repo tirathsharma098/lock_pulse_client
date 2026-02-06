@@ -8,7 +8,7 @@ import { decryptCompat, encryptField, getEncryptedSize, initSodium } from '@/lib
 import { z } from 'zod';
 import { DecryptedItem } from '@/services/vault.service';
 import { Visibility as VisibilityIcon, VisibilityOff as VisibilityOffIcon } from '@mui/icons-material';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch, IconButton } from '@/components/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch, IconButton, PasswordGenerator } from '@/components/ui';
 
 // local schema
 const addPasswordSchema = z.object({
@@ -173,8 +173,8 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
         <DialogTitle>Edit Password</DialogTitle>
       </DialogHeader>
       
-      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
       <DialogContent>
+        <form id="edit-password-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <div className="space-y-4">
           <div>
             <Input
@@ -251,6 +251,10 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
             label="Long text mode (for notes, keys, etc.)"
           />
         </div>
+        </form>
+        <div className="mt-4">
+          <PasswordGenerator />
+        </div>
       </DialogContent>
       
       <DialogFooter>
@@ -259,6 +263,7 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
         </Button>
         <Button
           type="submit"
+          form="edit-password-form"
           variant="primary"
           disabled={loading || !title || !password}
           loading={loading}
@@ -266,7 +271,6 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
           Update Password
         </Button>
       </DialogFooter>
-      </form>
     </Dialog>
   );
 }

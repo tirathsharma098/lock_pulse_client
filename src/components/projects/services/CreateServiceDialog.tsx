@@ -8,7 +8,7 @@ import {
   encryptField, wrapVaultKey, generateVaultKey, 
   generateSalt, getDefaultKdfParams, deriveKEK, combineNonceAndCiphertext 
 } from '@/lib/crypto';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch } from '@/components/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch, PasswordGenerator } from '@/components/ui';
 
 interface CreateServiceDialogProps {
   open: boolean;
@@ -103,8 +103,8 @@ export default function CreateServiceDialog({
         <DialogTitle>Create New Service</DialogTitle>
       </DialogHeader>
       
-      <form onSubmit={handleSubmit}>
-        <DialogContent>
+      <DialogContent>
+        <form id="create-service-form" onSubmit={handleSubmit}>
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
               <p className="text-red-800 text-sm">{error}</p>
@@ -161,22 +161,26 @@ export default function CreateServiceDialog({
               autoComplete="off"
             />
           </div>
-        </DialogContent>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={loading} type='button'>
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            variant="primary"
-            disabled={loading}
-            loading={loading}
-          >
-            Create Service
-          </Button>
-        </DialogFooter>
-      </form>
+        </form>
+        <div className="mt-4">
+          <PasswordGenerator />
+        </div>
+      </DialogContent>
+      
+      <DialogFooter>
+        <Button variant="outline" onClick={handleClose} disabled={loading} type='button'>
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          form="create-service-form"
+          variant="primary"
+          disabled={loading}
+          loading={loading}
+        >
+          Create Service
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 }

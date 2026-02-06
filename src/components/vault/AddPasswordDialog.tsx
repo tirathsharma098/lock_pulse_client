@@ -6,7 +6,7 @@ import { useVault } from '@/contexts/VaultContext';
 import { vaultService, type VaultItemData } from '@/services';
 import { encryptField, getEncryptedSize, initSodium } from '@/lib/crypto';
 import { z } from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch } from '@/components/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch, PasswordGenerator } from '@/components/ui';
 
 // local schema
 const addPasswordSchema = z.object({
@@ -122,8 +122,8 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
         <DialogTitle>Add New Password</DialogTitle>
       </DialogHeader>
       
-      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
       <DialogContent>
+        <form id="add-password-form" onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
         <div className="space-y-4">
           <div>
             <Input
@@ -186,6 +186,10 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
             label="Long text mode (for notes, keys, etc.)"
           />
         </div>
+        </form>
+        <div className="mt-4">
+          <PasswordGenerator />
+        </div>
       </DialogContent>
       
       <DialogFooter>
@@ -194,6 +198,7 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
         </Button>
         <Button
           type="submit"
+          form="add-password-form"
           variant="primary"
           disabled={loading || !title || !password}
           loading={loading}
@@ -201,7 +206,6 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
           Add Password
         </Button>
       </DialogFooter>
-      </form>
     </Dialog>
   );
 }

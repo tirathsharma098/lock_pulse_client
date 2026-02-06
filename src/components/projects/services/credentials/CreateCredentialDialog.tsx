@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { createCredential } from '@/services/credentialService';
 import { encryptField } from '@/lib/crypto';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch } from '@/components/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch, PasswordGenerator } from '@/components/ui';
 
 interface CreateCredentialDialogProps {
   open: boolean;
@@ -87,8 +87,8 @@ export default function CreateCredentialDialog({
         <DialogTitle>Create New Credential</DialogTitle>
       </DialogHeader>
       
-      <form onSubmit={handleSubmit}>
-        <DialogContent>
+      <DialogContent>
+        <form id="create-credential-form" onSubmit={handleSubmit}>
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
               <p className="text-red-800 text-sm">{error}</p>
@@ -136,22 +136,26 @@ export default function CreateCredentialDialog({
               label="Long Password"
             />
           </div>
-        </DialogContent>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={loading} type='button'>
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            variant="primary"
-            disabled={loading}
-            loading={loading}
-          >
-            Create Credential
-          </Button>
-        </DialogFooter>
-      </form>
+        </form>
+        <div className="mt-4">
+          <PasswordGenerator />
+        </div>
+      </DialogContent>
+      
+      <DialogFooter>
+        <Button variant="outline" onClick={handleClose} disabled={loading} type='button'>
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          form="create-credential-form"
+          variant="primary"
+          disabled={loading}
+          loading={loading}
+        >
+          Create Credential
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 }

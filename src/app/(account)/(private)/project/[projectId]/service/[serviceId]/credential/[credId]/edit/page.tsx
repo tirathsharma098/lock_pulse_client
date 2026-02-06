@@ -13,7 +13,7 @@ import { useVault } from '@/contexts/VaultContext';
 import { getCredential, updateCredential, Credential } from '@/services/credentialService';
 import { decryptCompat, encryptField } from '@/lib/crypto';
 import { toast } from 'sonner';
-import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, Switch, IconButton } from '@/components/ui';
+import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, Switch, IconButton, PasswordGenerator } from '@/components/ui';
 
 export default function CredentialEditPage() {
   const params = useParams();
@@ -155,7 +155,7 @@ export default function CredentialEditPage() {
           <CardTitle>Credential Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form id="credential-edit-form" onSubmit={handleSubmit}>
             {error && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-red-800">{error}</p>
@@ -217,29 +217,32 @@ export default function CredentialEditPage() {
                 onCheckedChange={setIsLong}
                 label="Long Password"
               />
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button 
-                  variant="outline" 
-                  type='button'
-                  onClick={() => router.replace(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`)}
-                  disabled={saving}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  variant="primary"
-                  disabled={saving}
-                  loading={saving}
-                  className="flex items-center space-x-2"
-                >
-                  <SaveIcon className="w-4 h-4" />
-                  <span>Save Changes</span>
-                </Button>
-              </div>
             </div>
           </form>
+          <div className="mt-4">
+            <PasswordGenerator />
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button 
+              variant="outline" 
+              type='button'
+              onClick={() => router.replace(`/project/${projectId}/service/${serviceId}/credential/${credId}/view`)}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              form="credential-edit-form"
+              variant="primary"
+              disabled={saving}
+              loading={saving}
+              className="flex items-center space-x-2"
+            >
+              <SaveIcon className="w-4 h-4" />
+              <span>Save Changes</span>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

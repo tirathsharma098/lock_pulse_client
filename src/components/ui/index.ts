@@ -7,3 +7,4 @@ export { Switch } from './switch';
 export { Select, type Option } from './select';
 export { IconButton } from './icon-button';
 export { Pagination } from './pagination';
+export { PasswordGenerator } from './password-generator';

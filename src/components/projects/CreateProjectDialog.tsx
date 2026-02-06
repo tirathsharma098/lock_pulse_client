@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { useVault } from '@/contexts/VaultContext';
 import { createProject } from '@/services/projectService';
 import { encryptField, wrapVaultKey, generateVaultKey, generateSalt, getDefaultKdfParams, deriveKEK, combineNonceAndCiphertext } from '@/lib/crypto';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch } from '@/components/ui';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, Button, Input, Textarea, Switch, PasswordGenerator } from '@/components/ui';
 
 interface CreateProjectDialogProps {
   open: boolean;
@@ -97,8 +97,8 @@ export default function CreateProjectDialog({
         <DialogTitle>Create New Project</DialogTitle>
       </DialogHeader>
       
-      <form onSubmit={handleSubmit}>
-        <DialogContent>
+      <DialogContent>
+        <form id="create-project-form" onSubmit={handleSubmit}>
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
               <p className="text-red-800 text-sm">{error}</p>
@@ -155,22 +155,26 @@ export default function CreateProjectDialog({
               autoComplete="off"
             />
           </div>
-        </DialogContent>
-        
-        <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={loading} type='button'>
-            Cancel
-          </Button>
-          <Button 
-            type="submit" 
-            variant="primary"
-            disabled={loading}
-            loading={loading}
-          >
-            Create Project
-          </Button>
-        </DialogFooter>
-      </form>
+        </form>
+        <div className="mt-4">
+          <PasswordGenerator />
+        </div>
+      </DialogContent>
+      
+      <DialogFooter>
+        <Button variant="outline" onClick={handleClose} disabled={loading} type='button'>
+          Cancel
+        </Button>
+        <Button 
+          type="submit" 
+          form="create-project-form"
+          variant="primary"
+          disabled={loading}
+          loading={loading}
+        >
+          Create Project
+        </Button>
+      </DialogFooter>
     </Dialog>
   );
 }

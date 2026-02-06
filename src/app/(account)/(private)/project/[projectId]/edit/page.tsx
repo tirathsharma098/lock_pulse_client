@@ -22,7 +22,7 @@ import {
   combineNonceAndCiphertext,
 } from '@/lib/crypto';
 import { toast } from 'sonner';
-import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, Switch, IconButton } from '@/components/ui';
+import { Card, CardHeader, CardContent, CardTitle, Button, Input, Textarea, Switch, IconButton, PasswordGenerator } from '@/components/ui';
 
 export default function ProjectEditPage() {
   const params = useParams();
@@ -182,7 +182,7 @@ export default function ProjectEditPage() {
           <CardTitle>Project Information</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form id="project-edit-form" onSubmit={handleSubmit}>
             {error && (
               <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-red-800">{error}</p>
@@ -252,28 +252,32 @@ export default function ProjectEditPage() {
                 rows={4}
                 autoComplete="off"
               />
-              
-              <div className="flex justify-end space-x-2 pt-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => router.replace(`/project/${projectId}/view`)}
-                  disabled={saving}
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  type="submit" 
-                  variant="primary"
-                  disabled={saving}
-                  loading={saving}
-                  className="flex items-center space-x-2"
-                >
-                  <SaveIcon className="w-4 h-4" />
-                  <span>Save Changes</span>
-                </Button>
-              </div>
             </div>
           </form>
+          <div className="mt-4">
+            <PasswordGenerator />
+          </div>
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button 
+              variant="outline" 
+              type="button"
+              onClick={() => router.replace(`/project/${projectId}/view`)}
+              disabled={saving}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              form="project-edit-form"
+              variant="primary"
+              disabled={saving}
+              loading={saving}
+              className="flex items-center space-x-2"
+            >
+              <SaveIcon className="w-4 h-4" />
+              <span>Save Changes</span>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
