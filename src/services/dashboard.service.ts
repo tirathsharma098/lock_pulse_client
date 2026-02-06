@@ -83,13 +83,22 @@ class DashboardService {
   /**
    * Get dashboard statistics
    */
-  async getDashboardStats(filter?: 'vault' | 'project'): Promise<StatsData> {
+  async getDashboardStats(filter?: 'vault' | 'project', month?: string): Promise<StatsData> {
     let endpoint = '/activity-log/dashboard/stats';
-    
+
+    const searchParams = new URLSearchParams();
     if (filter === 'vault') {
-      endpoint += '?vault=true';
+      searchParams.append('vault', 'true');
     } else if (filter === 'project') {
-      endpoint += '?vault=false';
+      searchParams.append('vault', 'false');
+    }
+    if (month) {
+      searchParams.append('month', month);
+    }
+
+    const queryString = searchParams.toString();
+    if (queryString) {
+      endpoint += `?${queryString}`;
     }
 
     return apiRequest(endpoint);

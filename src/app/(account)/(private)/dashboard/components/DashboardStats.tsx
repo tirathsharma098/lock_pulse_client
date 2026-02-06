@@ -11,26 +11,28 @@ interface DashboardStatsProps {
 }
 
 export default function DashboardStats({ filter = 'all' }: DashboardStatsProps) {
+  const currentMonth = new Date().toISOString().slice(0, 7);
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activityFilter, setActivityFilter] = useState<'all' | 'vault' | 'project'>('all');
   const [activityStats, setActivityStats] = useState<StatsData | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<string>(currentMonth);
 
   useEffect(() => {
     fetchStats();
-  }, [filter]);
+  }, [filter, selectedMonth]);
 
   useEffect(() => {
     fetchActivityFilterStats();
-  }, [activityFilter]);
+  }, [activityFilter, selectedMonth]);
 
   const fetchStats = async () => {
     setLoading(true);
     setError(null);
     try {
       const filterParam = filter === 'all' ? undefined : filter;
-      const data = await dashboardService.getDashboardStats(filterParam);
+      const data = await dashboardService.getDashboardStats(filterParam, selectedMonth);
       setStats(data);
       setActivityStats(data);
     } catch (err) {
@@ -44,7 +46,7 @@ export default function DashboardStats({ filter = 'all' }: DashboardStatsProps) 
   const fetchActivityFilterStats = async () => {
     try {
       const filterParam = activityFilter === 'all' ? undefined : activityFilter;
-      const data = await dashboardService.getDashboardStats(filterParam);
+      const data = await dashboardService.getDashboardStats(filterParam, selectedMonth);
       setActivityStats(data);
     } catch (err) {
       console.error('Error fetching filtered activity stats:', err);
@@ -182,6 +184,21 @@ export default function DashboardStats({ filter = 'all' }: DashboardStatsProps) 
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
+          Showing data for this month
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm text-gray-500 dark:text-gray-400">Month</label>
+          <input
+            type="month"
+            value={selectedMonth}
+            max={currentMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+            className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+          />
+        </div>
+      </div>
       <Grid container spacing={3}>
         {statCards.map((card, index) => (
           <Grid item xs={12} sm={6} md={4} key={index}>

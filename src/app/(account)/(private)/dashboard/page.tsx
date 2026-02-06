@@ -1,27 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   Tabs, 
   Tab, 
   Box, 
-  Card, 
-  CardContent, 
-  Typography,
-  Grid,
-  CircularProgress,
-  Alert,
 } from '@mui/material';
 import { 
   Activity, 
-  Eye, 
-  Edit, 
   Vault, 
   FolderKanban,
   TrendingUp,
 } from 'lucide-react';
 import DashboardStats from './components/DashboardStats';
-import ActivityTable from './components/ActivityTable';
 import ActivityFilters from './components/ActivityFilters';
 
 interface TabPanelProps {
@@ -47,7 +38,6 @@ function TabPanel(props: TabPanelProps) {
 
 export default function DashboardPage() {
   const [tabValue, setTabValue] = useState(0);
-  const [loading, setLoading] = useState(false);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
