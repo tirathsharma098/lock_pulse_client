@@ -48,6 +48,27 @@ export interface VerifyEmailTokenData {
   token: string;
 }
 
+export interface SendResetPasswordEmailData {
+  email: string;
+}
+
+export interface ResetPasswordStartData {
+  token: string;
+  registrationRequest: string;
+}
+
+export interface ResetPasswordStartResponse {
+  registrationResponse: string;
+}
+
+export interface ResetPasswordFinishData {
+  token: string;
+  registrationRecord: string;
+  wrappedVaultKey: string;
+  vaultKdfSalt: string;
+  vaultKdfParams: any;
+}
+
 export const authService = {
   registerStart: (data: RegisterStartData) =>
     apiRequest('/auth/register/start', {
@@ -81,6 +102,24 @@ export const authService = {
 
   verifyEmailToken: (data: VerifyEmailTokenData) =>
     apiRequest('/auth/verify-email/confirm', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  sendResetPasswordEmail: (data: SendResetPasswordEmailData) =>
+    apiRequest('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  resetPasswordStart: (data: ResetPasswordStartData): Promise<ResetPasswordStartResponse> =>
+    apiRequest('/auth/reset-password/start', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  resetPasswordFinish: (data: ResetPasswordFinishData) =>
+    apiRequest('/auth/reset-password/finish', {
       method: 'POST',
       body: JSON.stringify(data),
     }),

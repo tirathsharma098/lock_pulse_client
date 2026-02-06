@@ -13,6 +13,10 @@ export type {
   LoginFinishData,
   SendVerificationEmailData,
   VerifyEmailTokenData,
+  SendResetPasswordEmailData,
+  ResetPasswordStartData,
+  ResetPasswordStartResponse,
+  ResetPasswordFinishData,
 } from './auth.service';
 
 export type {

@@ -28,14 +28,18 @@ export interface AuthLog {
 
 export interface AuthLogResponse {
   logs: AuthLog[];
-  total: number;
+  limit: number;
+  nextCursor: string | null;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 class AuthLogService {
-  async getUserLogs(limit: number = 50, offset: number = 0): Promise<AuthLogResponse> {
+  async getUserLogs(limit: number = 10, cursor?: string, date?: string): Promise<AuthLogResponse> {
     const searchParams = new URLSearchParams();
     searchParams.append('limit', limit.toString());
-    searchParams.append('offset', offset.toString());
+    if (cursor) searchParams.append('cursor', cursor);
+    if (date) searchParams.append('date', date);
 
     return apiRequest(`/auth-log?${searchParams.toString()}`);
   }

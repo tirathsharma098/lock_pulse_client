@@ -246,6 +246,14 @@ export default function LoginClient() {
                 helperText={fieldErrors.password ?? ''}
               />
 
+              <div className="flex justify-end">
+                <Link href="/reset-password" passHref>
+                  <MuiLink component="span" className="cursor-pointer text-sm font-semibold text-red-600 hover:text-red-500">
+                    Reset password
+                  </MuiLink>
+                </Link>
+              </div>
+
               <Button
                 type="submit"
                 fullWidth
