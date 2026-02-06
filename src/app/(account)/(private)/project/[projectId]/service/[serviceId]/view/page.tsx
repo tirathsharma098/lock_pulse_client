@@ -170,6 +170,7 @@ export default function ServiceViewPage() {
                 <p className="mt-1 text-gray-900">{new Date(service.createdAt).toLocaleString()}</p>
               </div>
 
+              <form onSubmit={(e) => e.preventDefault()}>
               <div>
                 <div className="flex items-end space-x-2">
                   <div className="flex-1">
@@ -189,6 +190,7 @@ export default function ServiceViewPage() {
                           value={showPassword ? decryptedPassword : '••••••••••••'}
                           rows={4}
                           readOnly
+                          autoComplete="off"
                         />
                       ) : (
                         <Input
@@ -196,6 +198,7 @@ export default function ServiceViewPage() {
                           type={showPassword ? 'text' : 'password'}
                           value={showPassword ? decryptedPassword : '••••••••••••'}
                           readOnly
+                          autoComplete="off"
                         />
                       )
                     )}
@@ -224,6 +227,7 @@ export default function ServiceViewPage() {
                   )}
                 </div>
               </div>
+              </form>
               
               {service.notes && (
                 <div>

@@ -306,6 +306,7 @@ export default function ProjectViewPage() {
                 <p className="mt-1 text-gray-900">{new Date(project.createdAt).toLocaleString()}</p>
               </div>
 
+              <form onSubmit={(e) => e.preventDefault()}>
               <div>
                 <div className="flex items-end space-x-2">
                   <div className="flex-1">
@@ -325,6 +326,7 @@ export default function ProjectViewPage() {
                           value={showPassword ? decryptedPassword : '••••••••••••'}
                           rows={4}
                           readOnly
+                          autoComplete="off"
                         />
                       ) : (
                         <Input
@@ -332,6 +334,7 @@ export default function ProjectViewPage() {
                           type={showPassword ? 'text' : 'password'}
                           value={showPassword ? decryptedPassword : '••••••••••••'}
                           readOnly
+                          autoComplete="off"
                         />
                       )
                     )}
@@ -359,6 +362,7 @@ export default function ProjectViewPage() {
                   )}
                 </div>
               </div>
+              </form>
               
               {project.notes && (
                 <div>

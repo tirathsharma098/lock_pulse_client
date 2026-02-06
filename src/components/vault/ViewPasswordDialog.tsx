@@ -101,6 +101,7 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
       </DialogHeader>
       
       <DialogContent>
+        <form onSubmit={(e) => e.preventDefault()}>
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -114,6 +115,7 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
                     label="Title"
                     value={item.title}
                     readOnly
+                    autoComplete="off"
                   />
                 </div>
                 <IconButton 
@@ -140,6 +142,7 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
                       value={item.password}
                       rows={10}
                       readOnly
+                      autoComplete="off"
                     />
                   ) : (
                     <Input
@@ -147,6 +150,7 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
                       type={showPassword ? 'text' : 'password'}
                       value={item.password}
                       readOnly
+                      autoComplete="off"
                     />
                   )}
                 </div>
@@ -181,6 +185,7 @@ export default function ViewPasswordDialog({ open, onClose, itemId }: ViewPasswo
         ) : (
           <p className="text-gray-500">No item data available</p>
         )}
+        </form>
       </DialogContent>
       
       <DialogFooter>

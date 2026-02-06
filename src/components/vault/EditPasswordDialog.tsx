@@ -173,6 +173,7 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
         <DialogTitle>Edit Password</DialogTitle>
       </DialogHeader>
       
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
       <DialogContent>
         <div className="space-y-4">
           <div>
@@ -186,6 +187,7 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
               placeholder="e.g., Gmail Account"
               error={fieldErrors.title}
               autoFocus
+              autoComplete="off"
             />
             {title && (
               <p className="text-xs text-gray-500 mt-1">
@@ -208,6 +210,7 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
                     placeholder="Enter password"
                     rows={10}
                     error={fieldErrors.password}
+                    autoComplete="off"
                   />
                 </div>
               ) : (
@@ -222,6 +225,7 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
                     }}
                     placeholder="Enter password"
                     error={fieldErrors.password}
+                    autoComplete="off"
                   />
                 </div>
               )}
@@ -229,6 +233,7 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
                 onClick={() => setShowPassword(prev => !prev)}
                 variant="ghost"
                 className="mb-1"
+                type='button'
               >
                 {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
               </IconButton>}
@@ -249,18 +254,19 @@ export default function EditPasswordDialog({ open, onClose, onEdit, itemId }: Ed
       </DialogContent>
       
       <DialogFooter>
-        <Button variant="outline" onClick={handleClose} disabled={loading}>
+        <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
           Cancel
         </Button>
         <Button
+          type="submit"
           variant="primary"
-          onClick={handleSubmit}
           disabled={loading || !title || !password}
           loading={loading}
         >
           Update Password
         </Button>
       </DialogFooter>
+      </form>
     </Dialog>
   );
 }

@@ -224,7 +224,7 @@ export default function LoginClient() {
                   if (fieldErrors.username) setFieldErrors((p) => ({ ...p, username: undefined }));
                 }}
                 disabled={loading}
-                autoComplete="username"
+                autoComplete="off"
                 className="bg-white/70"
                 error={!!fieldErrors.username}
                 helperText={fieldErrors.username ?? ''}
@@ -240,7 +240,7 @@ export default function LoginClient() {
                   if (fieldErrors.password) setFieldErrors((p) => ({ ...p, password: undefined }));
                 }}
                 disabled={loading}
-                autoComplete="current-password"
+                autoComplete="off"
                 className="bg-white/70"
                 error={!!fieldErrors.password}
                 helperText={fieldErrors.password ?? ''}

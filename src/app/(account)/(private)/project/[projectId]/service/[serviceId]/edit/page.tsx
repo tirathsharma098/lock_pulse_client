@@ -199,6 +199,7 @@ export default function ServiceEditPage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter service name"
                 required
+                autoComplete="off"
               />
               
               <div>
@@ -213,6 +214,7 @@ export default function ServiceEditPage() {
                         required
                         rows={4}
                         helperText="Change this password to update service encryption"
+                        autoComplete="off"
                       />
                     ) : (
                       <Input
@@ -223,6 +225,7 @@ export default function ServiceEditPage() {
                         placeholder="Enter service password"
                         required
                         // helperText="Change this password to update service encryption"
+                        autoComplete="off"
                       />
                     )}
                   </div>
@@ -250,6 +253,7 @@ export default function ServiceEditPage() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add any notes about this service"
                 rows={4}
+                autoComplete="off"
               />
               
               <div className="flex justify-end space-x-2 pt-4">

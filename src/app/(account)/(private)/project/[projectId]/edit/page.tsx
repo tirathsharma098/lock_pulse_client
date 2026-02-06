@@ -196,6 +196,7 @@ export default function ProjectEditPage() {
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Enter project name"
                 required
+                autoComplete="off"
               />
               
               <div>
@@ -210,6 +211,7 @@ export default function ProjectEditPage() {
                         required
                         rows={4}
                         helperText="Change this password to update project encryption"
+                        autoComplete="off"
                       />
                     ) : (
                       <Input
@@ -220,6 +222,7 @@ export default function ProjectEditPage() {
                         placeholder="Enter project password"
                         required
                         helperText="Change this password to update project encryption"
+                        autoComplete="off"
                       />
                     )}
                   </div>
@@ -247,6 +250,7 @@ export default function ProjectEditPage() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add any notes about this project"
                 rows={4}
+                autoComplete="off"
               />
               
               <div className="flex justify-end space-x-2 pt-4">

@@ -113,6 +113,7 @@ export default function CreateProjectDialog({
               placeholder="Enter project name"
               required
               autoFocus
+              autoComplete="off"
             />
             
             {isLong ? (
@@ -124,6 +125,7 @@ export default function CreateProjectDialog({
                 required
                 rows={4}
                 helperText="This password will be used to encrypt project data"
+                autoComplete="off"
               />
             ) : (
               <Input
@@ -134,6 +136,7 @@ export default function CreateProjectDialog({
                 placeholder="Enter project password"
                 required
                 helperText="This password will be used to encrypt project data"
+                autoComplete="off"
               />
             )}
 
@@ -149,6 +152,7 @@ export default function CreateProjectDialog({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any notes about this project"
               rows={3}
+              autoComplete="off"
             />
           </div>
         </DialogContent>

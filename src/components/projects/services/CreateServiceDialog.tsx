@@ -119,6 +119,7 @@ export default function CreateServiceDialog({
               placeholder="Enter service name"
               required
               autoFocus
+              autoComplete="off"
             />
             
             {isLong ? (
@@ -130,6 +131,7 @@ export default function CreateServiceDialog({
                 required
                 rows={4}
                 helperText="This password will be used to encrypt service data"
+                autoComplete="off"
               />
             ) : (
               <Input
@@ -140,6 +142,7 @@ export default function CreateServiceDialog({
                 placeholder="Enter service password"
                 required
                 helperText="This password will be used to encrypt service data"
+                autoComplete="off"
               />
             )}
 
@@ -155,6 +158,7 @@ export default function CreateServiceDialog({
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any notes about this service"
               rows={3}
+              autoComplete="off"
             />
           </div>
         </DialogContent>

@@ -103,6 +103,7 @@ export default function CreateCredentialDialog({
               placeholder="e.g., Email, Admin Account, API Key, etc."
               required
               autoFocus
+              autoComplete="off"
             />
             
             {isLong ? (
@@ -114,6 +115,7 @@ export default function CreateCredentialDialog({
                 required
                 rows={4}
                 helperText="The password or value for this credential"
+                autoComplete="off"
               />
             ) : (
               <Input
@@ -124,6 +126,7 @@ export default function CreateCredentialDialog({
                 placeholder="The password or value for this credential"
                 required
                 helperText="The password or value for this credential"
+                autoComplete="off"
               />
             )}
 

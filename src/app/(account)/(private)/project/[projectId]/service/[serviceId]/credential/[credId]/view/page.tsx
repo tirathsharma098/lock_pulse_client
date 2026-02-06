@@ -194,7 +194,7 @@ export default function CredentialViewPage() {
                 <p className="text-red-800 text-sm">{decryptError}</p>
               </div>
             ) : (
-              <>
+              <form onSubmit={(e) => e.preventDefault()}>
                 <div>
                   <div className="flex items-end space-x-2">
                     <div className="flex-1">
@@ -202,6 +202,7 @@ export default function CredentialViewPage() {
                         label="Title"
                         value={decryptedTitle}
                         readOnly
+                        autoComplete="off"
                       />
                     </div>
                     <IconButton
@@ -225,6 +226,7 @@ export default function CredentialViewPage() {
                           value={showPassword ? decryptedPassword : '••••••••••••'}
                           rows={4}
                           readOnly
+                          autoComplete="off"
                         />
                       ) : (
                         <Input
@@ -232,6 +234,7 @@ export default function CredentialViewPage() {
                           type={showPassword ? 'text' : 'password'}
                           value={showPassword ? decryptedPassword : '••••••••••••'}
                           readOnly
+                          autoComplete="off"
                         />
                       )}
                     </div>
@@ -255,7 +258,7 @@ export default function CredentialViewPage() {
                     </IconButton>
                   </div>
                 </div>
-              </>
+              </form>
             )}
           </div>
         </CardContent>

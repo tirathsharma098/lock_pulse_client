@@ -122,6 +122,7 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
         <DialogTitle>Add New Password</DialogTitle>
       </DialogHeader>
       
+      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
       <DialogContent>
         <div className="space-y-4">
           <div>
@@ -135,6 +136,7 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
               placeholder="e.g., Gmail Account"
               error={fieldErrors.title}
               autoFocus
+              autoComplete="off"
             />
             {title && (
               <p className="text-xs text-gray-500 mt-1">
@@ -155,6 +157,7 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
                 placeholder="Enter password"
                 rows={10}
                 error={fieldErrors.password}
+                autoComplete="off"
               />
             ) : (
               <Input
@@ -167,6 +170,7 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
                 }}
                 placeholder="Enter password"
                 error={fieldErrors.password}
+                autoComplete="off"
               />
             )}
             {password && (
@@ -185,18 +189,19 @@ export default function AddPasswordDialog({ open, onClose, onAdd }: AddPasswordD
       </DialogContent>
       
       <DialogFooter>
-        <Button variant="outline" onClick={handleClose} disabled={loading}>
+        <Button type="button" variant="outline" onClick={handleClose} disabled={loading}>
           Cancel
         </Button>
         <Button
+          type="submit"
           variant="primary"
-          onClick={handleSubmit}
           disabled={loading || !title || !password}
           loading={loading}
         >
           Add Password
         </Button>
       </DialogFooter>
+      </form>
     </Dialog>
   );
 }

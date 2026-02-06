@@ -170,6 +170,7 @@ export default function CredentialEditPage() {
                 placeholder="e.g., Email, Admin Account, API Key, etc."
                 required
                 helperText="e.g., Email, Admin Account, API Key, etc."
+                autoComplete="off"
               />
               
               <div>
@@ -184,6 +185,7 @@ export default function CredentialEditPage() {
                         required
                         rows={4}
                         helperText="The password or value for this credential"
+                        autoComplete="off"
                       />
                     ) : (
                       <Input
@@ -194,6 +196,7 @@ export default function CredentialEditPage() {
                         placeholder="The password or value for this credential"
                         required
                         // helperText="The password or value for this credential"
+                        autoComplete="off"
                       />
                     )}
                   </div>
