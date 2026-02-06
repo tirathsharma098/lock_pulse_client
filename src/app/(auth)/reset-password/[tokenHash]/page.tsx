@@ -119,8 +119,8 @@ export default function ResetPasswordTokenPage({
   const isLoading = status === 'loading';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white">
-      <div className="mx-auto flex min-h-screen w-full max-w-4xl items-center px-4 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-blue-900 to-purple-900 text-white">
+      <div className="mx-auto flex min-h-screen w-full max-w-2xl items-center px-4 py-12">
         <div className="w-full rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl backdrop-blur sm:p-12">
           <div className="mb-8 flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/20 text-blue-200">
