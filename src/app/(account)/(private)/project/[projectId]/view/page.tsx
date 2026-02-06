@@ -11,7 +11,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Button,
   Autocomplete,
   Snackbar,
   Alert,
@@ -30,7 +29,7 @@ import { useVault } from '@/contexts/VaultContext';
 import { getProject, Project } from '@/services/projectService';
 import { decryptCompat } from '@/lib/crypto';
 import { toast } from 'sonner';
-import { Card, CardHeader, CardContent, CardTitle, Input, Textarea, IconButton as CustomIconButton } from '@/components/ui';
+import { Card, CardHeader, CardContent, CardTitle, Input, Textarea, IconButton as CustomIconButton, Button } from '@/components/ui';
 import { 
   ArrowBack as ArrowBackIcon, 
   Edit as EditIcon,
@@ -243,7 +242,7 @@ export default function ProjectViewPage() {
         <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
           <p className="text-red-800">{error}</p>
         </div>
-        <Button 
+        <Button
           onClick={() => router.back(/*'/project'*/)}
           className="flex items-center space-x-2"
         >
@@ -402,11 +401,12 @@ export default function ProjectViewPage() {
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6">Shared Users</Typography>
                   <Button
-                    variant="contained"
-                    startIcon={<PersonAddIcon />}
+                    variant="primary"
+                    className="flex items-center space-x-2"
                     onClick={() => setShareDialogOpen(true)}
                   >
-                    Share Project
+                    <PersonAddIcon />
+                    <span>Share Project</span>
                   </Button>
                 </Box>
 
@@ -465,7 +465,7 @@ export default function ProjectViewPage() {
                   <Button onClick={() => setShareDialogOpen(false)}>Cancel</Button>
                   <Button 
                     onClick={handleShareDialogSubmit} 
-                    variant="contained"
+                    variant="primary"
                     disabled={!selectedUser}
                   >
                     Share

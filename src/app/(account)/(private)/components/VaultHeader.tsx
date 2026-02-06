@@ -42,36 +42,44 @@ export default function VaultHeader() {
     };
   
     return (
-      <AppBar position="static">
-        <Toolbar>
-          <LockIcon className="mr-2" />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            <Link href='/vault'> LockPulse</Link>
-          </Typography>
-          <Chip
-            label="Unlocked"
-            color="success"
-            variant="filled"
-            sx={{ color: '#fff', fontWeight: 600 }}
-            className="mr-4"
-          />
-          <IconButton
-            color="inherit"
-            onClick={handleProfile}
-            sx={{ mr: 1 }}
-            aria-label="Profile"
-          >
-            <PersonIcon />
-          </IconButton>
-          <Button 
-            color="inherit" 
-            onClick={handleLogout}
-            startIcon={<LogoutIcon />}
-          >
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
+        <AppBar position="static" className="bg-slate-900/80 backdrop-blur border-b border-slate-800 shadow-sm">
+          <Toolbar className="min-h-[64px] gap-2">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800/70 ring-1 ring-slate-700">
+                <LockIcon className="text-slate-100" />
+              </span>
+              <Typography variant="h6" component="div" sx={{ flexGrow: 1 }} className="font-semibold tracking-tight text-slate-100">
+                <Link href="/vault" className="hover:text-white">LockPulse</Link>
+              </Typography>
+            </div>
+
+            <div className="ml-auto flex items-center gap-2">
+              <Chip
+                label="Unlocked"
+                color="success"
+                variant="filled"
+                sx={{ color: '#fff', fontWeight: 600 }}
+                className="rounded-full px-1 shadow-sm"
+              />
+              <IconButton
+                color="inherit"
+                onClick={handleProfile}
+                aria-label="Profile"
+                className="rounded-xl bg-slate-800/60 hover:bg-slate-700/70 transition-colors"
+              >
+                <PersonIcon />
+              </IconButton>
+              <Button
+                color="inherit"
+                onClick={handleLogout}
+                startIcon={<LogoutIcon />}
+                className="rounded-xl bg-slate-800/60 hover:bg-slate-700/70 px-4 py-2 font-medium normal-case transition-colors"
+              >
+                Logout
+              </Button>
+            </div>
+          </Toolbar>
+        </AppBar>
     );
   }
   

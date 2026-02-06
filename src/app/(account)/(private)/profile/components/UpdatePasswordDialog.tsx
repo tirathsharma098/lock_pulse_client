@@ -7,7 +7,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Button,
   Typography,
   Alert,
   Box,
@@ -32,6 +31,7 @@ import {
 } from '@/lib/crypto';
 import { useVault } from '@/contexts/VaultContext';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui';
 
 const confirmationSchema = z.object({
     username: z.string().min(1, 'Username is required'),
@@ -102,6 +102,16 @@ export default function UpdatePasswordDialog({ open, onClose, username }: Update
     }
 
     setStep(1);
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (loading) return;
+    if (step === 0) {
+      handleConfirmation();
+    } else {
+      void handlePasswordUpdate();
+    }
   };
 
   const handlePasswordUpdate = async () => {
@@ -187,125 +197,127 @@ export default function UpdatePasswordDialog({ open, onClose, username }: Update
         </Stepper>
       </DialogTitle>
 
-      <DialogContent>
-        {error && (
-          <Alert severity="error" className="mb-4">
-            {error}
-          </Alert>
-        )}
-
-        {step === 0 && (
-          <Box className="space-y-4">
-            <Alert severity="warning" className="mb-4">
-              <Typography variant="body2" className="font-semibold mb-2">
-                ⚠️ This action cannot be undone!
-              </Typography>
-              <Typography variant="body2">
-                • Your vault will be re-encrypted with the new password
-                <br />
-                • You will need the new password for all future access
-                <br />
-                • Make sure you remember or securely store your new password
-              </Typography>
+      <form onSubmit={handleSubmit}>
+        <DialogContent>
+          {error && (
+            <Alert severity="error" className="mb-4">
+              {error}
             </Alert>
+          )}
 
-            <Typography variant="body1" className="mb-4">
-              To confirm this action, please type your username: <strong>{username}</strong>
-            </Typography>
+          {step === 0 && (
+            <Box className="space-y-4">
+              <Alert severity="warning" className="mb-4">
+                <Typography variant="body2" className="font-semibold mb-2">
+                  ⚠️ This action cannot be undone!
+                </Typography>
+                <Typography variant="body2">
+                  • Your vault will be re-encrypted with the new password
+                  <br />
+                  • You will need the new password for all future access
+                  <br />
+                  • Make sure you remember or securely store your new password
+                </Typography>
+              </Alert>
 
-            <TextField
-              fullWidth
-              label="Confirm Username"
-              value={confirmUsername}
-              onChange={(e) => {
-                setConfirmUsername(e.target.value);
-                if (fieldErrors.confirmUsername) {
-                  setFieldErrors((p) => ({ ...p, confirmUsername: undefined }));
-                }
-              }}
-              disabled={loading}
-              error={!!fieldErrors.confirmUsername}
-              helperText={fieldErrors.confirmUsername}
-              placeholder={`Type "${username}" to confirm`}
-            />
-          </Box>
-        )}
-
-        {step === 1 && (
-          <Box className="space-y-4">
-            <Typography variant="body1" className="mb-4">
-              Enter your new master password:
-            </Typography>
-
-            <TextField
-              fullWidth
-              type="password"
-              label="New Master Password"
-              value={newPassword}
-              onChange={(e) => {
-                setNewPassword(e.target.value);
-                if (fieldErrors.newPassword) {
-                  setFieldErrors((p) => ({ ...p, newPassword: undefined }));
-                }
-              }}
-              disabled={loading}
-              error={!!fieldErrors.newPassword}
-              helperText={fieldErrors.newPassword}
-              autoComplete="new-password"
-            />
-
-            <TextField
-              fullWidth
-              type="password"
-              label="Confirm New Password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                if (fieldErrors.confirmPassword) {
-                  setFieldErrors((p) => ({ ...p, confirmPassword: undefined }));
-                }
-              }}
-              disabled={loading}
-              error={!!fieldErrors.confirmPassword}
-              helperText={fieldErrors.confirmPassword}
-              autoComplete="new-password"
-            />
-
-            {newPassword && (
-              <Typography variant="caption" color="textSecondary">
-                Encrypted size: {getEncryptedSize(newPassword)} bytes
+              <Typography variant="body1" className="mb-4">
+                To confirm this action, please type your username: <strong>{username}</strong>
               </Typography>
-            )}
-          </Box>
-        )}
-      </DialogContent>
 
-      <DialogActions className="p-6">
-        <Button onClick={handleClose} disabled={loading}>
-          Cancel
-        </Button>
-        {step === 0 ? (
-          <Button
-            onClick={handleConfirmation}
-            variant="contained"
-            color="warning"
-            disabled={loading || !confirmUsername}
-          >
-            Confirm & Continue
-          </Button>
-        ) : (
-          <Button
-            onClick={handlePasswordUpdate}
-            variant="contained"
-            color="primary"
-            disabled={loading || !newPassword || !confirmPassword}
-          >
-             <Box sx={{ display: "flex", alignItems: "center", minWidth: 150, justifyContent: "center" }}>
-              {loading ? <CircularProgress size={20} sx={{color: "white"}}/> : "Update Password"}
+              <TextField
+                fullWidth
+                label="Confirm Username"
+                value={confirmUsername}
+                onChange={(e) => {
+                  setConfirmUsername(e.target.value);
+                  if (fieldErrors.confirmUsername) {
+                    setFieldErrors((p) => ({ ...p, confirmUsername: undefined }));
+                  }
+                }}
+                disabled={loading}
+                error={!!fieldErrors.confirmUsername}
+                helperText={fieldErrors.confirmUsername}
+                placeholder={`Type "${username}" to confirm`}
+              />
             </Box>
+          )}
+
+          {step === 1 && (
+            <Box className="space-y-4">
+              <Typography variant="body1" className="mb-4">
+                Enter your new master password:
+              </Typography>
+
+              <TextField
+                fullWidth
+                type="password"
+                label="New Master Password"
+                value={newPassword}
+                onChange={(e) => {
+                  setNewPassword(e.target.value);
+                  if (fieldErrors.newPassword) {
+                    setFieldErrors((p) => ({ ...p, newPassword: undefined }));
+                  }
+                }}
+                disabled={loading}
+                error={!!fieldErrors.newPassword}
+                helperText={fieldErrors.newPassword}
+                autoComplete="new-password"
+              />
+
+              <TextField
+                fullWidth
+                type="password"
+                label="Confirm New Password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  if (fieldErrors.confirmPassword) {
+                    setFieldErrors((p) => ({ ...p, confirmPassword: undefined }));
+                  }
+                }}
+                disabled={loading}
+                error={!!fieldErrors.confirmPassword}
+                helperText={fieldErrors.confirmPassword}
+                autoComplete="new-password"
+              />
+
+              {newPassword && (
+                <Typography variant="caption" color="textSecondary">
+                  Encrypted size: {getEncryptedSize(newPassword)} bytes
+                </Typography>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions className="p-6">
+          <Button onClick={handleClose} disabled={loading} type="button">
+            Cancel
           </Button>
-        )}
-      </DialogActions>
+          {step === 0 ? (
+            <Button
+              type="submit"
+              variant="primary"
+              color="warning"
+              disabled={loading || !confirmUsername}
+            >
+              Confirm & Continue
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              variant="ghost"
+              color="primary"
+              disabled={loading || !newPassword || !confirmPassword}
+            >
+               <Box sx={{ display: "flex", alignItems: "center", minWidth: 150, justifyContent: "center" }}>
+                {loading ? <CircularProgress size={20} sx={{color: "black"}}/> : "Update Password"}
+              </Box>
+            </Button>
+          )}
+        </DialogActions>
+      </form>
     </Dialog>
   );
 }
