@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { DataGrid, GridColDef, GridPaginationModel } from '@mui/x-data-grid';
+import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import { format } from 'date-fns';
-import { FileText, Clock, User, MapPin, Hash } from 'lucide-react';
+import { FileText, Clock, User, Hash } from 'lucide-react';
 import { dashboardService, Activity, ActivityQueryParams } from '@/services/dashboard.service';
 
 interface ActivityTableProps {
@@ -15,8 +15,7 @@ interface ActivityTableProps {
   resourceId?: string;
   activityType?: string;
   resourceType?: string;
-  startDate?: string;
-  endDate?: string;
+  date?: string;
 }
 
 export default function ActivityTable({
@@ -28,29 +27,33 @@ export default function ActivityTable({
   resourceId,
   activityType,
   resourceType,
-  startDate,
-  endDate,
+  date,
 }: ActivityTableProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
-    page: 0,
-    pageSize: 10,
-  });
+  const [pageSize, setPageSize] = useState(limit);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [cursorStack, setCursorStack] = useState<(string | null)[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasNext, setHasNext] = useState(false);
+
+  useEffect(() => {
+    setCursor(null);
+    setCursorStack([]);
+  }, [isVaultResource, projectId, serviceId, resourceId, activityType, resourceType, date]);
 
   useEffect(() => {
     fetchActivities();
-  }, [paginationModel, isVaultResource, projectId, serviceId, resourceId, activityType, resourceType, startDate, endDate]);
+  }, [pageSize, cursor, isVaultResource, projectId, serviceId, resourceId, activityType, resourceType, date]);
 
   const fetchActivities = async () => {
     setLoading(true);
     setError(null);
     try {
       const params: ActivityQueryParams = {
-        limit: paginationModel.pageSize,
-        offset: paginationModel.page * paginationModel.pageSize,
+        limit: pageSize,
+        cursor: cursor ?? undefined,
       };
 
       if (isVaultResource !== undefined) params.isVaultResource = isVaultResource;
@@ -59,12 +62,12 @@ export default function ActivityTable({
       if (resourceId) params.resourceId = resourceId;
       if (activityType) params.activityType = activityType;
       if (resourceType) params.resourceType = resourceType;
-      if (startDate) params.startDate = startDate;
-      if (endDate) params.endDate = endDate;
+      if (date) params.date = date;
 
       const data = await dashboardService.getActivities(params);
       setActivities(data.activities);
-      setTotal(data.total);
+      setNextCursor(data.nextCursor);
+      setHasNext(data.hasNext);
     } catch (err) {
       console.error('Error fetching activities:', err);
       setError('Failed to load activities');
@@ -92,7 +95,7 @@ export default function ActivityTable({
       headerName: 'Sr. No.',
       width: 80,
       renderCell: (params) => {
-        const srNo = paginationModel.page * paginationModel.pageSize + params.api.getRowIndexRelativeToVisibleRows(params.row.id) + 1;
+        const srNo = params.api.getRowIndexRelativeToVisibleRows(params.row.id) + 1;
         return (
           <div className="flex items-center gap-2">
             <Hash className="w-3 h-3 text-gray-400" />
@@ -187,7 +190,9 @@ export default function ActivityTable({
               Activity Logs
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {total > 0 ? `Showing ${activities.length} of ${total} activities` : 'No activities found'}
+              {activities.length > 0
+                ? `Showing ${activities.length} activities${hasNext ? ' (more available)' : ''}`
+                : 'No activities found'}
             </p>
           </div>
         </div>
@@ -205,17 +210,59 @@ export default function ActivityTable({
 
       {/* Data Grid */}
       <div className="p-6">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            <label className="text-sm text-gray-600 dark:text-gray-400">Per page</label>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                const newSize = Number(e.target.value);
+                setPageSize(newSize);
+                setCursor(null);
+                setCursorStack([]);
+              }}
+              className="px-3 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
+            >
+              {[10, 25, 50, 100].map((size) => (
+                <option key={size} value={size}>{size}</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => {
+                if (cursorStack.length === 0) return;
+                const previousCursor = cursorStack[cursorStack.length - 1] ?? null;
+                setCursorStack(cursorStack.slice(0, -1));
+                setCursor(previousCursor);
+              }}
+              disabled={cursorStack.length === 0 || loading}
+              className="px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => {
+                if (!nextCursor) return;
+                setCursorStack([...cursorStack, cursor]);
+                setCursor(nextCursor);
+              }}
+              disabled={!hasNext || loading}
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
         <div style={{ height: 600, width: '100%' }}>
           <DataGrid
             rows={activities}
             columns={columns}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[10, 25, 50, 100]}
-            rowCount={total}
-            paginationMode="server"
+            pagination={undefined}
             loading={loading}
             disableRowSelectionOnClick
+            hideFooterPagination
+            hideFooterSelectedRowCount
             sx={{
               border: 'none',
               '& .MuiDataGrid-cell': {

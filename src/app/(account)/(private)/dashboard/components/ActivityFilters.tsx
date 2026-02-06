@@ -36,11 +36,11 @@ const RESOURCE_TYPES = [
 ];
 
 export default function ActivityFilters({ isVaultResource }: ActivityFiltersProps) {
+  const today = new Date().toISOString().split('T')[0];
   const [filters, setFilters] = useState({
     activityType: '',
     resourceType: '',
-    startDate: '',
-    endDate: '',
+    date: today,
     projectId: '',
     serviceId: '',
   });
@@ -135,8 +135,7 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
     setFilters({
       activityType: '',
       resourceType: '',
-      startDate: '',
-      endDate: '',
+      date: today,
       projectId: '',
       serviceId: '',
     });
@@ -318,30 +317,17 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
               </div>
             )}
 
-            {/* Start Date */}
+            {/* Date */}
             <div className="space-y-2">
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
                 <Calendar className="w-4 h-4" />
-                Start Date
+                Date
               </label>
               <input
                 type="date"
-                value={filters.startDate}
-                onChange={(e) => handleFilterChange('startDate', e.target.value)}
-                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-              />
-            </div>
-
-            {/* End Date */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-                <Calendar className="w-4 h-4" />
-                End Date
-              </label>
-              <input
-                type="date"
-                value={filters.endDate}
-                onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                value={filters.date}
+                onChange={(e) => handleFilterChange('date', e.target.value)}
+                max={today}
                 className="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
             </div>
@@ -367,8 +353,7 @@ export default function ActivityFilters({ isVaultResource }: ActivityFiltersProp
         resourceType={filters.resourceType}
         projectId={filters.projectId}
         serviceId={filters.serviceId}
-        startDate={filters.startDate}
-        endDate={filters.endDate}
+        date={filters.date}
       />
     </div>
   );

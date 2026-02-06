@@ -2,15 +2,14 @@ import { apiRequest } from './config/api';
 
 export interface ActivityQueryParams {
   limit?: number;
-  offset?: number;
+  cursor?: string;
   activityType?: string;
   resourceType?: string;
   projectId?: string;
   serviceId?: string;
   resourceId?: string;
   isVaultResource?: boolean;
-  startDate?: string;
-  endDate?: string;
+  date?: string;
 }
 
 export interface Activity {
@@ -30,9 +29,10 @@ export interface Activity {
 
 export interface ActivityResponse {
   activities: Activity[];
-  total: number;
   limit: number;
-  offset: number;
+  nextCursor: string | null;
+  hasNext: boolean;
+  hasPrev: boolean;
 }
 
 export interface StatsData {
@@ -63,7 +63,7 @@ class DashboardService {
     const searchParams = new URLSearchParams();
     
     if (params.limit) searchParams.append('limit', params.limit.toString());
-    if (params.offset) searchParams.append('offset', params.offset.toString());
+    if (params.cursor) searchParams.append('cursor', params.cursor);
     if (params.activityType) searchParams.append('activityType', params.activityType);
     if (params.resourceType) searchParams.append('resourceType', params.resourceType);
     if (params.projectId) searchParams.append('projectId', params.projectId);
@@ -72,8 +72,7 @@ class DashboardService {
     if (params.isVaultResource !== undefined) {
       searchParams.append('isVaultResource', params.isVaultResource.toString());
     }
-    if (params.startDate) searchParams.append('startDate', params.startDate);
-    if (params.endDate) searchParams.append('endDate', params.endDate);
+    if (params.date) searchParams.append('date', params.date);
 
     const queryString = searchParams.toString();
     const endpoint = queryString ? `/activity-log?${queryString}` : '/activity-log';
