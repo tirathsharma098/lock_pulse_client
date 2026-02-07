@@ -2,17 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import {
-  Container, 
-  Paper, 
-  TextField, 
-  Button, 
-  Typography, 
-  Alert, 
-  Box,
-  CircularProgress,
-  Link as MuiLink
-} from '@mui/material';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { IconButton } from '@/components/ui/icon-button';
 import Link from 'next/link';
 import * as opaque from '@serenity-kit/opaque';
 import { authService, userService } from '@/services';
@@ -21,7 +13,7 @@ import { useVault } from '@/contexts/VaultContext';
 import { toast } from 'sonner';
 import LoginPresentation from '../components/LoginPresentation';
 import { z } from 'zod'; // add zod
-import { Shield } from 'lucide-react';
+import { Shield, Send, Loader2 } from 'lucide-react';
 import styles from './LoginPresentation.module.css';
 import FullPageSpinner from '@/components/ui/full-page-loader';
 import { saveUser } from '@/lib/usersFn';
@@ -48,6 +40,7 @@ export default function LoginClient() {
   const [maskedEmail, setMaskedEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [sendingOtp, setSendingOtp] = useState(false);
+  const [otpCooldown, setOtpCooldown] = useState(0);
   // track field-level issues
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const router = useRouter();
@@ -99,6 +92,20 @@ export default function LoginClient() {
       toast.info("Session expired. Please log in again.");
     }
   }, [searchParams, username]);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setOtpCooldown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [otpCooldown]);
+
+  const formatCooldown = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,8 +213,8 @@ export default function LoginClient() {
       
       {/* Form Side */}
       <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-4 md:p-4">
-        <Container maxWidth="sm" className='!p-0 sm:!p-4'>
-          <Paper elevation={3} className="!p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
+        <div className="w-full max-w-md p-0 sm:p-4">
+          <div className="p-8 shadow-2xl border border-white/20 backdrop-blur-sm rounded-2xl bg-white">
             <div className='lg:hidden'>
               <div className="flex items-center justify-center mb-4">
                 <Link href='/' >
@@ -217,25 +224,24 @@ export default function LoginClient() {
                 </Link>
               </div>
             </div>
-            <Typography variant="h4" component="h1" className="!mt-5 !mb-6 text-center font-bold text-gray-800">
+            <h1 className="mt-5 mb-6 text-center text-3xl font-bold text-gray-800">
               Sign In
-            </Typography>
+            </h1>
 
             {success && (
-              <Alert severity="success" className="!mb-4">
+              <div className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
                 {success}
-              </Alert>
+              </div>
             )}
 
             {error && (
-              <Alert severity="error" className="!mb-4">
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
-              </Alert>
+              </div>
             )}
 
             <form onSubmit={handleSubmit} className="!space-y-4">
-              <TextField
-                fullWidth
+              <Input
                 label="Username"
                 value={username}
                 onChange={(e) => {
@@ -245,12 +251,10 @@ export default function LoginClient() {
                 disabled={loading}
                 autoComplete="off"
                 className="bg-white/70"
-                error={!!fieldErrors.username}
-                helperText={fieldErrors.username ?? ''}
+                error={fieldErrors.username}
               />
 
-              <TextField
-                fullWidth
+              <Input
                 type="password"
                 label="Master Password"
                 value={password}
@@ -261,8 +265,7 @@ export default function LoginClient() {
                 disabled={loading}
                 autoComplete="off"
                 className="bg-white/70"
-                error={!!fieldErrors.password}
-                helperText={fieldErrors.password ?? ''}
+                error={fieldErrors.password}
               />
 
               {deviceVerificationRequired && (
@@ -271,81 +274,84 @@ export default function LoginClient() {
                   <p className="mt-1 text-amber-800">
                     Send a code to {maskedEmail || 'your email'} and enter it below to continue.
                   </p>
-                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
-                    <TextField
-                      fullWidth
-                      size="small"
-                      label="Verification code"
-                      value={otp}
-                      onChange={(e) => setOtp(e.target.value)}
-                      disabled={loading}
-                      className="bg-white/70"
-                    />
-                    <Button
-                      variant="outlined"
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-end">
+                    <div className="flex-1">
+                      <Input
+                        label="Verification code"
+                        value={otp}
+                        onChange={(e) => setOtp(e.target.value)}
+                        disabled={loading}
+                        className="bg-white/70"
+                      />
+                    </div>
+                    <IconButton
+                      aria-label="Send verification code"
+                      title={otpCooldown > 0 ? `Resend in ${formatCooldown(otpCooldown)}` : 'Send code'}
                       onClick={async () => {
-                        if (sendingOtp || !username) return;
+                        if (sendingOtp || !username || otpCooldown > 0) return;
                         setSendingOtp(true);
                         setError('');
                         try {
                           await authService.sendVerifyDeviceCode({ username });
                           toast.success('Verification code sent');
+                          setOtpCooldown(90);
                         } catch (err: any) {
                           setError(err?.message || 'Failed to send verification code');
                         } finally {
                           setSendingOtp(false);
                         }
                       }}
-                      disabled={sendingOtp || !username}
-                      className="!h-10"
+                      disabled={sendingOtp || !username || otpCooldown > 0}
+                      className="h-10 w-10 rounded-full bg-blue-600 text-white hover:bg-blue-700"
                     >
-                      {sendingOtp ? 'Sending...' : 'Send code'}
-                    </Button>
+                      {sendingOtp ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </IconButton>
                   </div>
+                  {otpCooldown > 0 && (
+                    <p className="mt-2 text-xs text-amber-800">
+                      Resend available in {formatCooldown(otpCooldown)}
+                    </p>
+                  )}
                 </div>
               )}
 
               <div className="flex justify-end">
-                <Link href="/reset-password" passHref>
-                  <MuiLink component="span" className="cursor-pointer text-sm font-semibold text-red-600 hover:text-red-500">
-                    Reset password
-                  </MuiLink>
+                <Link href="/reset-password" className="text-sm font-semibold text-red-600 hover:text-red-500">
+                  Reset password
                 </Link>
               </div>
 
               <Button
                 type="submit"
-                fullWidth
-                variant="contained"
-                size="large"
-                disabled={loading}
-                className="!mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
+                size="lg"
+                loading={loading}
+                className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform transition-all duration-200 hover:scale-105 shadow-lg text-white"
               >
-                {loading ? <CircularProgress size={24} sx={{ color: 'white' }}/> : 'Sign In to Vault'}
+                Sign In to Vault
               </Button>
             </form>
 
-            <Box className="!mt-6 text-center">
-              <Typography variant="body2" className="text-gray-600">
-                Don&apos;t have an account?{' '}
-                <Link href="/register" passHref>
-                  <MuiLink component="span" className="cursor-pointer font-semibold text-blue-600 hover:text-purple-600 transition-colors">
-                    Create one
-                  </MuiLink>
-                </Link>
-              </Typography>
-            </Box>
-          </Paper>
+            <div className="mt-6 text-center text-gray-600 text-sm">
+              Don&apos;t have an account?{' '}
+              <Link href="/register" className="font-semibold text-blue-600 hover:text-purple-600 transition-colors">
+                Create one
+              </Link>
+            </div>
+          </div>
 
-          <Box className="!mt-4">
+          <div className="mt-4">
             <RecentUsers 
               onSelectUser={(selectedUsername) => {
                 setUsername(selectedUsername);
                 if (fieldErrors.username) setFieldErrors((p) => ({ ...p, username: undefined }));
               }}
             />
-          </Box>
-        </Container>
+          </div>
+        </div>
       </div>
     </div> : <FullPageSpinner/>
   );

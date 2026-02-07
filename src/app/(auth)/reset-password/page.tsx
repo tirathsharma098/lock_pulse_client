@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AlertTriangle, Mail } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { authService } from '@/services';
 
 export default function ResetPasswordPage() {
@@ -97,7 +98,7 @@ export default function ResetPasswordPage() {
 									/>
 								</div>
 
-								<button
+								<Button
 									type="submit"
 									disabled={loading || cooldown > 0 || !email}
 									className="w-full rounded-2xl bg-gradient-to-r from-rose-500 via-red-500 to-orange-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] hover:shadow-xl disabled:cursor-not-allowed disabled:from-slate-500 disabled:via-slate-500 disabled:to-slate-500"
@@ -107,7 +108,7 @@ export default function ResetPasswordPage() {
 										: loading
 											? 'Sending...'
 											: 'Send reset password email'}
-								</button>
+								</Button>
 							</form>
 						</div>
 					</div>

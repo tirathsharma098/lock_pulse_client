@@ -2,17 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Container, 
-  Paper, 
-  TextField, 
-  Button, 
-  Typography, 
-  Alert, 
-  Box,
-  CircularProgress,
-  Link as MuiLink
-} from '@mui/material';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import Link from 'next/link';
 import * as opaque from '@serenity-kit/opaque';
 import { authService } from '@/services'; // Updated import
@@ -183,8 +174,8 @@ export default function RegisterPage() {
       
       {/* Form Side */}
       <div className="flex-1 lg:w-1/2 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-4 md:p-4">
-        <Container maxWidth="sm" className='!p-0 sm:!p-4'>
-          <Paper elevation={3} className="p-8 shadow-2xl border border-white/20 backdrop-blur-sm">
+        <div className='w-full max-w-md p-0 sm:p-4'>
+          <div className="p-8 shadow-2xl border border-white/20 backdrop-blur-sm rounded-2xl bg-white">
           <div className='lg:hidden'>
               <div className="flex items-center justify-center mb-4">
                 <Link href='/' >
@@ -194,19 +185,18 @@ export default function RegisterPage() {
                 </Link>
               </div>
             </div>
-            <Typography variant="h4" component="h1" className="!mt-5 !mb-6 text-center font-bold text-gray-800">
+            <h1 className="mt-5 mb-6 text-center text-3xl font-bold text-gray-800">
               Create Account
-            </Typography>
+            </h1>
 
             {error && (
-              <Alert severity="error" className="mb-4">
+              <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
-              </Alert>
+              </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-            <TextField
-                fullWidth
+            <Input
                 label="Full Name"
                 value={fullname}
                 onChange={(e) => {
@@ -215,14 +205,12 @@ export default function RegisterPage() {
                     setFieldErrors((prev) => ({ ...prev, fullname: undefined }));
                   }
                 }}
-                error={!!fieldErrors.fullname}
-                helperText={fieldErrors.fullname}
+                error={fieldErrors.fullname}
                 disabled={loading}
                 autoComplete="name"
                 className="bg-white/70"
               />
-              <TextField
-                fullWidth
+              <Input
                 label="Username"
                 value={username}
                 onChange={(e) => {
@@ -233,11 +221,9 @@ export default function RegisterPage() {
 
                 autoComplete="username"
                 className="bg-white/70"
-                error={!!fieldErrors.username}
-                helperText={fieldErrors.username ?? ''}
+                error={fieldErrors.username}
               />
-               <TextField
-            fullWidth
+               <Input
             label="Email Address"
             value={email}
             onChange={(e) => {
@@ -246,15 +232,13 @@ export default function RegisterPage() {
                 setFieldErrors((prev) => ({ ...prev, email: undefined }));
               }
             }}
-            error={!!fieldErrors.email}
-            helperText={fieldErrors.email}
+            error={fieldErrors.email}
             disabled={loading}
             autoComplete="email"
             className="bg-white/70"
           />
-              <Box>
-              <TextField
-                fullWidth
+              <div>
+              <Input
                 type="password"
                 label="Master Password"
                 value={password}
@@ -265,17 +249,15 @@ export default function RegisterPage() {
                 disabled={loading}
                 autoComplete="new-password"
                 className="bg-white/70"
-                error={!!fieldErrors.password}
-                helperText={fieldErrors.password ?? ''}
+                error={fieldErrors.password}
               />
               {password && (
-              <Typography variant="caption" color="textSecondary" className="mt-1 block">
+              <p className="mt-1 block text-xs text-gray-500">
                 Encrypted size: {passwordSize} bytes
-              </Typography>
+              </p>
             )}
-            </Box>
-              <TextField
-                fullWidth
+            </div>
+              <Input
                 type="password"
                 label="Confirm Master Password"
                 value={confirmPassword}
@@ -286,34 +268,27 @@ export default function RegisterPage() {
                 disabled={loading}
                 autoComplete="new-password"
                 className="bg-white/70"
-                error={!!fieldErrors.confirmPassword}
-                helperText={fieldErrors.confirmPassword ?? ''}
+                error={fieldErrors.confirmPassword}
               />
 
               <Button
                 type="submit"
-                fullWidth
-                variant="contained"
-                size="large"
-                disabled={loading}
-                className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform transition-all duration-200 hover:scale-105 shadow-lg"
+                size="lg"
+                loading={loading}
+                className="mt-6 w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transform transition-all duration-200 hover:scale-105 shadow-lg text-white"
               >
-                {loading ? <CircularProgress size={24} sx={{ color: 'white' }}/> : 'Create Secure Vault'}
+                Create Secure Vault
               </Button>
             </form>
 
-            <Box className="mt-6 text-center">
-              <Typography variant="body2" className="text-gray-600">
-                Already have an account?{' '}
-                <Link href="/login" passHref>
-                  <MuiLink component="span" className="cursor-pointer font-semibold text-blue-600 hover:text-purple-600 transition-colors">
-                    Sign in
-                  </MuiLink>
-                </Link>
-              </Typography>
-            </Box>
-          </Paper>
-        </Container>
+            <div className="mt-6 text-center text-gray-600 text-sm">
+              Already have an account?{' '}
+              <Link href="/login" className="font-semibold text-blue-600 hover:text-purple-600 transition-colors">
+                Sign in
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div> : <FullPageSpinner/>
   );

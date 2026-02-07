@@ -7,6 +7,7 @@ import * as opaque from '@serenity-kit/opaque';
 import { z } from 'zod';
 import { ShieldCheck } from 'lucide-react';
 import { authService } from '@/services';
+import { Button } from '@/components/ui/button';
 import {
   generateVaultKey,
   generateSalt,
@@ -180,13 +181,13 @@ export default function ResetPasswordTokenPage({
               )}
             </div>
 
-            <button
+            <Button
               type="submit"
               disabled={isLoading}
               className="w-full rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] hover:shadow-xl disabled:cursor-not-allowed disabled:from-slate-500 disabled:via-slate-500 disabled:to-slate-500"
             >
               {isLoading ? 'Resetting...' : 'Reset password'}
-            </button>
+            </Button>
           </form>
 
           <div className="mt-6 text-xs text-slate-400">

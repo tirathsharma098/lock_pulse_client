@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, Sparkles } from 'lucide-react';
 import { authService } from '@/services';
+import { Button } from '@/components/ui/button';
 
 type VerifyStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -92,14 +93,14 @@ export default function VerifyEmailTokenPage({
 							<p className="text-sm text-slate-200/80">
 								Verify your email address to complete setup.
 							</p>
-							<button
+							<Button
 								type="button"
 								onClick={handleVerify}
 								disabled={isLoading || isSuccess}
 								className="mt-6 w-full rounded-2xl bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] hover:shadow-xl disabled:cursor-not-allowed disabled:from-slate-500 disabled:via-slate-500 disabled:to-slate-500"
 							>
 								{isLoading ? 'Verifying...' : isSuccess ? 'Verified' : 'Verify email'}
-							</button>
+							</Button>
 							<div className="mt-4 text-xs text-slate-400">
 								<Link href="/login" className="hover:text-white">
 									Return to login

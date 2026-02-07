@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Mail, ShieldCheck } from 'lucide-react';
 import { authService } from '@/services';
 import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
 
 const COOLDOWN_MS = 90_000;
 const DAILY_LIMIT = 10;
@@ -177,7 +178,7 @@ export default function VerifyEmailRequestPage({
 								</div>
 							)}
 
-							<button
+							<Button
 								type="button"
 								onClick={handleSend}
 								disabled={isDisabled}
@@ -190,7 +191,7 @@ export default function VerifyEmailRequestPage({
 										: isCooldown
 											? `Resend in ${formatTime(remainingMs)}`
 											: 'Send verification link'}
-							</button>
+							</Button>
 
 							<p className="text-xs text-slate-500">
 								If you do not see the email, check your spam folder or whitelist
