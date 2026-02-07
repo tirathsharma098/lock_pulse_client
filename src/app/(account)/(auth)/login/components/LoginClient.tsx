@@ -44,6 +44,10 @@ export default function LoginClient() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [deviceVerificationRequired, setDeviceVerificationRequired] = useState(false);
+  const [maskedEmail, setMaskedEmail] = useState('');
+  const [otp, setOtp] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
   // track field-level issues
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
   const router = useRouter();
@@ -100,6 +104,7 @@ export default function LoginClient() {
     e.preventDefault();
     setError('');
     setFieldErrors({});
+    setDeviceVerificationRequired(false);
     setLoading(true);
 
     // zod validation (replace native/inline validation)
@@ -121,16 +126,30 @@ export default function LoginClient() {
       const { startLoginRequest, clientLoginState } = opaque.client.startLogin({ password });
 
       // Send login start request - Updated to use authService
-      const { loginResponse, loginId, case: loginCase, email } = await authService.loginStart({
+      const { loginResponse, loginId, code: loginCode, email } = await authService.loginStart({
         username,
         startLoginRequest,
+        otp: otp || undefined,
       });
-      if(loginCase === 'EMAIL_NOT_VERIFIED') {
+      if(loginCode === 'EMAIL_NOT_VERIFIED') {
         setError('Email not verified. Please verify your email before logging in.');
         setLoading(false);
         if (email) {
           router.replace(`/${email}/verify-email`);
         }
+        return;
+      }
+      if (loginCode === 'DEVICE_VERIFICATION_REQUIRED') {
+        setDeviceVerificationRequired(true);
+        setMaskedEmail(email || '');
+        setLoading(false);
+        return;
+      }
+      if (loginCode === 'OTP_INVALID') {
+        setDeviceVerificationRequired(true);
+        setMaskedEmail(email || '');
+        setError('Invalid or expired verification code.');
+        setLoading(false);
         return;
       }
       if(!loginResponse || !loginId || loginResponse === 'decoy_response') {
@@ -245,6 +264,46 @@ export default function LoginClient() {
                 error={!!fieldErrors.password}
                 helperText={fieldErrors.password ?? ''}
               />
+
+              {deviceVerificationRequired && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                  <p className="font-semibold">Verify new device</p>
+                  <p className="mt-1 text-amber-800">
+                    Send a code to {maskedEmail || 'your email'} and enter it below to continue.
+                  </p>
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Verification code"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      disabled={loading}
+                      className="bg-white/70"
+                    />
+                    <Button
+                      variant="outlined"
+                      onClick={async () => {
+                        if (sendingOtp || !username) return;
+                        setSendingOtp(true);
+                        setError('');
+                        try {
+                          await authService.sendVerifyDeviceCode({ username });
+                          toast.success('Verification code sent');
+                        } catch (err: any) {
+                          setError(err?.message || 'Failed to send verification code');
+                        } finally {
+                          setSendingOtp(false);
+                        }
+                      }}
+                      disabled={sendingOtp || !username}
+                      className="!h-10"
+                    >
+                      {sendingOtp ? 'Sending...' : 'Send code'}
+                    </Button>
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-end">
                 <Link href="/reset-password" passHref>

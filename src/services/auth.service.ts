@@ -26,12 +26,13 @@ export interface RegisterFinishResponse {
 export interface LoginStartData {
   username: string;
   startLoginRequest: string;
+  otp?: string;
 }
 
 export interface LoginStartResponse {
   loginResponse: string;
   loginId: string;
-  case?: string;
+  code?: string;
   email?: string;
 }
 
@@ -120,6 +121,12 @@ export const authService = {
 
   resetPasswordFinish: (data: ResetPasswordFinishData) =>
     apiRequest('/auth/reset-password/finish', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  sendVerifyDeviceCode: (data: { username: string }) =>
+    apiRequest('/auth/verify-device', {
       method: 'POST',
       body: JSON.stringify(data),
     }),
